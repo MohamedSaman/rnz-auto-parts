@@ -964,12 +964,140 @@
                 width: 100%;
             }
         }
+
+        /* ===== Keyboard Navigation Styles ===== */
+        .sidebar .nav-link:focus,
+        .sidebar .nav-link.kb-focused {
+            outline: 2px solid var(--primary) !important;
+            outline-offset: -2px;
+            background: var(--sidebar-hover-bg) !important;
+            color: #ffffff !important;
+        }
+
+        .sidebar .nav-link.kb-focused.active {
+            outline: 2px solid rgba(255,255,255,0.6) !important;
+        }
+
+        /* Keyboard shortcut badge in sidebar */
+        .nav-link .kb-hint {
+            margin-left: auto;
+            font-size: 0.65rem;
+            background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.5);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: monospace;
+            letter-spacing: 0;
+            flex-shrink: 0;
+        }
+
+        /* Keyboard Help Overlay */
+        #kb-help-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: kbFadeIn 0.2s ease;
+        }
+
+        @keyframes kbFadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        #kb-help-overlay .kb-panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            max-width: 680px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+            color: #e2e8f0;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        }
+
+        #kb-help-overlay .kb-panel h4 {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #kb-help-overlay .kb-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        #kb-help-overlay .kb-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+        }
+
+        #kb-help-overlay .kb-row:last-child {
+            border-bottom: none;
+        }
+
+        #kb-help-overlay .kb-keys {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        #kb-help-overlay kbd {
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-bottom: 3px solid #334155;
+            border-radius: 5px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: #94a3b8;
+            white-space: nowrap;
+        }
+
+        #kb-help-overlay .kb-desc {
+            color: #94a3b8;
+        }
+
+        /* Keyboard nav indicator in top bar */
+        #kb-mode-indicator {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
+            background: var(--primary-50);
+            border: 1px solid var(--primary-100);
+            border-radius: 6px;
+            padding: 3px 10px;
+        }
+
+        #kb-mode-indicator.active {
+            display: flex;
+        }
     </style>
     @stack('styles')
     @livewireStyles
 </head>
 
-<body>
+<body x-data="adminKeyboard()" x-init="init()" @keydown.window="handleKey($event)">
 
     <div class="d-flex">
         <!-- Sidebar -->
@@ -1326,6 +1454,40 @@
             </ul>
         </div>
 
+        <!-- Keyboard Help Overlay (Alpine.js controlled) -->
+        <div id="kb-help-overlay" x-show="showHelp" x-cloak @click.self="showHelp = false" style="display:none;">
+            <div class="kb-panel">
+                <h4>
+                    <i class="bi bi-keyboard text-crimson"></i>
+                    Keyboard Shortcuts
+                    <button @click="showHelp = false" class="btn btn-sm ms-auto" style="background:rgba(255,255,255,0.1);color:#fff;border:none;"><i class="bi bi-x-lg"></i></button>
+                </h4>
+
+                <div class="kb-section-title">Navigation</div>
+                <div class="kb-row"><span class="kb-desc">Navigate sidebar items</span><span class="kb-keys"><kbd>↑</kbd><kbd>↓</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Expand / collapse submenu</span><span class="kb-keys"><kbd>→</kbd> / <kbd>←</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Activate focused link</span><span class="kb-keys"><kbd>Enter</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Close submenu / clear focus</span><span class="kb-keys"><kbd>Esc</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Toggle sidebar</span><span class="kb-keys"><kbd>Ctrl</kbd><kbd>B</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Focus sidebar (start keyboard nav)</span><span class="kb-keys"><kbd>Alt</kbd><kbd>S</kbd></span></div>
+
+                <div class="kb-section-title">Quick Page Access</div>
+                <div class="kb-row"><span class="kb-desc">Open POS Terminal</span><span class="kb-keys"><kbd>F5</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Dashboard</span><span class="kb-keys"><kbd>F1</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">POS Sales List</span><span class="kb-keys"><kbd>F2</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Products List</span><span class="kb-keys"><kbd>F3</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">GRN</span><span class="kb-keys"><kbd>F4</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Day Summary</span><span class="kb-keys"><kbd>F6</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Profit &amp; Loss</span><span class="kb-keys"><kbd>F7</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Expenses</span><span class="kb-keys"><kbd>F8</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Settings</span><span class="kb-keys"><kbd>F9</kbd></span></div>
+
+                <div class="kb-section-title">General</div>
+                <div class="kb-row"><span class="kb-desc">Show / hide this help</span><span class="kb-keys"><kbd>Ctrl</kbd><kbd>/</kbd></span></div>
+                <div class="kb-row"><span class="kb-desc">Close this help</span><span class="kb-keys"><kbd>Esc</kbd></span></div>
+            </div>
+        </div>
+
         <!-- Top Navigation Bar -->
         <nav class="top-bar d-flex justify-content-between align-items-center">
             <!-- Sidebar toggle button -->
@@ -1344,6 +1506,11 @@
 
             <!-- Real-time Clock and POS Button -->
             <div class="d-none d-lg-flex align-items-center gap-4 me-3">
+                <!-- Keyboard mode indicator -->
+                <div id="kb-mode-indicator" title="Keyboard navigation active. Press Ctrl+/ for shortcuts.">
+                    <i class="bi bi-keyboard"></i> KB Mode
+                </div>
+
                 <div id="digitalClock" class="fw-800 font-monospace text-orange px-3 py-2 rounded-3 bg-white border shadow-sm" 
                     style="font-size: 1.5rem; letter-spacing: 0.1em; border-color: rgba(245, 131, 32, 0.2); min-width: 150px; text-align: center;">
                     00:00:00
@@ -1352,9 +1519,11 @@
                 <div class="btn btn-primary rounded-pill shadow-sm d-flex align-items-center gap-2 px-3 py-2"
                     onclick="handlePOSClick()"
                     role="button"
+                    title="Open POS (F5)"
                     style="background: var(--primary); border: none;">
                     <i class="bi bi-cart-plus-fill fs-5"></i>
                     <span class="fw-bold">POS</span>
+                    <span class="kb-hint">F5</span>
                 </div>
             </div>
 
@@ -2019,6 +2188,302 @@
                     Swal.fire('Error!', 'An error occurred while updating cash-in-hand', 'error');
                 });
         });
+    </script>
+
+    <script>
+    // ===== Alpine.js Keyboard Navigation Component =====
+    function adminKeyboard() {
+        return {
+            showHelp: false,
+            kbMode: false,       // true when user is navigating sidebar via keyboard
+            focusedIndex: -1,    // index into the flat list of visible nav links
+
+            init() {
+                // Nothing extra needed; Alpine handles @keydown.window
+            },
+
+            // Returns all currently VISIBLE (not hidden by collapsed submenu) sidebar nav-links
+            getVisibleLinks() {
+                const sidebar = document.querySelector('.sidebar');
+                if (!sidebar) return [];
+                // Select links that are either top-level or inside an expanded (.show) collapse
+                const all = sidebar.querySelectorAll('.nav > li > a.nav-link, .collapse.show .nav-link');
+                return Array.from(all).filter(el => {
+                    // Skip disabled links
+                    if (el.classList.contains('disabled')) return false;
+                    // Skip links inside non-shown collapses
+                    const parentCollapse = el.closest('.collapse');
+                    if (parentCollapse && !parentCollapse.classList.contains('show')) return false;
+                    return true;
+                });
+            },
+
+            clearFocus() {
+                document.querySelectorAll('.sidebar .nav-link.kb-focused').forEach(el => {
+                    el.classList.remove('kb-focused');
+                });
+            },
+
+            setFocus(index) {
+                const links = this.getVisibleLinks();
+                if (links.length === 0) return;
+                // Clamp index
+                index = Math.max(0, Math.min(index, links.length - 1));
+                this.focusedIndex = index;
+                this.clearFocus();
+                links[index].classList.add('kb-focused');
+                links[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            },
+
+            enterKbMode() {
+                this.kbMode = true;
+                const indicator = document.getElementById('kb-mode-indicator');
+                if (indicator) indicator.classList.add('active');
+                if (this.focusedIndex < 0) this.setFocus(0);
+            },
+
+            exitKbMode() {
+                this.kbMode = false;
+                this.focusedIndex = -1;
+                this.clearFocus();
+                const indicator = document.getElementById('kb-mode-indicator');
+                if (indicator) indicator.classList.remove('active');
+            },
+
+            // Toggle a Bootstrap collapse submenu
+            toggleSubmenu(link) {
+                const targetId = link.getAttribute('href');
+                if (!targetId || !targetId.startsWith('#')) return false;
+                const submenu = document.querySelector(targetId);
+                if (!submenu) return false;
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(submenu, { toggle: false });
+                if (submenu.classList.contains('show')) {
+                    bsCollapse.hide();
+                    link.setAttribute('aria-expanded', 'false');
+                } else {
+                    bsCollapse.show();
+                    link.setAttribute('aria-expanded', 'true');
+                }
+                return true;
+            },
+
+            expandSubmenu(link) {
+                const targetId = link.getAttribute('href');
+                if (!targetId || !targetId.startsWith('#')) return false;
+                const submenu = document.querySelector(targetId);
+                if (!submenu || submenu.classList.contains('show')) return false;
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(submenu, { toggle: false });
+                bsCollapse.show();
+                link.setAttribute('aria-expanded', 'true');
+                return true;
+            },
+
+            collapseSubmenu(link) {
+                const targetId = link.getAttribute('href');
+                if (!targetId || !targetId.startsWith('#')) return false;
+                const submenu = document.querySelector(targetId);
+                if (!submenu || !submenu.classList.contains('show')) return false;
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(submenu, { toggle: false });
+                bsCollapse.hide();
+                link.setAttribute('aria-expanded', 'false');
+                return true;
+            },
+
+            navigateToPage(url) {
+                if (url && url !== '#' && !url.startsWith('#')) {
+                    window.location.href = url;
+                }
+            },
+
+            handleKey(event) {
+                const tag = event.target.tagName.toLowerCase();
+                const isTyping = ['input', 'textarea', 'select'].includes(tag) ||
+                                  event.target.isContentEditable;
+
+                // ── Help overlay: Esc closes it ──────────────────────────────
+                if (this.showHelp) {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        this.showHelp = false;
+                    }
+                    return; // block all other shortcuts while help is open
+                }
+
+                // ── Ctrl+/ → toggle help (works even while typing) ───────────
+                if (event.ctrlKey && event.key === '/') {
+                    event.preventDefault();
+                    this.showHelp = !this.showHelp;
+                    return;
+                }
+
+                // ── Ctrl+B → toggle sidebar ──────────────────────────────────
+                if (event.ctrlKey && event.key === 'b') {
+                    event.preventDefault();
+                    const toggler = document.getElementById('sidebarToggler');
+                    if (toggler) toggler.click();
+                    return;
+                }
+
+                // ── Alt+S → focus sidebar ────────────────────────────────────
+                if (event.altKey && event.key === 's') {
+                    event.preventDefault();
+                    this.enterKbMode();
+                    return;
+                }
+
+                // ── Function key shortcuts (work even while typing in some cases) ──
+                if (!isTyping) {
+                    switch (event.key) {
+                        case 'F1':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.dashboard') }}";
+                            return;
+                        case 'F2':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.pos-sales') }}";
+                            return;
+                        case 'F3':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.Productes') }}";
+                            return;
+                        case 'F4':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.grn') }}";
+                            return;
+                        case 'F5':
+                            event.preventDefault();
+                            handlePOSClick(); // existing function
+                            return;
+                        case 'F6':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.income') }}";
+                            return;
+                        case 'F7':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.profit-loss') }}";
+                            return;
+                        case 'F8':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.expenses') }}";
+                            return;
+                        case 'F9':
+                            event.preventDefault();
+                            window.location.href = "{{ route('admin.settings') }}";
+                            return;
+                    }
+                }
+
+                // ── Sidebar keyboard navigation (only when not typing) ────────
+                if (isTyping) return;
+
+                const links = this.getVisibleLinks();
+
+                switch (event.key) {
+                    case 'ArrowDown': {
+                        event.preventDefault();
+                        this.enterKbMode();
+                        const next = this.focusedIndex < 0 ? 0 : this.focusedIndex + 1;
+                        this.setFocus(Math.min(next, links.length - 1));
+                        break;
+                    }
+                    case 'ArrowUp': {
+                        event.preventDefault();
+                        this.enterKbMode();
+                        const prev = this.focusedIndex < 0 ? links.length - 1 : this.focusedIndex - 1;
+                        this.setFocus(Math.max(prev, 0));
+                        break;
+                    }
+                    case 'ArrowRight': {
+                        if (!this.kbMode) return;
+                        event.preventDefault();
+                        if (this.focusedIndex >= 0 && links[this.focusedIndex]) {
+                            const link = links[this.focusedIndex];
+                            const expanded = this.expandSubmenu(link);
+                            if (expanded) {
+                                // After expanding, move focus to first child
+                                this.$nextTick ? this.$nextTick(() => this.setFocus(this.focusedIndex + 1))
+                                              : setTimeout(() => this.setFocus(this.focusedIndex + 1), 350);
+                            }
+                        }
+                        break;
+                    }
+                    case 'ArrowLeft': {
+                        if (!this.kbMode) return;
+                        event.preventDefault();
+                        if (this.focusedIndex >= 0 && links[this.focusedIndex]) {
+                            const link = links[this.focusedIndex];
+                            // If this link is inside a submenu, collapse the parent
+                            const parentCollapse = link.closest('.collapse');
+                            if (parentCollapse) {
+                                const parentToggle = document.querySelector(`[href="#${parentCollapse.id}"]`);
+                                if (parentToggle) {
+                                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(parentCollapse, { toggle: false });
+                                    bsCollapse.hide();
+                                    parentToggle.setAttribute('aria-expanded', 'false');
+                                    // Find and focus the parent toggle
+                                    const allLinks = this.getVisibleLinks();
+                                    // Re-query after collapse
+                                    setTimeout(() => {
+                                        const newLinks = this.getVisibleLinks();
+                                        const parentIdx = newLinks.indexOf(parentToggle);
+                                        if (parentIdx >= 0) this.setFocus(parentIdx);
+                                    }, 350);
+                                }
+                            } else {
+                                // It's a top-level dropdown toggle — collapse it
+                                this.collapseSubmenu(link);
+                            }
+                        }
+                        break;
+                    }
+                    case 'Enter': {
+                        if (!this.kbMode) return;
+                        event.preventDefault();
+                        if (this.focusedIndex >= 0 && links[this.focusedIndex]) {
+                            const link = links[this.focusedIndex];
+                            const href = link.getAttribute('href');
+                            if (href && href.startsWith('#') && !href.startsWith('#!')) {
+                                // It's a submenu toggle
+                                const expanded = this.toggleSubmenu(link);
+                                if (expanded) {
+                                    setTimeout(() => this.setFocus(this.focusedIndex), 350);
+                                }
+                            } else if (href && href !== '#') {
+                                window.location.href = href;
+                            } else {
+                                link.click();
+                            }
+                        }
+                        break;
+                    }
+                    case 'Escape': {
+                        if (this.kbMode) {
+                            event.preventDefault();
+                            // If focused on a submenu item, collapse its parent first
+                            if (this.focusedIndex >= 0 && links[this.focusedIndex]) {
+                                const link = links[this.focusedIndex];
+                                const parentCollapse = link.closest('.collapse');
+                                if (parentCollapse) {
+                                    const parentToggle = document.querySelector(`[href="#${parentCollapse.id}"]`);
+                                    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(parentCollapse, { toggle: false });
+                                    bsCollapse.hide();
+                                    if (parentToggle) parentToggle.setAttribute('aria-expanded', 'false');
+                                    setTimeout(() => {
+                                        const newLinks = this.getVisibleLinks();
+                                        const parentIdx = newLinks.indexOf(parentToggle);
+                                        if (parentIdx >= 0) this.setFocus(parentIdx);
+                                    }, 350);
+                                    return;
+                                }
+                            }
+                            this.exitKbMode();
+                        }
+                        break;
+                    }
+                }
+            }
+        };
+    }
     </script>
     @stack('scripts')
 </body>
