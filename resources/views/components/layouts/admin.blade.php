@@ -1007,11 +1007,11 @@
                                     <i class="bi bi-tags-fill"></i> <span>Product Category</span>
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            {{--<li class="nav-item">
                                 <a class="nav-link py-2" href="{{ route('admin.manage-variants') }}">
                                     <i class="bi bi-layers"></i> <span>Product Variant</span>
                                 </a>
-                            </li>
+                            </li>--}}
                         </ul>
                     </div>
                 </li>
@@ -1270,11 +1270,11 @@
                         <i class="bi bi-file-earmark-bar-graph"></i> <span>Reports</span>
                     </a>
                 </li>
-                <li>
+                {{--<li>
                     <a class="nav-link" href="{{ route('admin.analytics') }}">
                         <i class="bi bi-bar-chart"></i> <span>Analytics</span>
                     </a>
-                </li>
+                </li>--}}
                 <li>
                     <a class="nav-link" href="{{ route('admin.profit-loss') }}">
                         <i class="bi bi-graph-up-arrow"></i> <span>Profit & Loss</span>

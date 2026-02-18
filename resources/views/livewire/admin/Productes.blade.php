@@ -1320,7 +1320,7 @@
                                 <!-- Pricing Mode Selection -->
                                 <div class="row mb-4">
                                     <div class="col-12">
-                                        <label class="form-label fw-semibold">Pricing Mode:</label>
+                                        {{--<label class="form-label fw-semibold">Pricing Mode:</label>
                                         <div class="btn-group w-100" role="group">
                                             <input type="radio" class="btn-check" id="pricing_mode_single" 
                                                 wire:model.live="pricing_mode" value="single" checked>
@@ -1333,7 +1333,7 @@
                                             <label class="btn btn-outline-primary" for="pricing_mode_variant">
                                                 <i class="bi bi-tags me-2"></i>Variant-Based Pricing
                                             </label>
-                                        </div>
+                                        </div>--}}
                                         <small class="text-muted d-block mt-2">
                                             @if($pricing_mode === 'single')
                                                 Single price applies to all units of this product
