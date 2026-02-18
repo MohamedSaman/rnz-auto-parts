@@ -8,13 +8,13 @@
         @layer base {
             :root {
                 /* Accent palette - tweak these for different color themes */
-                --accent-50: #fff7ef;
-                --accent-100: #ffefe0;
-                --accent-300: #ffb58a;
-                --accent-500: #ff7a2d; /* primary accent */
-                --accent-700: #e65c00;
-                --bg-pos: #f6f8fb;
-                --muted: #94a3b8;
+                --accent-50: #fff1f2;
+                --accent-100: #ffe4e6;
+                --accent-300: #fda4af;
+                --accent-500: #e11d48; /* primary accent */
+                --accent-700: #be123c;
+                --bg-pos: #f8fafc;
+                --muted: #64748b;
             }
 
             html, body { background: var(--bg-pos); font-family: 'Inter', sans-serif; color: #0f172a; }
@@ -29,7 +29,7 @@
 
             /* Header */
             .pos-billing-terminal header { background: linear-gradient(90deg, var(--accent-50), #ffffff); border-bottom: 1px solid rgba(15,23,42,0.04); }
-            .pos-billing-terminal header .bg-[#e67e22] { background: linear-gradient(135deg,var(--accent-500),var(--accent-700)); box-shadow: 0 6px 18px rgba(230,92,0,0.12); }
+            .pos-billing-terminal header .bg-[#e11d48] { background: linear-gradient(135deg,var(--accent-500),var(--accent-700)); box-shadow: 0 6px 18px rgba(230,92,0,0.12); }
 
             /* Accent buttons */
             .btn-accent { background: linear-gradient(90deg,var(--accent-500),var(--accent-700)); color: white; }
@@ -81,7 +81,7 @@
                 </div>
                 {{--<div>
                     <h1 class="font-bold text-sm leading-tight tracking-tight text-slate-900 uppercase">
-                        Hardmen <span class="text-[#e67e22]">(Pvt) Ltd</span>
+                        Hardmen <span class="text-[#e11d48]">(Pvt) Ltd</span>
                     </h1>
                     <p class="text-[10px] text-slate-500 font-medium tracking-wide">ADVANCED POS TERMINAL</p>
                 </div>--}}
@@ -89,7 +89,7 @@
             
             <div class="flex items-center gap-4">
                 <div class="bg-slate-100 px-3 py-1 rounded border border-slate-200">
-                    <span class="font-mono text-sm font-bold text-[#e67e22] tracking-widest" id="posClock">00:00:00</span>
+                    <span class="font-mono text-sm font-bold text-[#e11d48] tracking-widest" id="posClock">00:00:00</span>
                 </div>
                 <button class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors text-[10px] font-bold text-slate-600 border border-slate-200"
                         wire:click="viewCloseRegisterReport">
@@ -118,7 +118,7 @@
                 >
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-                        <input class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-[#e67e22]/20 focus:border-[#e67e22] outline-none text-sm transition-all" 
+                        <input class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-md focus:ring-2 focus:ring-[#e11d48]/20 focus:border-[#e11d48] outline-none text-sm transition-all" 
                             x-ref="searchInput"
                             wire:model.live.debounce.300ms="search"
                             placeholder="Scan barcode or type product name..." type="text"
@@ -157,7 +157,7 @@
                             <div class="flex items-center gap-3 p-3 cursor-pointer border-b border-slate-50 last:border-0 transition-colors"
                                 data-search-result
                                 data-search-index="{{ $sIndex }}"
-                                :class="highlightIndex === {{ $sIndex }} ? 'bg-orange-50 border-l-2 !border-l-[#e67e22]' : 'hover:bg-slate-50'"
+                                :class="highlightIndex === {{ $sIndex }} ? 'bg-rose-50 border-l-2 !border-l-[#e11d48]' : 'hover:bg-slate-50'"
                                 wire:click="addToCart({{ json_encode($res) }})"
                                 x-on:mouseenter="highlightIndex = {{ $sIndex }}">
                                 <img src="{{ $this->getImageUrl($res['image']) }}" 
@@ -169,11 +169,11 @@
                                         {{ $res['code'] }} | 
                                         <span class="font-bold {{ $res['stock'] <= 5 ? 'text-amber-500' : 'text-green-600' }}">Available: {{ $res['stock'] }}</span>
                                         @if(($res['pending'] ?? 0) > 0)
-                                            | <span class="font-bold text-orange-500">Pending: {{ $res['pending'] }}</span>
+                                            | <span class="font-bold text-rose-500">Pending: {{ $res['pending'] }}</span>
                                         @endif
                                     </p>
                                 </div>
-                                <span class="text-xs font-black text-[#e67e22]">Rs. {{ number_format($res['price'], 2) }}</span>
+                                <span class="text-xs font-black text-[#e11d48]">Rs. {{ number_format($res['price'], 2) }}</span>
                             </div>
                             @endforeach
                         </div>
@@ -236,7 +236,7 @@
                                         <div class="text-[11px] text-slate-400 ml-2">
                                             <span class="font-mono font-bold {{ ($item['stock'] ?? 0) <= 5 ? 'text-amber-500' : 'text-green-600' }}">Avail: {{ $item['stock'] ?? 0 }}</span>
                                             @if(($item['pending'] ?? 0) > 0)
-                                                | <span class="font-mono font-bold text-orange-500">Pending: {{ $item['pending'] }}</span>
+                                                | <span class="font-mono font-bold text-rose-500">Pending: {{ $item['pending'] }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -269,7 +269,7 @@
                                         value="{{ $displayDiscount }}"
                                         wire:change="updateDiscount({{ $index }}, $event.target.value)" 
                                         wire:key="disc-{{ $cartKey }}"
-                                        class="w-full px-2 py-1 text-[10px] font-bold text-center bg-slate-50 border border-slate-200 rounded hover:border-[#e67e22]/30 focus:border-[#e67e22] focus:outline-none transition-all {{ $discountPerUnit > 0 ? 'text-green-600 bg-green-50/50' : 'text-slate-400' }}" />
+                                        class="w-full px-2 py-1 text-[10px] font-bold text-center bg-slate-50 border border-slate-200 rounded hover:border-[#e11d48]/30 focus:border-[#e11d48] focus:outline-none transition-all {{ $discountPerUnit > 0 ? 'text-green-600 bg-green-50/50' : 'text-slate-400' }}" />
                                     @if($discountPerUnit > 0)
                                         <div class="text-[9px] text-green-600 mt-0.5 font-mono">
                                             @if($discountType === 'percentage' && $discountPercent > 0)
@@ -349,7 +349,7 @@
                             </div>
                         </div>
                         <div>
-                            <button class="w-full py-2 bg-white border border-slate-200 rounded text-[10px] font-black flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-[#e67e22]/50 transition-all text-slate-600 shadow-sm uppercase tracking-tighter"
+                            <button class="w-full py-2 bg-white border border-slate-200 rounded text-[10px] font-black flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-[#e11d48]/50 transition-all text-slate-600 shadow-sm uppercase tracking-tighter"
                                 wire:click="openSaleDiscountModal">
                                 <span class="material-symbols-outlined text-base">sell</span>
                                 APPLY GLOBAL DISCOUNT
@@ -359,9 +359,9 @@
                     <div class="grid grid-cols-2 gap-4 items-center border-t border-slate-200 pt-4">
                         <div class="flex justify-between items-baseline">
                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</span>
-                            <span class="text-3xl font-black text-[#e67e22] tracking-tighter">Rs. {{ number_format($grandTotal, 2) }}</span>
+                            <span class="text-3xl font-black text-[#e11d48] tracking-tighter">Rs. {{ number_format($grandTotal, 2) }}</span>
                         </div>
-                        <button class="w-full bg-[#e67e22] hover:bg-orange-600 text-white font-black py-3 rounded-lg flex items-center justify-center gap-2 shadow-xl shadow-orange-500/20 transition-all text-xs uppercase tracking-widest disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed group"
+                        <button class="w-full bg-[#e11d48] hover:bg-rose-600 text-white font-black py-3 rounded-lg flex items-center justify-center gap-2 shadow-xl shadow-rose-500/20 transition-all text-xs uppercase tracking-widest disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed group"
                             wire:click="validateAndCreateSale" {{ count($cart) == 0 ? 'disabled' : '' }}>
                             <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">payments</span>
                             Complete Sale
@@ -378,13 +378,13 @@
                         <div class="flex-1">
                             <label class="text-[10px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Customer Selection</label>
                             <div class="relative group">
-                                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-[#e67e22] transition-colors">person</span>
-                                <select class="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-md outline-none text-xs font-bold appearance-none focus:ring-2 focus:ring-[#e67e22]/10 focus:border-[#e67e22] transition-all" wire:model.live="customerId">
+                                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-[#e11d48] transition-colors">person</span>
+                                <select class="w-full pl-9 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-md outline-none text-xs font-bold appearance-none focus:ring-2 focus:ring-[#e11d48]/10 focus:border-[#e11d48] transition-all" wire:model.live="customerId">
                                     @foreach($customers as $customer)
                                     <option value="{{ $customer->id }}">{{ $customer->business_name ?? $customer->name }} ({{ $customer->phone }})</option>
                                     @endforeach
                                 </select>
-                                <button class="absolute right-8 top-1/2 -translate-y-1/2 text-[#e67e22] p-1.5 hover:bg-orange-50 rounded-full transition-all" wire:click="openCustomerModal" title="Add Customer">
+                                <button class="absolute right-8 top-1/2 -translate-y-1/2 text-[#e11d48] p-1.5 hover:bg-rose-50 rounded-full transition-all" wire:click="openCustomerModal" title="Add Customer">
                                     <span class="material-symbols-outlined text-lg">person_add</span>
                                 </button>
                                 <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-300 text-lg pointer-events-none">expand_more</span>
@@ -394,7 +394,7 @@
                             <label class="text-[10px] font-black text-slate-400 uppercase mb-1.5 block tracking-widest">Price Type</label>
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">sell</span>
-                                <select class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-md outline-none text-xs font-bold appearance-none focus:border-[#e67e22] transition-all" wire:model.live="priceType">
+                                <select class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-md outline-none text-xs font-bold appearance-none focus:border-[#e11d48] transition-all" wire:model.live="priceType">
                                     <option value="retail">Retail Price</option>
                                     <option value="wholesale">Wholesale</option>
                                     <option value="distribute">Distribute Price</option>
@@ -430,12 +430,12 @@
                     <div class="grid grid-cols-2 gap-3">
                         <button class="flex items-center justify-center gap-2 py-2.5 bg-slate-100 border border-slate-200 rounded-md hover:bg-slate-200 hover:border-slate-300 transition-all font-black text-[10px] text-slate-600 uppercase tracking-tighter shadow-sm"
                             wire:click="toggleCategoryPanel">
-                            <span class="material-symbols-outlined text-lg text-[#e67e22]">category</span>
+                            <span class="material-symbols-outlined text-lg text-[#e11d48]">category</span>
                             FILTER BY CATEGORY
                         </button>
                         <button class="flex items-center justify-center gap-2 py-2.5 bg-slate-100 border border-slate-200 rounded-md hover:bg-slate-200 hover:border-slate-300 transition-all font-black text-[10px] text-slate-600 uppercase tracking-tighter shadow-sm"
                             wire:click="toggleBrandPanel">
-                            <span class="material-symbols-outlined text-lg text-[#e67e22]">branding_watermark</span>
+                            <span class="material-symbols-outlined text-lg text-[#e11d48]">branding_watermark</span>
                             FILTER BY BRAND
                         </button>
                     </div>
@@ -449,7 +449,7 @@
                             $isLow = ($product['stock'] ?? 0) <= 5 && ($product['stock'] ?? 0) > 0;
                             $isOut = ($product['stock'] ?? 0) <= 0;
                         @endphp
-                        <div class="group bg-white border border-slate-200 rounded-lg shadow-sm hover:border-[#e67e22]/60 hover:shadow-md transition-all cursor-pointer relative flex flex-col h-full overflow-hidden"
+                        <div class="group bg-white border border-slate-200 rounded-lg shadow-sm hover:border-[#e11d48]/60 hover:shadow-md transition-all cursor-pointer relative flex flex-col h-full overflow-hidden"
                              wire:click="addToCart({{ json_encode($product) }})">
                             
                             {{-- Batch Status --}}
@@ -478,15 +478,15 @@
                                 
                                 <div class="mt-auto flex items-end justify-between">
                                     <div class="flex flex-col">
-                                        <span class="text-[#e67e22] font-black text-sm leading-none tracking-tighter">Rs. {{ number_format($product['price'], 0) }}</span>
+                                        <span class="text-[#e11d48] font-black text-sm leading-none tracking-tighter">Rs. {{ number_format($product['price'], 0) }}</span>
                                         <span class="text-[9px] text-slate-400 font-bold mt-1.5">
                                             <span class="{{ ($product['stock'] ?? 0) <= 5 ? 'text-amber-500' : 'text-green-600' }}">Avail: {{ $product['stock'] }}</span>
                                             @if(($product['pending'] ?? 0) > 0)
-                                                | <span class="text-orange-500">Pend: {{ $product['pending'] }}</span>
+                                                | <span class="text-rose-500">Pend: {{ $product['pending'] }}</span>
                                             @endif
                                         </span>
                                     </div>
-                                    <div class="bg-slate-100 p-1.5 rounded-md group-hover:bg-[#e67e22] group-hover:text-white transition-all shadow-sm">
+                                    <div class="bg-slate-100 p-1.5 rounded-md group-hover:bg-[#e11d48] group-hover:text-white transition-all shadow-sm">
                                         <span class="material-symbols-outlined text-base font-black">add</span>
                                     </div>
                                 </div>
@@ -511,19 +511,19 @@
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] transition-opacity duration-300 {{ $showCategoryPanel ? 'opacity-100' : 'opacity-0 pointer-events-none' }}" wire:click.self="$set('showCategoryPanel', false)"></div>
     <aside class="fixed right-0 top-0 bottom-0 w-1/2 bg-white z-[2001] shadow-2xl transition-transform duration-300 transform {{ $showCategoryPanel ? 'translate-x-0' : 'translate-x-full' }} flex flex-col">
         <div class="p-4 flex justify-between items-center border-b border-slate-100 bg-slate-50">
-            <h6 class="mb-0 font-black text-xs text-slate-800 tracking-widest"><i class="material-symbols-outlined align-middle mr-2 text-[#e67e22]">grid_view</i>ALL CATEGORIES</h6>
+            <h6 class="mb-0 font-black text-xs text-slate-800 tracking-widest"><i class="material-symbols-outlined align-middle mr-2 text-[#e11d48]">grid_view</i>ALL CATEGORIES</h6>
             <button class="text-slate-400 hover:text-slate-600 transition-colors" wire:click="$set('showCategoryPanel', false)">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
         <div class="p-2 overflow-y-auto flex-1 custom-scrollbar">
-            <button class=" mb-1 text-center  p-3 rounded-lg transition-all border border-slate-100 {{ !$selectedCategory ? 'bg-[#e67e22] text-white shadow-lg shadow-orange-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
+            <button class=" mb-1 text-center  p-3 rounded-lg transition-all border border-slate-100 {{ !$selectedCategory ? 'bg-[#e11d48] text-white shadow-lg shadow-rose-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
                 wire:click="showAllProducts">
                 <span class="font-black text-xs tracking-tight">Show All Items</span>
                 <span class="text-[10px] font-bold opacity-70">{{ count($products) }}</span>
             </button>
             @foreach($categories as $category)
-            <button class=" mb-1 text-center p-3 rounded-lg transition-all border border-slate-100 {{ $selectedCategory == $category->id ? 'bg-[#e67e22] text-white shadow-lg shadow-orange-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
+            <button class=" mb-1 text-center p-3 rounded-lg transition-all border border-slate-100 {{ $selectedCategory == $category->id ? 'bg-[#e11d48] text-white shadow-lg shadow-rose-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
                 wire:click="selectCategory({{ $category->id }})">
                 <span class="font-black text-xs tracking-tight">{{ $category->category_name }}</span>
                 <span class="text-[10px] font-bold opacity-70">{{ $category->products_count }}</span>
@@ -536,19 +536,19 @@
     <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] transition-opacity duration-300 {{ $showBrandPanel ? 'opacity-100' : 'opacity-0 pointer-events-none' }}" wire:click.self="$set('showBrandPanel', false)"></div>
     <aside class="fixed right-0 top-0 bottom-0 w-1/2 bg-white z-[2001] shadow-2xl transition-transform duration-300 transform {{ $showBrandPanel ? 'translate-x-0' : 'translate-x-full' }} flex flex-col">
         <div class="p-4 flex justify-between items-center border-b border-slate-100 bg-slate-50">
-            <h6 class="mb-0 font-black text-xs text-slate-800 tracking-widest"><i class="material-symbols-outlined align-middle mr-2 text-[#e67e22]">local_offer</i>ALL BRANDS</h6>
+            <h6 class="mb-0 font-black text-xs text-slate-800 tracking-widest"><i class="material-symbols-outlined align-middle mr-2 text-[#e11d48]">local_offer</i>ALL BRANDS</h6>
             <button class="text-slate-400 hover:text-slate-600 transition-colors" wire:click="$set('showBrandPanel', false)">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
         <div class="p-2 overflow-y-auto flex-1 custom-scrollbar">
-            <button class=" mb-1 text-center  p-3 rounded-lg transition-all border border-slate-100 {{ !$selectedBrand ? 'bg-[#e67e22] text-white shadow-lg shadow-orange-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
+            <button class=" mb-1 text-center  p-3 rounded-lg transition-all border border-slate-100 {{ !$selectedBrand ? 'bg-[#e11d48] text-white shadow-lg shadow-rose-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
                 wire:click="showAllBrands">
                 <span class="font-black text-xs tracking-tight">Show All Brands</span>
                 <span class="text-[10px] font-bold opacity-70">{{ count($products) }}</span>
             </button>
             @foreach($brands as $brand)
-            <button class=" mb-1 text-center p-3 rounded-lg transition-all border border-slate-100 {{ $selectedBrand == $brand['id'] ? 'bg-[#e67e22] text-white shadow-lg shadow-orange-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
+            <button class=" mb-1 text-center p-3 rounded-lg transition-all border border-slate-100 {{ $selectedBrand == $brand['id'] ? 'bg-[#e11d48] text-white shadow-lg shadow-rose-500/30' : 'hover:bg-slate-100 text-slate-600' }}"
                 wire:click="selectBrand({{ $brand['id'] }})">
                 <span class="font-black text-xs tracking-tight">{{ $brand['brand_name'] }}</span>
                 <span class="text-[10px] font-bold opacity-70">{{ $brand['products_count'] }}</span>
@@ -566,7 +566,7 @@
         @if($showCustomerModal)
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative transform transition-all">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-black text-xs uppercase tracking-widest text-[#e67e22]"><i class="material-symbols-outlined align-middle mr-2">person_add</i>ADD NEW CUSTOMER</h3>
+                <h3 class="font-black text-xs uppercase tracking-widest text-[#e11d48]"><i class="material-symbols-outlined align-middle mr-2">person_add</i>ADD NEW CUSTOMER</h3>
                 <button class="text-slate-400 hover:text-slate-600" wire:click="closeCustomerModal"><span class="material-symbols-outlined">close</span></button>
             </div>
             <div class="p-6 grid grid-cols-2 gap-4">
@@ -637,7 +637,7 @@
             </div>
             <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
                 <button class="px-6 py-2.5 text-[10px] font-black uppercase text-slate-400" wire:click="closeCustomerModal">Discard</button>
-                <button class="px-8 py-2.5 bg-[#e67e22] text-white rounded-lg text-[10px] font-black uppercase shadow-lg shadow-orange-500/20" wire:click="createCustomer">Save Customer</button>
+                <button class="px-8 py-2.5 bg-[#e11d48] text-white rounded-lg text-[10px] font-black uppercase shadow-lg shadow-rose-500/20" wire:click="createCustomer">Save Customer</button>
             </div>
         </div>
         @endif
@@ -650,9 +650,9 @@
             </div>
             <div class="p-6 space-y-4">
                 <div class="flex gap-2 p-1 bg-slate-100 rounded-xl">
-                    <button class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all {{ $saleDiscountType == 'fixed' ? 'bg-white text-[#e67e22] shadow-sm' : 'text-slate-400' }}"
+                    <button class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all {{ $saleDiscountType == 'fixed' ? 'bg-white text-[#e11d48] shadow-sm' : 'text-slate-400' }}"
                         wire:click="$set('saleDiscountType', 'fixed')">Fixed Amount</button>
-                    <button class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all {{ $saleDiscountType == 'percentage' ? 'bg-white text-[#e67e22] shadow-sm' : 'text-slate-400' }}"
+                    <button class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all {{ $saleDiscountType == 'percentage' ? 'bg-white text-[#e11d48] shadow-sm' : 'text-slate-400' }}"
                         wire:click="$set('saleDiscountType', 'percentage')">Percentage (%)</button>
                 </div>
                 <div class="space-y-2">
@@ -662,23 +662,23 @@
                             step="0.01"
                             min="0"
                             max="{{ $saleDiscountType == 'percentage' ? '100' : '' }}"
-                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xl font-black text-slate-700 outline-none focus:border-[#e67e22]" 
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xl font-black text-slate-700 outline-none focus:border-[#e11d48]" 
                             wire:model.live="saleDiscountValue"
                             placeholder="0">
                     </div>
                     {{-- Validation Helper Text --}}
                     <div class="text-[9px] font-bold text-slate-500 px-1">
                         @if($saleDiscountType == 'percentage')
-                            Max: <span class="text-[#e67e22]">100%</span>
+                            Max: <span class="text-[#e11d48]">100%</span>
                         @else
-                            Max: <span class="text-[#e67e22]">Rs. {{ number_format($subtotalAfterItemDiscounts, 2) }}</span> (Sale Total)
+                            Max: <span class="text-[#e11d48]">Rs. {{ number_format($subtotalAfterItemDiscounts, 2) }}</span> (Sale Total)
                         @endif
                     </div>
                 </div>
             </div>
             <div class="p-4 bg-slate-50 flex gap-2">
                 <button class="flex-1 py-3 text-[10px] font-black uppercase text-slate-400" wire:click="$set('showSaleDiscountModal', false)">Cancel</button>
-                <button class="flex-1 py-3 bg-[#e67e22] text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-orange-500/10"
+                <button class="flex-1 py-3 bg-[#e11d48] text-white rounded-xl text-[10px] font-black uppercase shadow-lg shadow-rose-500/10"
                     wire:click="applySaleDiscount">Apply Discount</button>
             </div>
         </div>
@@ -688,7 +688,7 @@
         @if($showPaymentModal)
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[85vh] overflow-hidden relative transform transition-all flex flex-col">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
-                <h3 class="font-black text-xs uppercase tracking-widest text-[#e67e22]"><i class="material-symbols-outlined align-middle mr-2">payment_confirmed</i>Secure Transaction</h3>
+                <h3 class="font-black text-xs uppercase tracking-widest text-[#e11d48]"><i class="material-symbols-outlined align-middle mr-2">payment_confirmed</i>Secure Transaction</h3>
                 <button class="text-slate-400 hover:text-slate-600" wire:click="closePaymentModal"><span class="material-symbols-outlined">close</span></button>
             </div>
             
@@ -700,11 +700,11 @@
                         @foreach(['cash' => 'payments', 'multiple' => 'paid', 'cheque' => 'check_box', 'credit' => 'history'] as $id => $icon)
                         <div class="group relative">
                             <input type="radio" value="{{ $id }}" wire:model.live="paymentMethod" id="pay_{{ $id }}" class="sr-only">
-                            <label for="pay_{{ $id }}" class="flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all {{ $paymentMethod == $id ? 'border-[#e67e22] bg-orange-50/50 text-[#e67e22]' : 'border-slate-100 grayscale hover:bg-slate-50 hover:grayscale-0' }}">
+                            <label for="pay_{{ $id }}" class="flex flex-col items-center justify-center p-4 border-2 rounded-xl cursor-pointer transition-all {{ $paymentMethod == $id ? 'border-[#e11d48] bg-rose-50/50 text-[#e11d48]' : 'border-slate-100 grayscale hover:bg-slate-50 hover:grayscale-0' }}">
                                 <span class="material-symbols-outlined text-3xl mb-2">{{ $icon }}</span>
                                 <span class="text-[10px] font-black uppercase">{{ ucfirst(str_replace('_', ' ', $id)) }}</span>
                                 @if($paymentMethod == $id)
-                                    <span class="absolute top-1 right-1 material-symbols-outlined text-[#e67e22] text-base">check_circle</span>
+                                    <span class="absolute top-1 right-1 material-symbols-outlined text-[#e11d48] text-base">check_circle</span>
                                 @endif
                             </label>
                         </div>
@@ -718,7 +718,7 @@
                                 <label class="text-[9px] font-black text-slate-400 uppercase block mb-2">Amount Received</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">Rs.</span>
-                                    <input type="number" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-xl text-3xl font-black text-[#e67e22] outline-none" wire:model.live="amountReceived">
+                                    <input type="number" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-xl text-3xl font-black text-[#e11d48] outline-none" wire:model.live="amountReceived">
                                 </div>
                             </div>
                             <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex items-center justify-between">
@@ -731,7 +731,7 @@
                                     <label class="text-[9px] font-black text-slate-400 uppercase mb-1 block">Cash Amount</label>
                                     <div class="relative">
                                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">Rs.</span>
-                                        <input type="number" step="0.01" min="0" max="{{ max(0, $grandTotal - collect($cheques)->sum('amount')) }}" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-xl text-3xl font-black text-[#e67e22] outline-none" wire:model.live="cashAmount">
+                                        <input type="number" step="0.01" min="0" max="{{ max(0, $grandTotal - collect($cheques)->sum('amount')) }}" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-xl text-3xl font-black text-[#e11d48] outline-none" wire:model.live="cashAmount">
                                     </div>
                                     <div class="mt-2 text-[10px] text-slate-400">Remaining to cover: <span class="font-black text-slate-700">Rs. {{ number_format(max(0, $grandTotal - collect($cheques)->sum('amount')), 2) }}</span></div>
                                 </div>
@@ -739,7 +739,7 @@
                                 <div>
                                     <div class="flex justify-between items-center">
                                         <label class="text-[9px] font-black text-slate-400 uppercase mb-1 block">Cheques</label>
-                                        <button class="text-[10px] font-black text-[#e67e22]" wire:click="toggleChequeForm">{{ $expandedChequeForm ? 'Cancel' : '+ Add Cheque' }}</button>
+                                        <button class="text-[10px] font-black text-[#e11d48]" wire:click="toggleChequeForm">{{ $expandedChequeForm ? 'Cancel' : '+ Add Cheque' }}</button>
                                     </div>
 
                                     @if(count($cheques) > 0)
@@ -764,14 +764,14 @@
                                         <input type="text" class="w-full p-2 bg-white border border-slate-200 rounded text-xs font-bold" wire:model="tempChequeNumber" placeholder="Cheque #">
                                         <input type="date" class="w-full p-2 bg-white border border-slate-200 rounded text-xs" wire:model="tempChequeDate">
                                         <input type="number" class="w-full p-2 bg-white border border-slate-200 rounded text-xs font-bold" wire:model="tempChequeAmount" placeholder="Amount">
-                                        <button class="w-full py-2 bg-[#e67e22] text-white rounded-lg text-[10px] font-black uppercase" wire:click="addCheque">Add Cheque</button>
+                                        <button class="w-full py-2 bg-[#e11d48] text-white rounded-lg text-[10px] font-black uppercase" wire:click="addCheque">Add Cheque</button>
                                     </div>
                                     @endif
                                 </div>
                             </div>
                         @elseif($paymentMethod == 'cheque')
                             <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                                <button class="w-full py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase text-[#e67e22] shadow-sm mb-3" wire:click="toggleChequeForm">
+                                <button class="w-full py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black uppercase text-[#e11d48] shadow-sm mb-3" wire:click="toggleChequeForm">
                                     {{ $expandedChequeForm ? 'Cancel Form' : '+ Add Cheque Details' }}
                                 </button>
                                 @if($expandedChequeForm)
@@ -780,7 +780,7 @@
                                     <input type="text" class="w-full p-2 bg-white border border-slate-200 rounded text-xs font-bold" wire:model="tempChequeNumber" placeholder="Cheque #">
                                     <input type="date" class="w-full p-2 bg-white border border-slate-200 rounded text-xs" wire:model="tempChequeDate">
                                     <input type="number" class="w-full p-2 bg-white border border-slate-200 rounded text-xs font-bold" wire:model="tempChequeAmount" placeholder="Amount">
-                                    <button class="w-full py-2 bg-[#e67e22] text-white rounded-lg text-[10px] font-black uppercase" wire:click="addCheque">Link Cheque</button>
+                                    <button class="w-full py-2 bg-[#e11d48] text-white rounded-lg text-[10px] font-black uppercase" wire:click="addCheque">Link Cheque</button>
                                 </div>
                                 @endif
 
@@ -789,17 +789,17 @@
                                 <div class="mt-4 space-y-2">
                                     <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Added Cheques ({{ count($cheques) }})</label>
                                     @foreach($cheques as $index => $cheque)
-                                    <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between group hover:border-orange-200 transition-all">
+                                    <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between group hover:border-rose-500 transition-all">
                                         <div class="flex-1 space-y-1">
                                             <div class="flex items-center gap-2">
-                                                <span class="material-symbols-outlined text-[#e67e22] text-sm">check_box</span>
+                                                <span class="material-symbols-outlined text-[#e11d48] text-sm">check_box</span>
                                                 <span class="font-black text-xs text-slate-800">{{ $cheque['bank_name'] }}</span>
                                             </div>
                                             <div class="grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-bold ml-6">
                                                 <div><span class="text-slate-400">Cheque #:</span> {{ $cheque['number'] }}</div>
                                                 <div><span class="text-slate-400">Date:</span> {{ date('d/m/Y', strtotime($cheque['date'])) }}</div>
                                             </div>
-                                            <div class="text-xs font-black text-[#e67e22] ml-6">Rs. {{ number_format($cheque['amount'], 2) }}</div>
+                                            <div class="text-xs font-black text-[#e11d48] ml-6">Rs. {{ number_format($cheque['amount'], 2) }}</div>
                                         </div>
                                         <button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-lg" wire:click="removeCheque({{ $index }})" title="Remove Cheque">
                                             <span class="material-symbols-outlined text-red-500 text-lg">delete</span>
@@ -808,9 +808,9 @@
                                     @endforeach
                                     
                                     {{-- Total Cheques Amount --}}
-                                    <div class="mt-3 p-3 bg-orange-50 border border-orange-100 rounded-lg flex justify-between items-center">
-                                        <span class="text-[10px] font-black text-orange-600 uppercase tracking-widest">Total Cheque Amount</span>
-                                        <span class="text-lg font-black text-[#e67e22]">Rs. {{ number_format(collect($cheques)->sum('amount'), 2) }}</span>
+                                    <div class="mt-3 p-3 bg-rose-50 border border-rose-100 rounded-lg flex justify-between items-center">
+                                        <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest">Total Cheque Amount</span>
+                                        <span class="text-lg font-black text-[#e11d48]">Rs. {{ number_format(collect($cheques)->sum('amount'), 2) }}</span>
                                     </div>
                                 </div>
                                 @endif
@@ -844,7 +844,7 @@
                         <div class="mt-4 p-6 bg-white rounded-2xl shadow-xl shadow-slate-200 border border-white">
                             <div class="flex justify-between items-center mb-6">
                                 <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Grand Total</span>
-                                <span class="text-3xl font-black text-[#e67e22]">Rs. {{ number_format($grandTotal, 2) }}</span>
+                                <span class="text-3xl font-black text-[#e11d48]">Rs. {{ number_format($grandTotal, 2) }}</span>
                             </div>
                             <textarea class="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold outline-none" wire:model="paymentNotes" placeholder="Transaction notes..." rows="2"></textarea>
                         </div>
@@ -852,7 +852,7 @@
                     
                     <div class="mt-auto pt-8 flex gap-3">
                         <button class="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-xl uppercase tracking-widest hover:bg-slate-200 transition-all text-xs" wire:click="closePaymentModal">Cancel</button>
-                        <button class="flex-[2] py-4 bg-[#e67e22] text-white font-black rounded-xl uppercase tracking-widest shadow-xl shadow-orange-500/20 text-xs flex items-center justify-center gap-2" wire:click="completeSaleWithPaymentAndPrint">
+                        <button class="flex-[2] py-4 bg-[#e11d48] text-white font-black rounded-xl uppercase tracking-widest shadow-xl shadow-rose-500/20 text-xs flex items-center justify-center gap-2" wire:click="completeSaleWithPaymentAndPrint">
                             <span class="material-symbols-outlined">print_connect</span>
                             Process & Print
                         </button>
@@ -916,7 +916,7 @@
                         <div style="flex:0 0 45%; text-align:right;">
                             <p style="margin:0; font-size:12px;"><strong>Invoice Number:</strong> {{ $createdSale->invoice_number }}</p>
                             <p style="margin:0; font-size:12px;"><strong>Date:</strong> {{ $createdSale->created_at->format('d/m/Y h:i A') }}</p>
-                            <p style="margin:0; font-size:12px;"><strong>Payment Status:</strong> <span style="color:#e67e22; font-weight:bold;">{{ ucfirst($createdSale->payment_status ?? 'paid') }}</span></p>
+                            <p style="margin:0; font-size:12px;"><strong>Payment Status:</strong> <span style="color:#e11d48; font-weight:bold;">{{ ucfirst($createdSale->payment_status ?? 'paid') }}</span></p>
                         </div>
                     </div>
 
@@ -1025,7 +1025,7 @@
             <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-center gap-3 shrink-0">
                 <button class="px-8 py-3 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50" wire:click="createNewSale">Close & New</button>
                 <button class="px-10 py-3 bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 flex items-center gap-2" onclick="printInvoice()"><span class="material-symbols-outlined text-base">print</span> Print Invoice</button>
-                <button class="px-8 py-3 bg-[#e67e22] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-500/20" wire:click="downloadInvoice">Download PDF</button>
+                <button class="px-8 py-3 bg-[#e11d48] text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-rose-500/20" wire:click="downloadInvoice">Download PDF</button>
             </div>
         </div>
         @endif
@@ -1046,7 +1046,7 @@
                     </div>
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-black text-slate-300 uppercase tracking-widest block mb-1">Total Turnover</label>
-                        <span class="text-lg font-black text-[#e67e22]">Rs. {{ number_format($sessionSummary['total_pos_sales'] ?? 0, 2) }}</span>
+                        <span class="text-lg font-black text-[#e11d48]">Rs. {{ number_format($sessionSummary['total_pos_sales'] ?? 0, 2) }}</span>
                     </div>
                 </div>
                 <div class="space-y-3 pt-4 border-t border-slate-50">
@@ -1059,7 +1059,7 @@
                         <span class="text-red-500">Rs. {{ number_format($sessionSummary['expenses'] ?? 0, 2) }}</span>
                     </div>
                 </div>
-                <div class="p-6 bg-[#e67e22] rounded-2xl flex items-center justify-between text-white shadow-xl shadow-orange-500/20">
+                <div class="p-6 bg-[#e11d48] rounded-2xl flex items-center justify-between text-white shadow-xl shadow-rose-500/20">
                     <span class="text-[10px] font-black uppercase tracking-[0.2em]">Liquid Cash in Hand</span>
                     <span class="text-2xl font-black tracking-tighter">Rs. {{ number_format($sessionSummary['expected_cash'] ?? 0, 2) }}</span>
                 </div>

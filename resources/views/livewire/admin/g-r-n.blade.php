@@ -16,8 +16,8 @@
                 <div class="card summary-card awaiting h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
-                            <div class="icon-container bg-warning bg-opacity-10 me-3">
-                                <i class="bi bi-box-seam text-warning fs-4"></i>
+                            <div class="icon-container bg-crimson-soft me-3">
+                                <i class="bi bi-box-seam text-crimson fs-4"></i>
                             </div>
                             <div class="flex-grow-1">
                                 <p class="text-muted mb-1">Awaiting Receipt</p>
@@ -52,7 +52,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="fw-bold text-dark mb-1">
-                        <i class="bi bi-list-task text-primary me-2"></i> Purchase Orders
+                        <i class="bi bi-list-task text-crimson me-2"></i> Purchase Orders
                     </h5>
                     <p class="text-muted small mb-0">Process incoming orders from suppliers</p>
                 </div>
@@ -331,11 +331,11 @@
         }
 
         .summary-card.awaiting {
-            border-left-color: #ffc107;
+            border-left-color: #64748b;
         }
 
         .summary-card.received {
-            border-left-color: #28a745;
+            border-left-color: var(--primary);
         }
 
         .icon-container {
@@ -383,7 +383,7 @@
         }
 
         .summary-card.total {
-            border-left-color: #2a83df;
+            border-left-color: var(--primary);
         }
 
         .btn-link {
@@ -422,13 +422,13 @@
         }
 
         .btn-primary {
-            background-color: #4361ee;
-            border-color: #4361ee;
+            background-color: var(--primary);
+            border-color: var(--primary);
         }
 
         .btn-primary:hover {
-            background-color: #3f37c9;
-            border-color: #3f37c9;
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
             transform: translateY(-2px);
         }
 
@@ -453,8 +453,16 @@
         }
 
         .list-group-item:hover {
-            background-color: #e3f2fd;
+            background-color: #fef2f2;
             transform: translateX(5px);
+        }
+
+        .text-crimson {
+            color: var(--primary) !important;
+        }
+
+        .bg-crimson-soft {
+            background-color: rgba(225, 29, 72, 0.1) !important;
         }
     </style>
     @endpush

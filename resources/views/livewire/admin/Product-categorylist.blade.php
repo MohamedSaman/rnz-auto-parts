@@ -3,12 +3,12 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-tags-fill text-success me-2"></i> Product Category Management
+                <i class="bi bi-tags-fill text-crimson me-2"></i> Product Category Management
             </h3>
             <p class="text-muted mb-0">Manage and organize your product categories efficiently</p>
         </div>
         <div>
-            <button class="btn btn-primary" wire:click="createCategory">
+            <button class="btn btn-crimson" wire:click="createCategory">
                 <i class="bi bi-plus-lg me-2"></i> Add Category
             </button>
         </div>
@@ -21,7 +21,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="fw-bold text-dark mb-1">
-                            <i class="bi bi-list-ul text-primary me-2"></i> Category List
+                            <i class="bi bi-list-ul text-crimson me-2"></i> Category List
                         </h5>
                         <p class="text-muted small mb-0">View and manage all product categories</p>
                     </div>
@@ -48,7 +48,7 @@
                                                 <span class="fw-medium text-dark">{{ $category->category_name }}</span>
                                             </td>
                                             <td class="text-end pe-4">
-                                                <button class="text-primary me-2 bg-opacity-0 border-0" wire:click="editCategory({{ $category->id }})">
+                                                <button class="text-crimson me-2 bg-opacity-0 border-0" wire:click="editCategory({{ $category->id }})">
                                                     <i class="bi bi-pencil fs-6"></i>
                                                 </button>
                                                 <button class="text-danger me-2 bg-opacity-0 border-0" wire:click="confirmDelete({{ $category->id }})">
@@ -94,7 +94,7 @@
                             @enderror
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-crimson">
                                 <i class="bi bi-check2-circle me-1"></i> Save Category
                             </button>
                         </div>
@@ -209,8 +209,8 @@
     }
 
     .form-control:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {
@@ -219,15 +219,26 @@
         padding: 0.75rem 1.5rem;
         transition: all 0.3s ease;
     }
-
+    .btn-crimson {
+        background-color: var(--primary);
+        color: white;
+    }
+    .btn-crimson:hover {
+        background-color: var(--primary-600);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .text-crimson {
+        color: var(--primary) !important;
+    }
     .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
+        background-color: var(--primary);
+        border-color: var(--primary);
     }
 
     .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
         transform: translateY(-2px);
     }
 </style>

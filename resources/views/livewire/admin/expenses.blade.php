@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-pie-chart-fill text-success me-2"></i> Expense Management
+                <i class="bi bi-pie-chart-fill text-crimson me-2"></i> Expense Management
             </h3>
             <p class="text-muted mb-0">Track and manage your company expenses efficiently</p>
         </div>
@@ -24,8 +24,8 @@
             <div class="card summary-card today h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon-container bg-success bg-opacity-10 me-3">
-                            <i class="bi bi-calendar-day text-success fs-4"></i>
+                        <div class="icon-container bg-crimson-soft me-3">
+                            <i class="bi bi-calendar-day text-crimson fs-4"></i>
                         </div>
                         <div class="flex-grow-1">
                             <p class="text-muted mb-1">Today's Expenses</p>
@@ -58,8 +58,8 @@
             <div class="card summary-card total h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon-container bg-primary bg-opacity-10 me-3">
-                            <i class="bi bi-cash-coin text-primary fs-4"></i>
+                        <div class="icon-container bg-crimson-soft me-3">
+                            <i class="bi bi-cash-coin text-crimson fs-4"></i>
                         </div>
                         <div class="flex-grow-1">
                             <p class="text-muted mb-1">Total Expenses</p>
@@ -83,7 +83,7 @@
                         </h5>
                         <p class="text-muted small mb-0">Small daily costs like snacks, printouts, or stationery</p>
                     </div>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDailyExpenseModal">
+                    <button class="btn btn-crimson btn-sm" data-bs-toggle="modal" data-bs-target="#addDailyExpenseModal">
                         <i class="bi bi-plus-lg me-1"></i> Add
                     </button>
                 </div>
@@ -560,15 +560,15 @@
     }
 
     .summary-card.today {
-        border-left-color: #4cc9f0;
+        border-left-color: var(--primary);
     }
 
     .summary-card.month {
-        border-left-color: #1a5fb8;
+        border-left-color: #1e293b;
     }
 
     .summary-card.total {
-        border-left-color: #2a83df;
+        border-left-color: #64748b;
     }
 
     .icon-container {
@@ -632,8 +632,8 @@
 
     .form-control:focus,
     .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {
@@ -644,24 +644,24 @@
     }
 
     .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
+        background-color: var(--primary);
+        border-color: var(--primary);
     }
 
     .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
         transform: translateY(-2px);
     }
 
     .btn-info {
-        background-color: #4895ef;
-        border-color: #4895ef;
+        background-color: var(--info);
+        border-color: var(--info);
     }
 
     .btn-info:hover {
-        background-color: #3a7bd5;
-        border-color: #3a7bd5;
+        background-color: var(--info-700);
+        border-color: var(--info-700);
         transform: translateY(-2px);
     }
 

@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-graph-up-arrow text-success me-2"></i> Day Summary Report
+                <i class="bi bi-graph-up-arrow text-crimson me-2"></i> Day Summary Report
             </h3>
             <p class="text-muted mb-0">Track and manage your company revenue efficiently</p>
         </div>
@@ -14,7 +14,7 @@
             <!-- <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addIncomeModal">
                 <i class="bi bi-plus-lg me-1"></i> Add & Deposit
             </button> -->
-            <button class="btn btn-primary">
+            <button class="btn btn-crimson">
                 <i class="bi bi-download me-2"></i> Export Report
             </button>
         </div>
@@ -24,48 +24,48 @@
     <div class="row mb-0">
         <!-- Cash in Hand Card - Blue -->
         <div class="col-xl-3 col-md-6 mb-2">
-            <div class="card gradient-card" style="background: linear-gradient(135deg, #2a83df 0%, #1a5fb8 100%);">
+            <div class="card gradient-card" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
                 <div class="card-body text-white">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">💰 OPENING CASH</h6>
                     </div>
-                    <h2 class="fw-bold mb-0" ">Rs. {{ number_format($openingCash, 2) }}</h2>
+                    <h2 class="fw-bold mb-0">Rs. {{ number_format($openingCash, 2) }}</h2>
                 </div>
             </div>
         </div>
 
         <!-- Cash Sales Card - Orange/Red -->
         <div class=" col-xl-3 col-md-6 mb-2">
-                        <div class="card gradient-card" style="background: linear-gradient(135deg, #f4511e 0%, #ff7043 100%);">
+                        <div class="card gradient-card" style="background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);">
                             <div class="card-body text-white">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">💵 CASH SALES</h6>
                                 </div>
-                                <h2 class="fw-bold mb-0" ">Rs. {{ number_format($cashIncome, 2) }}</h2>
+                                <h2 class="fw-bold mb-0">Rs. {{ number_format($cashIncome, 2) }}</h2>
                 </div>
             </div>
         </div>
 
         <!-- Cash Late Payments Card - Pink -->
         <div class=" col-xl-3 col-md-6 mb-2">
-                                    <div class="card gradient-card" style="background: linear-gradient(135deg, #d81b60 0%, #ec407a 100%);">
+                                    <div class="card gradient-card" style="background: linear-gradient(135deg, #475569 0%, #1e293b 100%);">
                                         <div class="card-body text-white">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">⏰ CHEQUE PAYMENTS</h6>
                                             </div>
-                                            <h2 class="fw-bold mb-0" ">Rs. {{ number_format($chequeIncome, 2) }}</h2>
+                                            <h2 class="fw-bold mb-0">Rs. {{ number_format($chequeIncome, 2) }}</h2>
                 </div>
             </div>
         </div>
 
         <!-- Cash Late Payments Card - Cyan -->
         <div class=" col-xl-3 col-md-6 mb-2">
-                                                <div class="card gradient-card" style="background: linear-gradient(135deg, #00acc1 0%, #26c6da 100%);">
+                                                <div class="card gradient-card" style="background: linear-gradient(135deg, #be123c 0%, #9f1239 100%);">
                                                     <div class="card-body text-white">
                                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                                             <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">💰 CASH LATE PAYMENT</h6>
                                                         </div>
-                                                        <h2 class="fw-bold mb-0" ">Rs. {{ number_format($cashLatePayments, 2) }}</h2>
+                                                        <h2 class="fw-bold mb-0">Rs. {{ number_format($cashLatePayments, 2) }}</h2>
                 </div>
             </div>
         </div>
@@ -75,10 +75,10 @@
     <div class=" row mb-0">
                                                             <!-- Today's Deposits Card - Dark Purple -->
                                                             <div class="col-xl-3 col-md-6 mb-2">
-                                                                <div class="card gradient-card" style="background: linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%);">
+                                                                <div class="card gradient-card" style="background: linear-gradient(135deg, #334155 0%, #0f172a 100%);">
                                                                     <div class="card-body text-white">
                                                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                            <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">� TODAY DEPOSITS</h6>
+                                                                            <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">💰 TODAY DEPOSITS</h6>
                                                                         </div>
                                                                         <h2 class="fw-bold mb-0">Rs. {{ number_format($todayDeposits, 2) }}</h2>
                                                                     </div>
@@ -87,10 +87,10 @@
 
                                                             <!-- Expenses Card - Orange -->
                                                             <div class="col-xl-3 col-md-6 mb-2">
-                                                                <div class="card gradient-card" style="background: linear-gradient(135deg, #f57c00 0%, #ff9800 100%);">
+                                                                <div class="card gradient-card" style="background: linear-gradient(135deg, #9f1239 0%, #881337 100%);">
                                                                     <div class="card-body text-white">
                                                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                            <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">� EXPENSES</h6>
+                                                                            <h6 class="text-white-50 mb-0" style="font-size: 0.85rem; font-weight: 500; letter-spacing: 1px;">💵 EXPENSES</h6>
                                                                         </div>
                                                                         <h2 class="fw-bold mb-0">Rs. {{ number_format($todayExpenses, 2) }}</h2>
                                                                     </div>
@@ -125,7 +125,7 @@
 
                                                     <!-- Cash Sales List Table -->
                                                     <div class="card">
-                                                        <div class="card-header" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
+                                                        <div class="card-header" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%);">
                                                             <h5 class="fw-bold text-white mb-0">
                                                                 <i class="bi bi-cash-coin me-2"></i>💰 CASH SALES - TODAY
                                                             </h5>
@@ -133,7 +133,7 @@
                                                         <div class="card-body p-0 overflow-auto">
                                                             <div class="table-responsive">
                                                                 <table class="table table-hover mb-0">
-                                                                    <thead style="background: linear-gradient(135deg, #2a83df 0%, #1a5fb8 100%);">
+                                                                    <thead style="background: linear-gradient(135deg, #475569 0%, #1e293b 100%);">
                                                                         <tr>
                                                                             <th class="ps-4">INV.NO</th>
                                                                             <th>PAY.REF</th>
@@ -521,8 +521,8 @@
 
                                 .form-control:focus,
                                 .form-select:focus {
-                                    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15);
-                                    border-color: #198754;
+                                    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+                                    border-color: var(--primary);
                                 }
 
                                 .btn {
@@ -552,6 +552,18 @@
                                     background-color: #ffca2c;
                                     border-color: #ffca2c;
                                     transform: translateY(-2px);
+                                }
+                                .btn-crimson {
+                                    background-color: var(--primary);
+                                    color: white;
+                                }
+                                .btn-crimson:hover {
+                                    background-color: var(--primary-600);
+                                    color: white;
+                                    transform: translateY(-2px);
+                                }
+                                .text-crimson {
+                                    color: var(--primary) !important;
                                 }
                             </style>
                             @endpush

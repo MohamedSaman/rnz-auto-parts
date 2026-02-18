@@ -29,10 +29,10 @@
             margin-bottom: 15px;
         }
 
-        .revenue-icon { background: #198754; }
-        .expense-icon { background: #dc3545; }
-        .salary-icon { background: #ffc107; }
-        .profit-icon { background: #000000; }
+        .revenue-icon { background: var(--success); }
+        .expense-icon { background: var(--danger); }
+        .salary-icon { background: var(--warning); }
+        .profit-icon { background: var(--primary); }
 
         .metric-content h6 {
             color: #6c757d;
@@ -66,7 +66,7 @@
         }
 
         .chart-header {
-            background: #000000;
+            background: var(--primary);
             padding: 1.25rem;
             border-bottom: none;
         }
@@ -111,8 +111,8 @@
         }
 
         .filter-card .form-control:focus {
-            border-color: #000000;
-            box-shadow: 0 0 0 0.2rem rgba(142, 185, 34, 0.25);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(225, 29, 72, 0.25);
         }
 
         .filter-card .btn {
@@ -122,13 +122,13 @@
         }
 
         .filter-card .btn-primary {
-            background: #000000;
-            border-color: #000000;
+            background: var(--primary);
+            border-color: var(--primary);
         }
 
         .filter-card .btn-primary:hover {
-            background: #7aa51d;
-            border-color: #7aa51d;
+            background: var(--primary-600);
+            border-color: var(--primary-600);
         }
 
         .filter-card .btn-secondary {
@@ -230,7 +230,7 @@
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h1>
-                    <i class="fas fa-chart-line me-3" style="color: #000000;"></i>Profit & Loss Statement
+                    <i class="fas fa-chart-line me-3" style="color: var(--primary);"></i>Profit & Loss Statement
                 </h1>
                 <p class="subtitle">📊 Financial overview and performance analysis</p>
             </div>
@@ -584,7 +584,7 @@
                 @if(!empty($monthlyTrends))
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
-                            <thead style="background: linear-gradient(135deg, #2a83df 0%, #1a5fb8 100%);">
+                            <thead style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%);">
                                 <tr>
                                     <th>📅 Month</th>
                                     <th class="text-end">📈 Revenue</th>

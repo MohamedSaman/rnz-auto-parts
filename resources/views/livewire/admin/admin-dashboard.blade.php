@@ -71,9 +71,9 @@
             font-weight: 600;
         }
 
-        .in-stock { background: #ecfdf5; color: #065f46; }
-        .low-stock { background: #fffbeb; color: #92400e; }
-        .out-of-stock { background: #fef2f2; color: #991b1b; }
+        .in-stock { background: #fef2f2; color: #e11d48; } /* Using Crimson for in-stock as primary */
+        .low-stock { background: #fff7ed; color: #ea580c; }
+        .out-of-stock { background: #f8fafc; color: #64748b; }
 
         .progress {
             height: 6px;
@@ -104,12 +104,12 @@
                     <div class="stat-value mb-3">Rs.{{ number_format($totalSales, 0) }}</div>
                     
                     <div class="progress mb-2">
-                        <div class="progress-bar bg-success" style="width: {{ $revenuePercentage }}%;"></div>
+                        <div class="progress-bar" style="width: {{ $revenuePercentage }}%; background-color: var(--primary);"></div>
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Revenue: {{ $revenuePercentage }}%</small>
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                        <span class="badge" style="background-color: rgba(225, 29, 72, 0.1); color: var(--primary); border: 1px solid rgba(225, 29, 72, 0.25); px-2 py-1">
                             Rs.{{ number_format($totalRevenue, 0) }}
                         </span>
                     </div>
@@ -124,12 +124,12 @@
                     <div class="stat-value mb-3">Rs.{{ number_format($totalPaidAmount, 0) }}</div>
                     
                     <div class="progress mb-2">
-                        <div class="progress-bar bg-primary" style="width: {{ $revenuePercentage }}%;"></div>
+                        <div class="progress-bar" style="width: 100%; background-color: #64748b;"></div>
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">Due: {{ $duePercentage }}%</small>
-                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1">
+                        <span class="badge" style="background-color: rgba(100, 116, 139, 0.1); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.25); px-2 py-1">
                             Rs.{{ number_format($totalDueAmount, 0) }}
                         </span>
                     </div>
@@ -211,7 +211,7 @@
                             <h6 class="fw-bold text-dark mb-1">Inventory Status</h6>
                             <p class="text-muted small mb-0">Current stock levels and alerts</p>
                         </div>
-                        <a href="{{ route('admin.Product-stock-details') }}" class="btn btn-sm btn-outline-primary border-0 bg-transparent text-primary">
+                        <a href="{{ route('admin.Product-stock-details') }}" class="btn btn-sm btn-outline-crimson border-0 bg-transparent text-crimson">
                             <i class="bi bi-arrow-right-circle fs-5"></i>
                         </a>
                     </div>
@@ -226,15 +226,18 @@
                         if ($Product->available_stock == 0) {
                             $statusClass = 'out-of-stock';
                             $statusText = 'Out of Stock';
-                            $progressClass = 'bg-danger';
+                            $progressClass = '';
+                            $progressStyle = 'background-color: #64748b;';
                         } elseif ($stockPercentage <= 25) { 
                             $statusClass='low-stock'; 
                             $statusText='Low Stock';
-                            $progressClass='bg-warning'; 
+                            $progressClass=''; 
+                            $progressStyle = 'background-color: #ea580c;';
                         } else { 
                             $statusClass='in-stock'; 
                             $statusText='In Stock';
-                            $progressClass='bg-success'; 
+                            $progressClass=''; 
+                            $progressStyle = 'background-color: var(--primary);';
                         } 
                         @endphp 
                         <div class="inventory-item mb-2">
@@ -247,7 +250,7 @@
                             </div>
                             <div class="d-flex align-items-center gap-3">
                                 <div class="progress flex-grow-1">
-                                    <div class="progress-bar {{ $progressClass }}" style="width: {{ $stockPercentage }}%;"></div>
+                                    <div class="progress-bar {{ $progressClass }}" style="width: {{ $stockPercentage }}%; {{ $progressStyle }}"></div>
                                 </div>
                                 <small class="text-muted fw-500" style="min-width: 45px;">{{ $Product->available_stock }}/{{ $Product->total_stock }}</small>
                             </div>
@@ -288,10 +291,10 @@
                     labels: dailyLabels,
                     datasets: [{
                         label: 'Daily Sales (Rs.)',
-                        backgroundColor: 'rgba(245, 131, 32, 0.1)',
-                        borderColor: '#f58320',
+                        backgroundColor: 'rgba(225, 29, 72, 0.1)',
+                        borderColor: '#e11d48',
                         borderWidth: 3,
-                        pointBackgroundColor: '#f58320',
+                        pointBackgroundColor: '#e11d48',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 5,

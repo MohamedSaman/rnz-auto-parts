@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-credit-card text-success me-2"></i> Payment Records
+                <i class="bi bi-credit-card text-crimson me-2"></i> Payment Records
             </h3>
             <p class="text-muted mb-0">View and manage all payment records</p>
         </div>
@@ -661,19 +661,19 @@
     }
 
     .summary-card.total {
-        border-left-color: #2a83df;
+        border-left-color: var(--primary);
     }
 
     .summary-card.pending {
-        border-left-color: #ffc107;
+        border-left-color: #64748b;
     }
 
     .summary-card.approved {
-        border-left-color: #198754;
+        border-left-color: #1e293b;
     }
 
     .summary-card.completed {
-        border-left-color: #1a5fb8;
+        border-left-color: var(--primary-600);
     }
 
     .icon-container {
@@ -723,8 +723,8 @@
 
     .form-control:focus,
     .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {
@@ -734,14 +734,16 @@
         transition: all 0.3s ease;
     }
 
-    .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
+    .btn-primary, .btn-crimson {
+        background-color: var(--primary);
+        color: white;
+        border-color: var(--primary);
     }
 
-    .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+    .btn-primary:hover, .btn-crimson:hover {
+        background-color: var(--primary-600);
+        color: white;
+        border-color: var(--primary-600);
         transform: translateY(-2px);
     }
 

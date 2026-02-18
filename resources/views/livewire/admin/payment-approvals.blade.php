@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-shield-check text-primary me-2"></i> Payment Approvals
+                <i class="bi bi-shield-check text-crimson me-2"></i> Payment Approvals
             </h3>
             <p class="text-muted mb-0">Manage and approve customer payment requests</p>
         </div>
@@ -16,13 +16,13 @@
             <div class="card summary-card pending h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon-container bg-warning bg-opacity-10 me-3">
-                            <i class="bi bi-hourglass-split text-warning fs-4"></i>
+                        <div class="icon-container bg-crimson-soft me-3">
+                            <i class="bi bi-hourglass-split text-crimson fs-4"></i>
                         </div>
                         <div class="flex-grow-1">
                             <p class="text-muted mb-1">Pending Approvals</p>
                             <h4 class="fw-bold mb-0">{{ \App\Models\Payment::where('status', 'pending')->count() }}</h4>
-                            <span class="badge bg-warning bg-opacity-10 text-warning">Awaiting Review</span>
+                            <span class="badge bg-crimson-soft text-crimson">Awaiting Review</span>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="fw-bold text-dark mb-1">
-                    <i class="bi bi-credit-card text-primary me-2"></i> Payment Submissions
+                    <i class="bi bi-credit-card text-crimson me-2"></i> Payment Submissions
                 </h5>
                 <p class="text-muted small mb-0">Review and manage customer payment requests</p>
             </div>
@@ -112,11 +112,11 @@
                 <!-- Filter Dropdown -->
                 <div class="col-12 col-md-6">
                     <div class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" 
+                        <button class="btn btn-outline-crimson dropdown-toggle w-100" type="button" 
                                 id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-funnel me-2"></i> Filters
                             @if ($filters['status'] || $filters['dateRange'])
-                                <span class="badge bg-primary ms-1">{{ ($filters['status'] ? 1 : 0) + ($filters['dateRange'] ? 1 : 0) }}</span>
+                                <span class="badge bg-crimson ms-1">{{ ($filters['status'] ? 1 : 0) + ($filters['dateRange'] ? 1 : 0) }}</span>
                             @endif
                         </button>
                         <div class="dropdown-menu p-3 dropdown-menu-end" style="width: 300px;" 
@@ -145,7 +145,7 @@
                             <!-- Clear Filters -->
                             @if ($filters['status'] || $filters['dateRange'])
                             <div class="d-grid">
-                                <button class="btn btn-secondary" 
+                                <button class="btn btn-outline-crimson" 
                                         wire:click="resetFilters">
                                     <i class="bi bi-arrow-repeat me-1"></i> Clear Filters
                                 </button>
@@ -176,8 +176,8 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="icon-container bg-primary bg-opacity-10 me-3">
-                                            <i class="bi bi-receipt text-primary"></i>
+                                        <div class="icon-container bg-crimson-soft me-3">
+                                            <i class="bi bi-receipt text-crimson"></i>
                                         </div>
                                         <div>
                                             <span class="fw-medium text-dark">{{ $payment->sale->invoice_number }}</span>
@@ -261,7 +261,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">
-                        <i class="bi bi-shield-check text-primary me-2"></i> Payment Review
+                        <i class="bi bi-shield-check text-crimson me-2"></i> Payment Review
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -527,8 +527,8 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="d-grid gap-3">
-                                            <button class="btn btn-success" wire:click="approvePayment">
-                                                <i class="bi bi-check-circle me-2"></i>Approve Payment
+                                            <button class="btn btn-crimson" wire:click="approvePayment">
+                                                <i class="bi bi-check-circle me-2"></i> Approve Payment
                                             </button>
                                             <button class="btn btn-danger" 
                                                     onclick="document.getElementById('rejectionSection').classList.toggle('d-none')">
@@ -631,19 +631,19 @@
     }
 
     .summary-card.pending {
-        border-left-color: #2a83df;
+        border-left-color: var(--primary);
     }
 
     .summary-card.approved {
-        border-left-color: #198754;
+        border-left-color: #1e293b;
     }
 
     .summary-card.rejected {
-        border-left-color: #dc3545;
+        border-left-color: #64748b;
     }
 
     .summary-card.today {
-        border-left-color: #1a5fb8;
+        border-left-color: var(--primary-600);
     }
 
     .icon-container {
@@ -693,8 +693,8 @@
 
     .form-control:focus,
     .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {
@@ -704,14 +704,16 @@
         transition: all 0.3s ease;
     }
 
-    .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
+    .btn-primary, .btn-crimson {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
     }
 
-    .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+    .btn-primary:hover, .btn-crimson:hover {
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
+        color: white;
         transform: translateY(-2px);
     }
 
@@ -780,6 +782,28 @@
     .icon-xl {
         width: 80px;
         height: 80px;
+    }
+    .text-crimson {
+        color: var(--primary) !important;
+    }
+
+    .bg-crimson {
+        background-color: var(--primary) !important;
+        color: white !important;
+    }
+
+    .bg-crimson-soft {
+        background-color: rgba(225, 29, 72, 0.1) !important;
+    }
+
+    .btn-outline-crimson {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-outline-crimson:hover {
+        background-color: var(--primary);
+        color: white;
     }
 </style>
 @endpush

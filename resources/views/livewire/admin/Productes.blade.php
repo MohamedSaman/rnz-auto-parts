@@ -18,12 +18,12 @@
         }
 
         .content-tab.active {
-            color: #f58320;
-            border-bottom-color: #f58320;
+            color: var(--primary);
+            border-bottom-color: var(--primary);
         }
 
         .content-tab:hover:not(.active) {
-            color: #f58320;
+            color: var(--primary);
             border-bottom-color: #dee2e6;
         }
 
@@ -111,8 +111,8 @@
         }
 
         .action-btn.edit {
-            color: #4361ee;
-            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            background-color: rgba(225, 29, 72, 0.1);
         }
 
         .action-btn.delete {
@@ -125,7 +125,7 @@
         }
 
         .action-btn:hover.edit {
-            background-color: rgba(67, 97, 238, 0.2);
+            background-color: rgba(225, 29, 72, 0.2);
         }
 
         .action-btn:hover.delete {
@@ -153,8 +153,8 @@
 
         .form-control:focus,
         .form-select:focus {
-            box-shadow: 0 0 0 3px rgba(245, 131, 32, 0.15);
-            border-color: #f58320;
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+            border-color: var(--primary);
         }
 
         /* Modern button styling */
@@ -166,13 +166,13 @@
         }
 
         .btn-primary {
-            background-color: #f58320;
-            border-color: #f58320;
+            background-color: var(--primary);
+            border-color: var(--primary);
         }
 
         .btn-primary:hover {
-            background-color: #d16d0e;
-            border-color: #d16d0e;
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
             transform: translateY(-2px);
         }
 
@@ -211,13 +211,13 @@
         }
 
         .nav-tabs-custom .nav-link.active {
-            color: #f58320;
-            border-bottom-color: #f58320;
+            color: var(--primary);
+            border-bottom-color: var(--primary);
             background-color: transparent;
         }
 
         .nav-tabs-custom .nav-link:hover {
-            color: #f58320;
+            color: var(--primary);
             border-bottom-color: #dee2e6;
         }
 
@@ -256,9 +256,9 @@
             }
 
             .content-tab.active {
-                background-color: #4361ee;
+                background-color: var(--primary);
                 color: white;
-                border-color: #4361ee;
+                border-color: var(--primary);
             }
 
             .pagination {
@@ -456,7 +456,7 @@
             left: 0;
             width: 60px;
             height: 3px;
-            background: linear-gradient(90deg, #1536c7ff, #2143ebff);
+            background: linear-gradient(90deg, var(--primary), var(--primary-600));
             border-radius: 2px;
         }
 

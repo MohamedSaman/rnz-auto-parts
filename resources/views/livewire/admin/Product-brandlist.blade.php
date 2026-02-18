@@ -3,12 +3,12 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-shop text-success me-2"></i> Product Brand Management
+                <i class="bi bi-shop text-crimson me-2"></i> Product Brand Management
             </h3>
             <p class="text-muted mb-0">Manage and organize your product brands efficiently</p>
         </div>
         <div>
-            <button class="btn btn-primary" wire:click="createBrand">
+            <button class="btn btn-crimson" wire:click="createBrand">
                 <i class="bi bi-plus-lg me-2"></i> Add Brand
             </button>
         </div>
@@ -21,7 +21,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="fw-bold text-dark mb-1">
-                            <i class="bi bi-list-ul text-primary me-2"></i> Brand List
+                            <i class="bi bi-list-ul text-crimson me-2"></i> Brand List
                         </h5>
                         <p class="text-muted small mb-0">View and manage all product brands</p>
                     </div>
@@ -250,8 +250,8 @@
     }
 
     .form-control:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {
@@ -261,14 +261,27 @@
         transition: all 0.3s ease;
     }
 
+    .btn-crimson {
+        background-color: var(--primary);
+        color: white;
+    }
+    .btn-crimson:hover {
+        background-color: var(--primary-600);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .text-crimson {
+        color: var(--primary) !important;
+    }
+
     .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
+        background-color: var(--primary);
+        border-color: var(--primary);
     }
 
     .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
         transform: translateY(-2px);
     }
 </style>

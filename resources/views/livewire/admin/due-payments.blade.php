@@ -16,13 +16,13 @@
             <div class="card summary-card pending h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="icon-container bg-info bg-opacity-10 me-3">
-                            <i class="bi bi-hourglass text-info fs-4"></i>
+                        <div class="icon-container bg-crimson-soft me-3">
+                            <i class="bi bi-hourglass text-crimson fs-4"></i>
                         </div>
                         <div class="flex-grow-1">
                             <p class="text-muted mb-1">Pending Payment</p>
                             <h4 class="fw-bold mb-0">{{ $pendingCount }}</h4>
-                            <span class="badge bg-info bg-opacity-10 text-info">To Collect</span>
+                            <span class="badge bg-crimson-soft text-crimson">To Collect</span>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="fw-bold text-dark mb-1">
-                    <i class="bi bi-journal-text text-primary me-2"></i> Due Payments
+                    <i class="bi bi-journal-text text-crimson me-2"></i> Due Payments
                 </h5>
                 <p class="text-muted small mb-0">View and manage all customer due payments</p>
             </div>
@@ -111,11 +111,11 @@
                 <!-- Filter Dropdown -->
                 <div class="col-12 col-md-6">
                     <div class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" 
+                        <button class="btn btn-outline-crimson dropdown-toggle w-100" type="button" 
                                 id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-funnel me-2"></i> Filters
                             @if ($filters['status'] || $filters['dateRange'])
-                                <span class="badge bg-primary ms-1">!</span>
+                                <span class="badge bg-crimson ms-1">!</span>
                             @endif
                         </button>
                         <div class="dropdown-menu p-3 dropdown-menu-end" style="width: 300px;" 
@@ -140,7 +140,7 @@
                             </div>
                             
                             <div class="d-grid">
-                                <button class="btn btn-secondary" wire:click="resetFilters">
+                                <button class="btn btn-outline-crimson" wire:click="resetFilters">
                                     <i class="bi bi-arrow-repeat me-1"></i> Reset Filters
                                 </button>
                             </div>
@@ -174,8 +174,8 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="icon-container bg-primary bg-opacity-10 me-3">
-                                            <i class="bi bi-person text-primary"></i>
+                                        <div class="icon-container bg-crimson-soft me-3">
+                                            <i class="bi bi-person text-crimson"></i>
                                         </div>
                                         <div>
                                             <span class="fw-medium text-dark">{{ $sale->customer->name }}</span>
@@ -202,11 +202,11 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group" role="group">
-                                        <button class="btn btn-sm btn-primary rounded-pill " 
+                                        <button class="btn btn-sm btn-crimson rounded-pill" 
                                                 wire:click="getSaleDetails({{ $sale->id }})" 
                                                 wire:loading.attr="disabled"
                                                 title="Receive Payment">
-                                            <i class="bi bi-currency-dollar"></i>Receive
+                                            <i class="bi bi-currency-dollar"></i> Receive
                                         </button>
                                         {{--<button class="btn btn-sm btn-warning" 
                                                 wire:click="openExtendDueModal({{ $sale->id }})" 
@@ -546,19 +546,19 @@
     }
 
     .summary-card.pending {
-        border-left-color: #2a83df;
+        border-left-color: var(--primary);
     }
 
     .summary-card.pending-amount {
-        border-left-color: #6c757d;
+        border-left-color: #64748b;
     }
 
     .summary-card.awaiting {
-        border-left-color: #ffc107;
+        border-left-color: #f1f5f9;
     }
 
     .summary-card.total {
-        border-left-color: #198754;
+        border-left-color: #1e293b;
     }
 
     .icon-container {
@@ -608,8 +608,8 @@
 
     .form-control:focus,
     .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {
@@ -619,14 +619,16 @@
         transition: all 0.3s ease;
     }
 
-    .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
+    .btn-primary, .btn-crimson {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
     }
 
-    .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+    .btn-primary:hover, .btn-crimson:hover {
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
+        color: white;
         transform: translateY(-2px);
     }
 
@@ -685,8 +687,27 @@
         border-bottom-left-radius: 0;
     }
 
-    .text-xs {
-        font-size: 0.75rem;
+    .text-crimson {
+        color: var(--primary) !important;
+    }
+
+    .bg-crimson {
+        background-color: var(--primary) !important;
+        color: white !important;
+    }
+
+    .bg-crimson-soft {
+        background-color: rgba(225, 29, 72, 0.1) !important;
+    }
+
+    .btn-outline-crimson {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-outline-crimson:hover {
+        background-color: var(--primary);
+        color: white;
     }
 </style>
 @endpush

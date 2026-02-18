@@ -7,15 +7,15 @@ use App\Models\Sale;
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-cash-stack text-success me-2"></i> POS Sales Management
+                <i class="bi bi-cash-stack text-crimson me-2"></i> POS Sales Management
             </h3>
             <p class="text-muted mb-0">View and manage POS sales</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.quotation-system') }}" class="btn btn-outline-primary">
+            <a href="{{ route('admin.quotation-system') }}" class="btn btn-outline-crimson">
                 <i class="bi bi-file-earmark-text me-2"></i> Create Quotation
             </a>
-            <a href="{{ route('admin.store-billing') }}" class="btn btn-primary">
+            <a href="{{ route('admin.store-billing') }}" class="btn btn-crimson text-white">
                 <i class="bi bi-plus-circle me-2"></i> New POS Sale
             </a>
         </div>
@@ -24,11 +24,11 @@ use App\Models\Sale;
     {{-- Statistics Cards --}}
     <div class="row mb-5">
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-primary border-4 shadow h-100 py-2">
+            <div class="card border-start border-crimson border-4 shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                            <div class="text-xs fw-bold text-crimson text-uppercase mb-1">
                                 Total POS Sales
                             </div>
                             <div class="h5 mb-0 fw-bold text-gray-800">{{ $stats['total_sales'] }}</div>
@@ -42,11 +42,11 @@ use App\Models\Sale;
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-success border-4 shadow h-100 py-2">
+            <div class="card border-start border-dark border-4 shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                            <div class="text-xs fw-bold text-dark text-uppercase mb-1">
                                 Total Revenue
                             </div>
                             <div class="h5 mb-0 fw-bold text-gray-800">Rs.{{ number_format($stats['total_amount'], 2) }}</div>
@@ -60,7 +60,7 @@ use App\Models\Sale;
         </div>
 
         <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-start border-warning border-4 shadow h-100 py-2">
+            <div class="card border-start border-slate-soft border-4 shadow h-100 py-2" style="border-left-color: #64748b !important;">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
@@ -138,9 +138,9 @@ use App\Models\Sale;
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="fw-bold mb-0">
-                    <i class="bi bi-list-ul text-primary me-2"></i> POS Sales List
+                    <i class="bi bi-list-ul text-crimson me-2"></i> POS Sales List
                 </h5>
-                <span class="badge bg-primary">{{ $sales->total() }} records</span>
+                <span class="badge bg-crimson">{{ $sales->total() }} records</span>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <label class="text-sm text-muted fw-medium">Show</label>
@@ -1137,6 +1137,47 @@ use App\Models\Sale;
             border: none !important;
             border-top: 1px solid #000 !important;
             margin: 8px 0 !important;
+        }
+        
+        /* Crimson styles */
+        .text-crimson { color: var(--primary) !important; }
+        .bg-crimson { background-color: var(--primary) !important; color: white !important; }
+        .border-crimson { border-color: var(--primary) !important; }
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+            border-color: var(--primary);
+        }
+
+        .btn-crimson {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-crimson:hover {
+            background-color: var(--primary-600);
+            border-color: var(--primary-600);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-crimson {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-outline-crimson:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .dropdown-item i {
+            transition: transform 0.2s;
+        }
+        
+        .dropdown-item:hover i {
+            transform: scale(1.2);
         }
         
         /* Optimize for printing */

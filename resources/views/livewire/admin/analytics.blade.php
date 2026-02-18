@@ -21,7 +21,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #2a83df, #28a745, #ffc107, #dc3545);
+            background: linear-gradient(90deg, var(--primary), #fb7185, #fda4af, #be123c);
         }
 
         .analytics-metric-card:hover {
@@ -41,10 +41,10 @@
             margin-bottom: 16px;
         }
 
-        .revenue-icon { background: linear-gradient(135deg, #2a83df, #1a5fb8); }
-        .sales-icon { background: linear-gradient(135deg, #28a745, #1e7e34); }
-        .due-icon { background: linear-gradient(135deg, #dc3545, #bd2130); }
-        .profit-icon { background: linear-gradient(135deg, #ffc107, #e0a800); }
+        .revenue-icon { background: linear-gradient(135deg, var(--primary), #be123c); }
+        .sales-icon { background: linear-gradient(135deg, #475569, #1e293b); }
+        .due-icon { background: linear-gradient(135deg, #94a3b8, #64748b); }
+        .profit-icon { background: linear-gradient(135deg, #fb7185, var(--primary)); }
 
         .metric-content h6 {
             color: #6c757d;
@@ -71,8 +71,8 @@
             gap: 4px;
         }
 
-        .metric-change.positive { color: #28a745; }
-        .metric-change.negative { color: #dc3545; }
+        .metric-change.positive { color: var(--primary); }
+        .metric-change.negative { color: #64748b; }
 
         .analytics-chart-card {
             background: white;
@@ -140,9 +140,9 @@
         }
 
         .chart-controls .btn.active {
-            background: #2a83df;
+            background: var(--primary);
             color: white;
-            border-color: #2a83df;
+            border-color: var(--primary);
         }
 
         .status-legend {
@@ -166,9 +166,9 @@
             border-radius: 50%;
         }
 
-        .legend-color.paid { background: #28a745; }
-        .legend-color.partial { background: #ffc107; }
-        .legend-color.pending { background: #dc3545; }
+        .legend-color.paid { background: var(--primary); }
+        .legend-color.partial { background: #fb7185; }
+        .legend-color.pending { background: #64748b; }
 
         .performance-card {
             background: white;
@@ -188,12 +188,12 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #ffc107, #fd7e14);
+            background: linear-gradient(90deg, var(--primary), #be123c);
         }
 
-        .performance-card.rank-1::before { background: linear-gradient(90deg, #ffc107, #fd7e14); }
-        .performance-card.rank-2::before { background: linear-gradient(90deg, #6c757d, #495057); }
-        .performance-card.rank-3::before { background: linear-gradient(90deg, #cd7f32, #8B4513); }
+        .performance-card.rank-1::before { background: linear-gradient(90deg, var(--primary), #9f1239); }
+        .performance-card.rank-2::before { background: linear-gradient(90deg, #475569, #1e293b); }
+        .performance-card.rank-3::before { background: linear-gradient(90deg, #94a3b8, #64748b); }
 
         .performance-card:hover {
             transform: translateY(-2px);
@@ -732,13 +732,13 @@
                         {
                             label: 'Total Sales',
                             data: salesData,
-                            borderColor: '#2a83df',
-                            backgroundColor: 'rgba(42, 131, 223, 0.1)',
+                            borderColor: '#1e293b',
+                            backgroundColor: 'rgba(30, 41, 59, 0.1)',
                             borderWidth: 4,
                             pointRadius: 6,
                             pointHoverRadius: 8,
-                            pointBackgroundColor: '#2a83df',
-                            pointBorderColor: '#2a83df',
+                            pointBackgroundColor: '#1e293b',
+                            pointBorderColor: '#1e293b',
                             pointBorderWidth: 2,
                             fill: true,
                             tension: 0.4
@@ -746,12 +746,12 @@
                         {
                             label: 'Revenue',
                             data: revenueData,
-                            borderColor: '#28a745',
-                            backgroundColor: 'rgba(40, 167, 69, 0.15)',
+                            borderColor: '#e11d48',
+                            backgroundColor: 'rgba(225, 29, 72, 0.15)',
                             borderWidth: 4,
                             pointRadius: 6,
                             pointHoverRadius: 8,
-                            pointBackgroundColor: '#28a745',
+                            pointBackgroundColor: '#e11d48',
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
                             fill: true,

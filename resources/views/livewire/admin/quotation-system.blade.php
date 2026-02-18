@@ -5,7 +5,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h3 class="fw-bold text-dark mb-2">
-                        <i class="bi bi-file-earmark-text text-success me-2"></i> Create Quotation
+                        <i class="bi bi-file-earmark-text text-crimson me-2"></i> Create Quotation
                     </h3>
                     <p class="text-muted">Quickly create professional quotations for customers</p>
                 </div>
@@ -111,7 +111,7 @@
             <div class="card h-100 shadow-sm border-1">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0 fw-semibold">
-                        <i class="bi bi-search me-2 text-success"></i> Add Products
+                        <i class="bi bi-search me-2 text-crimson"></i> Add Products
                     </h5>
                 </div>
 
@@ -232,7 +232,7 @@
                     <h5 class="card-title mb-0">
                         <i class="bi bi-cart me-2"></i>Quotation Items
                     </h5>
-                    <span class="badge bg-primary">{{ count($cart) }} items</span>
+                    <span class="badge bg-crimson">{{ count($cart) }} items</span>
                 </div>
                 <div class="card-body p-0">
                     @if(count($cart) > 0)
@@ -590,9 +590,9 @@
                                             <td class="text-end fw-bold">- Rs.{{ number_format($totalDiscount, 2) }}</td>
                                         </tr>
                                         @endif
-                                        <tr class="border-top border-2" style="border-color: #f58320 !important;">
+                                        <tr class="border-top border-2" style="border-color: var(--primary) !important;">
                                             <td class="text-end"><strong>Grand Total:</strong></td>
-                                            <td class="text-end fw-bold" style="color: #f58320; font-size: 1.1rem;">Rs.{{ number_format($createdQuotation->total_amount, 2) }}</td>
+                                            <td class="text-end fw-bold" style="color: var(--primary); font-size: 1.1rem;">Rs.{{ number_format($createdQuotation->total_amount, 2) }}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -628,7 +628,7 @@
                         <i class="bi bi-printer me-2"></i>Print Quotation
                     </a>
                     @endif
-                    <a href="{{ route('admin.quotation-list') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.quotation-list') }}" class="btn btn-crimson">
                         <i class="bi bi-list-check me-2"></i>Go to Quotation List
                     </a>
                 </div>
@@ -658,8 +658,8 @@
     }
 
     .search-result-item.active {
-        background-color: #e7f3ff !important;
-        border-left: 3px solid #0d6efd;
+        background-color: #fef2f2 !important;
+        border-left: 3px solid var(--primary);
     }
 
     .table th {
@@ -701,18 +701,39 @@
     }
 
     .quotation-preview .header {
-        border-bottom: 2px solid #057642ff;
+        border-bottom: 2px solid var(--primary);
         padding-bottom: 1rem;
     }
 
     .quotation-preview table th {
-        background-color: #038d4fff;
+        background-color: #1e293b;
         color: white;
         border: none;
     }
 
     .quotation-preview table td {
-        border: 1px solid #dee2e6;
+        border: 1px solid #e2e8f0;
+    }
+
+    .text-crimson {
+        color: var(--primary) !important;
+    }
+
+    .btn-crimson {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .btn-crimson:hover {
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
+        color: white;
+    }
+
+    .bg-crimson {
+        background-color: var(--primary) !important;
+        color: white !important;
     }
 
     /* Discount input styling */

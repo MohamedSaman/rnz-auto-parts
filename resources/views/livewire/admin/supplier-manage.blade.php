@@ -8,7 +8,7 @@
             <p class="text-muted mb-0">Manage your suppliers and business contacts efficiently</p>
         </div>
         <div>
-            <button class="btn btn-primary" wire:click="createSupplier">
+            <button class="btn btn-crimson" wire:click="createSupplier">
                 <i class="bi bi-plus-circle me-2"></i> Add Supplier
             </button>
         </div>
@@ -19,7 +19,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="fw-bold text-dark mb-1">
-                        <i class="bi bi-list-ul text-primary me-2"></i> Supplier List
+                        <i class="bi bi-list-ul text-crimson me-2"></i> Supplier List
                     </h5>
                     <p class="text-muted small mb-0">View and manage all registered suppliers</p>
                 </div>
@@ -212,7 +212,7 @@
                             @enderror
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-crimson">
                                 <i class="bi bi-check2-circle me-1"></i> Save Supplier
                             </button>
                         </div>
@@ -367,7 +367,7 @@
                             @enderror
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-crimson">
                                 <i class="bi bi-check2-circle me-1"></i> Update Supplier
                             </button>
                         </div>
@@ -429,25 +429,20 @@
 
     .form-control:focus,
     .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        padding: 0.75rem 1.5rem;
-        transition: all 0.3s ease;
+    .btn-primary, .btn-crimson {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
     }
 
-    .btn-primary {
-        background-color: #4361ee;
-        border-color: #4361ee;
-    }
-
-    .btn-primary:hover {
-        background-color: #3f37c9;
-        border-color: #3f37c9;
+    .btn-primary:hover, .btn-crimson:hover {
+        background-color: var(--primary-600);
+        border-color: var(--primary-600);
+        color: white;
         transform: translateY(-2px);
     }
 
@@ -477,6 +472,9 @@
     .is-invalid:focus {
         border-color: #dc3545;
         box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    .text-crimson {
+        color: var(--primary) !important;
     }
 </style>
 @endpush

@@ -20,10 +20,10 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <button class="btn" style="background-color: #17a2b8; color: white; border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 500;" wire:click="openImportModal">
+                <button class="btn btn-outline-secondary" style="border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 500;" wire:click="openImportModal">
                     <i class="bi bi-download me-2"></i> Import Excel
                 </button>
-                <button class="btn btn-primary" wire:click="createCustomer" style="background-color: #ff8c42; border-color: #ff8c42; border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 500;">
+                <button class="btn btn-primary" wire:click="createCustomer" style="background-color: var(--primary); border-color: var(--primary); border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 500;">
                     <i class="bi bi-plus-lg me-2"></i> Add Customer
                 </button>
             </div>
@@ -299,9 +299,9 @@
                     @endif
 
                     <div class="d-grid mt-3">
-                        <button type="submit" class="btn" style="background: linear-gradient(135deg, #ff8c42 0%, #ff6b6b 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem; font-weight: 600; font-size: 1.05rem; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);" 
-                                onmouseover="this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.5)'; this.style.transform='translateY(-2px)';" 
-                                onmouseout="this.style.boxShadow='0 4px 12px rgba(255, 107, 107, 0.3)'; this.style.transform='translateY(0)';" 
+                        <button type="submit" class="btn" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem; font-weight: 600; font-size: 1.05rem; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);" 
+                                onmouseover="this.style.boxShadow='0 6px 20px rgba(225, 29, 72, 0.5)'; this.style.transform='translateY(-2px)';" 
+                                onmouseout="this.style.boxShadow='0 4px 12px rgba(225, 29, 72, 0.3)'; this.style.transform='translateY(0)';" 
                                 wire:loading.attr="disabled">
                             <i class="bi bi-check2-circle me-2"></i>
                             <span wire:loading.remove>Save Customer</span>
@@ -423,9 +423,9 @@
                         @endif
 
                         <div class="d-grid mt-3">
-                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #ff8c42 0%, #ff6b6b 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem; font-weight: 600; font-size: 1.05rem; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);" 
-                                    onmouseover="this.style.boxShadow='0 6px 20px rgba(255, 107, 107, 0.5)'; this.style.transform='translateY(-2px)';" 
-                                    onmouseout="this.style.boxShadow='0 4px 12px rgba(255, 107, 107, 0.3)'; this.style.transform='translateY(0)';" 
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem; font-weight: 600; font-size: 1.05rem; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);" 
+                                    onmouseover="this.style.boxShadow='0 6px 20px rgba(225, 29, 72, 0.5)'; this.style.transform='translateY(-2px)';" 
+                                    onmouseout="this.style.boxShadow='0 4px 12px rgba(225, 29, 72, 0.3)'; this.style.transform='translateY(0)';" 
                                     wire:loading.attr="disabled">
                                 <i class="bi bi-check2-circle me-2"></i>
                                 <span wire:loading.remove>Update Customer</span>
@@ -446,7 +446,7 @@
     <div class="modal fade show d-block" tabindex="-1" aria-labelledby="viewDetailsModalLabel" aria-hidden="false" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 1100px;">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); border-radius: 12px 12px 0 0;">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%); border-radius: 12px 12px 0 0;">
                     <div class="d-flex align-items-center">
                         <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
                             <i class="bi bi-person-fill text-white fs-5"></i>
@@ -1072,10 +1072,16 @@
         border: 1px solid #e2e8f0;
     }
 
+    .customer-tab.active {
+        color: var(--primary) !important;
+        border-bottom: 2px solid var(--primary) !important;
+        background-color: transparent !important;
+    }
+
     .form-control:focus,
     .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        border-color: var(--primary);
     }
 
     .btn {

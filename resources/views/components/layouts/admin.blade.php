@@ -22,38 +22,45 @@
 
     <style>
         /* Theme tokens: Orange & White theme */
-        :root {
-            /* Clean Page Background */
-            --page-bg: #f3f4f6;
-            --surface: #ffffff;
+    :root {
+        /* Clean Page Background */
+        --page-bg: #f8fafc;
+        --surface: #ffffff;
 
-            /* Professional Brand Palette - Vibrant Orange & Neutral Accents */
-            --primary: #f58320;
-            --primary-600: #e07010;
-            --primary-700: #c66008;
-            --primary-50: #fff7ed;
-            --primary-100: #ffedd5;
+        /* Professional Automotive Palette - Racing Red & Deep Slate */
+        --primary: #e11d48; /* Racing Red */
+        --primary-600: #be123c;
+        --primary-700: #9f1239;
+        --primary-50: #fff1f2;
+        --primary-100: #ffe4e6;
 
-            /* Functional Colors */
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
+        /* Functional Colors */
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #0ea5e9;
 
-            /* Refined Neutral Palette */
-            --text-main: #111827;
-            --text-muted: #6b7280;
-            --text-light: #9ca3af;
-            --border: #e5e7eb;
-            --border-light: #f3f4f6;
+        /* Refined Neutral Palette */
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --text-light: #94a3b8;
+        --border: #e2e8f0;
+        --border-light: #f1f5f9;
 
-            /* Effects */
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --radius-md: 10px;
-            --radius-lg: 16px;
-        }
+        /* Sidebar - Dark Professional */
+        --sidebar-bg: #0f172a;
+        --sidebar-text: #94a3b8;
+        --sidebar-hover-bg: #1e293b;
+        --sidebar-active-bg: #1e293b;
+        --sidebar-active-text: #ffffff;
+
+        /* Effects */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --radius-md: 10px;
+        --radius-lg: 16px;
+    }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -65,7 +72,38 @@
         }
 
         .fw-800 { font-weight: 800 !important; }
-        .text-orange { color: #f58320 !important; }
+        .text-primary { color: var(--primary) !important; }
+        .text-crimson { color: var(--primary) !important; }
+        .bg-crimson { background-color: var(--primary) !important; color: white !important; }
+        .bg-crimson-soft { background-color: var(--primary-50) !important; }
+        .border-crimson { border-color: var(--primary) !important; }
+
+        .btn-crimson {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-crimson:hover {
+            background-color: var(--primary-600);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
+        }
+
+        .btn-outline-crimson {
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-crimson:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
 
         /* Ensure dropdowns in table are not clipped */
         .table-responsive {
@@ -179,8 +217,8 @@
         .sidebar {
             width: 270px;
             height: 100vh;
-            background: #ffffff;
-            color: var(--text-main);
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
             padding: 0;
             position: fixed;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -254,11 +292,11 @@
         }
 
         .sidebar-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-            color: #1e293b;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #ffffff;
             letter-spacing: -0.02em;
-            
+            text-transform: uppercase;
         }
 
         /* Navigation styles */
@@ -268,8 +306,8 @@
         }
 
         .nav-link {
-            color: var(--text-muted);
-            padding: 6px 24px;
+            color: var(--sidebar-text);
+            padding: 10px 24px;
             margin: 4px 12px;
             border-radius: 8px;
             transition: all 0.2s;
@@ -280,14 +318,14 @@
 
 
         .nav-link.active {
-            background: var(--primary-50);
-            color: var(--primary);
+            background: var(--primary);
+            color: #ffffff;
             border-left: none;
         }
 
         .nav-link:hover:not(.active) {
-            color: var(--primary);
-            background: var(--border-light);
+            color: #ffffff;
+            background: var(--sidebar-hover-bg);
             outline: none;
         }
 
@@ -324,11 +362,11 @@
 
         .nav-link.dropdown-toggle[aria-expanded="true"]::after {
             transform: rotate(180deg);
-            color: var(--primary);
+            color: #ffffff;
         }
 
         .nav-link.dropdown-toggle:hover::after {
-            color: var(--primary);
+            color: #ffffff;
         }
 
         #inventorySubmenu .nav-link,
@@ -385,10 +423,10 @@
                 left: 68px; /* Slightly closer for better hover transition */
                 top: 0;
                 width: 240px;
-                background: #ffffff !important;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+                background: var(--sidebar-bg) !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
                 border-radius: 12px !important;
-                border: 1px solid var(--border) !important;
+                border: 1px solid var(--sidebar-hover-bg) !important;
                 z-index: 9999 !important;
                 padding: 10px 0 !important;
                 height: auto !important;
@@ -492,14 +530,14 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #f58320;
+            background: var(--primary);
             color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             letter-spacing: -0.03em;
-            border: 2px solid #f58320;
+            border: 2px solid var(--primary);
         }
 
         .admin-name {
@@ -615,13 +653,13 @@
         }
 
         .content-tab.active {
-            color: #f58320;
-            border-bottom-color: #f58320;
+            color: var(--primary);
+            border-bottom-color: var(--primary);
             font-weight: 600;
         }
 
         .content-tab:hover:not(.active) {
-            color: #f58320;
+            color: var(--primary);
             border-bottom-color: var(--border);
         }
 
