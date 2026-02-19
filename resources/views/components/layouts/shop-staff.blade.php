@@ -28,7 +28,7 @@
             --surface: #ffffff;
 
             /* Professional Brand Palette - Vibrant Orange & Neutral Accents */
-            --primary: #f58320;
+            --primary: #e11d48;
             --primary-600: #e07010;
             --primary-700: #c66008;
             --primary-50: #fff7ed;
@@ -65,7 +65,7 @@
         }
 
         .fw-800 { font-weight: 800 !important; }
-        .text-orange { color: #f58320 !important; }
+        .text-orange { color: #e11d48 !important; }
 
         /* Sidebar styles */
         .sidebar {
@@ -300,14 +300,14 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #f58320;
+            background: #e11d48;
             color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             letter-spacing: -0.03em;
-            border: 2px solid #f58320;
+            border: 2px solid #e11d48;
         }
 
         .admin-name {
@@ -441,7 +441,7 @@
 
             <!-- Centered Company Name (hidden on small screens) -->
             <div class="flex-grow-1 d-none d-md-flex justify-content-center">
-                <h5 class="m-0 fw-bold" style="letter-spacing: -0.02em; color:#f58320;">Shop Staff Portal</h5>
+                <h5 class="m-0 fw-bold" style="letter-spacing: -0.02em; color:#e11d48;">Shop Staff Portal</h5>
             </div>
 
             <!-- Real-time Clock -->

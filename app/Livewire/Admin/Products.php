@@ -12,6 +12,7 @@ use App\Models\ProductVariant;
 use App\Models\BrandList;
 use App\Models\CategoryList;
 use App\Models\ProductSupplier;
+use App\Models\ProductModel;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\PurchaseOrder;
@@ -40,10 +41,11 @@ class Products extends Component
     use WithPagination, WithFileUploads;
 
     public $search = '';
+    public $stockFilter = 'all';
 
     // Create form fields
-    public $code, $name, $model, $brand, $category, $image, $description, $barcode, $status, $supplier;
-    public $supplier_price, $retail_price, $wholesale_price, $distributor_price, $discount_price, $available_stock, $damage_stock;
+    public $code, $name, $model_id, $brand, $category, $image, $description, $barcode, $status, $supplier;
+    public $supplier_price, $retail_price, $wholesale_price, $distributor_price, $discount_price, $available_stock, $damage_stock, $low_stock;
 
     // Pricing mode: 'single' or 'variant'
     public $pricing_mode = 'single';
@@ -64,9 +66,9 @@ class Products extends Component
     public $importFile;
 
     // Edit form fields
-    public $editId, $editCode, $editName, $editModel, $editBrand, $editCategory, $editImage, $existingImage,
+    public $editId, $editCode, $editName, $editModelId, $editBrand, $editCategory, $editImage, $existingImage,
         $editDescription, $editBarcode, $editStatus, $editSupplierPrice, $editRetailPrice, $editWholesalePrice,
-        $editDiscountPrice, $editDamageStock;
+        $editDiscountPrice, $editDamageStock, $editSupplier, $editLowStock;
 
     // Track original pricing mode when opening edit modal so we don't accidentally delete variant rows
     public $original_pricing_mode = 'single';
@@ -85,6 +87,12 @@ class Products extends Component
     // Default IDs for brand, category, and supplier
     public $defaultBrandId, $defaultCategoryId, $defaultSupplierId;
     public $perPage = 10;
+
+    // Quick-create modal fields
+    public $quickCategoryName = '';
+    public $quickBrandName = '';
+    public $quickSupplierName = '', $quickSupplierPhone = '', $quickSupplierEmail = '', $quickSupplierAddress = '';
+    public $quickModelName = '';
 
     public function mount()
     {
@@ -246,6 +254,137 @@ class Products extends Component
         $this->discount_price = 0;
     }
 
+    // 🔹 Quick-Create: Category
+    public function saveQuickCategory()
+    {
+        $this->validate([
+            'quickCategoryName' => 'required|string|max:255|unique:category_lists,category_name',
+        ], [
+            'quickCategoryName.required' => 'Category name is required.',
+            'quickCategoryName.unique'   => 'This category already exists.',
+        ]);
+
+        try {
+            $category = CategoryList::create([
+                'category_name' => $this->quickCategoryName,
+                'status'        => 'active',
+            ]);
+
+            // Auto-select the new category in both Add and Edit modals
+            $this->category = $category->id;
+            $this->editCategory = $category->id;
+            $this->quickCategoryName = '';
+            $this->resetValidation('quickCategoryName');
+
+            // Close via our custom JS handler (keeps parent modal open)
+            $this->dispatch('quickModalClosed', 'quickCreateCategoryModal');
+            $this->js("Swal.fire({icon:'success', title:'Success!', text:'Category created successfully!', timer:2000, showConfirmButton:false})");
+        } catch (\Exception $e) {
+            $this->js("Swal.fire('Error!', 'Failed to create category: " . addslashes($e->getMessage()) . "', 'error')");
+        }
+    }
+
+    // 🔹 Quick-Create: Brand
+    public function saveQuickBrand()
+    {
+        $this->validate([
+            'quickBrandName' => 'required|string|max:255|unique:brand_lists,brand_name',
+        ], [
+            'quickBrandName.required' => 'Brand name is required.',
+            'quickBrandName.unique'   => 'This brand already exists.',
+        ]);
+
+        try {
+            $brand = BrandList::create([
+                'brand_name' => $this->quickBrandName,
+                'status'     => 'active',
+            ]);
+
+            // Auto-select the new brand in both Add and Edit modals
+            $this->brand = $brand->id;
+            $this->editBrand = $brand->id;
+            $this->quickBrandName = '';
+            $this->resetValidation('quickBrandName');
+
+            // Close via our custom JS handler (keeps parent modal open)
+            $this->dispatch('quickModalClosed', 'quickCreateBrandModal');
+            $this->js("Swal.fire({icon:'success', title:'Success!', text:'Brand created successfully!', timer:2000, showConfirmButton:false})");
+        } catch (\Exception $e) {
+            $this->js("Swal.fire('Error!', 'Failed to create brand: " . addslashes($e->getMessage()) . "', 'error')");
+        }
+    }
+
+    // 🔹 Quick-Create: Supplier
+    public function saveQuickSupplier()
+    {
+        $this->validate([
+            'quickSupplierName'    => 'required|string|max:255',
+            'quickSupplierPhone'   => 'nullable|string|max:50',
+            'quickSupplierEmail'   => 'nullable|email|max:255',
+            'quickSupplierAddress' => 'nullable|string|max:500',
+        ], [
+            'quickSupplierName.required' => 'Supplier name is required.',
+            'quickSupplierEmail.email'   => 'Please enter a valid email address.',
+        ]);
+
+        try {
+            $supplier = ProductSupplier::create([
+                'name'    => $this->quickSupplierName,
+                'phone'   => $this->quickSupplierPhone ?: '0000000000',
+                'email'   => $this->quickSupplierEmail ?: null,
+                'address' => $this->quickSupplierAddress ?: null,
+                'status'  => 'active',
+            ]);
+
+            // Auto-select the new supplier in both Add and Edit modals
+            $this->supplier = $supplier->id;
+            $this->editSupplier = $supplier->id;
+            $this->quickSupplierName    = '';
+            $this->quickSupplierPhone   = '';
+            $this->quickSupplierEmail   = '';
+            $this->quickSupplierAddress = '';
+            $this->resetValidation(['quickSupplierName', 'quickSupplierPhone', 'quickSupplierEmail', 'quickSupplierAddress']);
+
+            // Close via our custom JS handler (keeps parent modal open)
+            $this->dispatch('quickModalClosed', 'quickCreateSupplierModal');
+            $this->js("Swal.fire({icon:'success', title:'Success!', text:'Supplier created successfully!', timer:2000, showConfirmButton:false})");
+        } catch (\Exception $e) {
+            $this->js("Swal.fire('Error!', 'Failed to create supplier: " . addslashes($e->getMessage()) . "', 'error')");
+        }
+    }
+
+    // 🔹 Quick-Create: Model
+    public function saveQuickModel()
+    {
+        $this->validate([
+            'quickModelName' => 'required|string|max:255|unique:product_models,model_name',
+        ], [
+            'quickModelName.required' => 'Model name is required.',
+            'quickModelName.unique'   => 'This model already exists.',
+        ]);
+
+        try {
+            $model = ProductModel::create([
+                'model_name' => $this->quickModelName,
+                'status'     => 'active',
+            ]);
+
+            // Auto-select the new model in both Add and Edit modals
+            $this->model_id    = $model->id;
+            $this->editModelId = $model->id;
+            $this->quickModelName = '';
+            $this->resetValidation('quickModelName');
+
+            // Close via our custom JS handler (keeps parent modal open)
+            $this->dispatch('quickModalClosed', 'quickCreateModelModal');
+            $this->js("Swal.fire({icon:'success', title:'Success!', text:'Model created successfully!', timer:2000, showConfirmButton:false})");
+        } catch (\Exception $e) {
+            $this->js("Swal.fire('Error!', 'Failed to create model: " . addslashes($e->getMessage()) . "', 'error')");
+        }
+    }
+
+
+
     /**
      * Sort variant values for consistent display order.
      * Numeric-like values are sorted numerically (4, 4.5, 6), otherwise natural case-insensitive order.
@@ -287,11 +426,13 @@ class Products extends Component
         $brands = BrandList::orderBy('brand_name')->get();
         $categories = CategoryList::orderBy('category_name')->get();
         $suppliers = ProductSupplier::orderBy('name')->get();
+        $models = ProductModel::orderBy('model_name')->get();
 
         // For staff, show all products (same as admin but read-only access)
         if ($this->isStaff()) {
             $products = ProductDetail::leftJoin('brand_lists', 'product_details.brand_id', '=', 'brand_lists.id')
                 ->leftJoin('category_lists', 'product_details.category_id', '=', 'category_lists.id')
+                ->leftJoin('product_models', 'product_details.model_id', '=', 'product_models.id')
                 ->leftJoin('product_stocks', 'product_details.id', '=', 'product_stocks.product_id')
                 ->leftJoin('product_prices', function ($join) {
                     $join->on('product_details.id', '=', 'product_prices.product_id')
@@ -302,7 +443,8 @@ class Products extends Component
                     'product_details.id',
                     'product_details.code',
                     'product_details.name as product_name',
-                    'product_details.model',
+                    'product_details.model_id',
+                    'product_models.model_name as model',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -321,7 +463,7 @@ class Products extends Component
                 ->where(function ($query) {
                     $query->where('product_details.name', 'like', '%' . $this->search . '%')
                         ->orWhere('product_details.code', 'like', '%' . $this->search . '%')
-                        ->orWhere('product_details.model', 'like', '%' . $this->search . '%')
+                        ->orWhere('product_models.model_name', 'like', '%' . $this->search . '%')
                         ->orWhere('brand_lists.brand_name', 'like', '%' . $this->search . '%')
                         ->orWhere('category_lists.category_name', 'like', '%' . $this->search . '%')
                         ->orWhere('product_details.status', 'like', '%' . $this->search . '%')
@@ -331,7 +473,8 @@ class Products extends Component
                     'product_details.id',
                     'product_details.code',
                     'product_details.name',
-                    'product_details.model',
+                    'product_details.model_id',
+                    'product_models.model_name',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -344,6 +487,15 @@ class Products extends Component
                     'brand_lists.brand_name',
                     'category_lists.category_name'
                 )
+                ->when($this->stockFilter === 'low', function ($q) {
+                    $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) < 5');
+                })
+                ->when($this->stockFilter === 'out', function ($q) {
+                    $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) <= 0');
+                })
+                ->when($this->stockFilter === 'available', function ($q) {
+                    $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) > 0');
+                })
                 ->orderByRaw("CASE WHEN product_details.code LIKE 'G-%' THEN 1 ELSE 0 END ASC")
                 ->orderBy('product_details.code', 'asc')
                 ->paginate($this->perPage);
@@ -351,6 +503,7 @@ class Products extends Component
             // Admin sees all products - group by product to avoid duplicates from variants
             $products = ProductDetail::leftJoin('brand_lists', 'product_details.brand_id', '=', 'brand_lists.id')
                 ->leftJoin('category_lists', 'product_details.category_id', '=', 'category_lists.id')
+                ->leftJoin('product_models', 'product_details.model_id', '=', 'product_models.id')
                 ->leftJoin('product_stocks', 'product_details.id', '=', 'product_stocks.product_id')
                 ->leftJoin('product_prices', function ($join) {
                     $join->on('product_details.id', '=', 'product_prices.product_id')
@@ -361,7 +514,8 @@ class Products extends Component
                     'product_details.id',
                     'product_details.code',
                     'product_details.name as product_name',
-                    'product_details.model',
+                    'product_details.model_id',
+                    'product_models.model_name as model',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -380,7 +534,7 @@ class Products extends Component
                 ->where(function ($query) {
                     $query->where('product_details.name', 'like', '%' . $this->search . '%')
                         ->orWhere('product_details.code', 'like', '%' . $this->search . '%')
-                        ->orWhere('product_details.model', 'like', '%' . $this->search . '%')
+                        ->orWhere('product_models.model_name', 'like', '%' . $this->search . '%')
                         ->orWhere('brand_lists.brand_name', 'like', '%' . $this->search . '%')
                         ->orWhere('category_lists.category_name', 'like', '%' . $this->search . '%')
                         ->orWhere('product_details.status', 'like', '%' . $this->search . '%')
@@ -390,7 +544,8 @@ class Products extends Component
                     'product_details.id',
                     'product_details.code',
                     'product_details.name',
-                    'product_details.model',
+                    'product_details.model_id',
+                    'product_models.model_name',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -403,18 +558,34 @@ class Products extends Component
                     'brand_lists.brand_name',
                     'category_lists.category_name'
                 )
+                ->when($this->stockFilter === 'low', function ($q) {
+                    $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) <= 5');
+                })
+                ->when($this->stockFilter === 'out', function ($q) {
+                    $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) <= 0');
+                })
+                ->when($this->stockFilter === 'available', function ($q) {
+                    $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) > 0');
+                })
                 ->orderByRaw("CASE WHEN product_details.code LIKE 'G-%' THEN 1 ELSE 0 END ASC")
                 ->orderBy('product_details.code', 'asc')
                 ->paginate($this->perPage);
         }
 
+        // Count low stock items (only where low_stock is set > 0)
+        $lowStockCount = \App\Models\ProductStock::whereColumn('available_stock', '<=', 'low_stock')
+            ->where('low_stock', '>', 0)
+            ->count();
+
         return view('livewire.admin.Productes', [
-            'products' => $products,
-            'brands' => $brands,
+            'lowStockCount' => $lowStockCount,
+            'products'   => $products,
+            'brands'     => $brands,
             'categories' => $categories,
-            'suppliers' => $suppliers,
-            'isStaff' => $this->isStaff(),
-            'staffType' => Auth::user()->staff_type ?? null,
+            'suppliers'  => $suppliers,
+            'models'     => $models,
+            'isStaff'    => $this->isStaff(),
+            'staffType'  => Auth::user()->staff_type ?? null,
         ])->layout($this->layout);
     }
 
@@ -423,14 +594,19 @@ class Products extends Component
         $this->resetPage();
     }
 
+    public function updatedStockFilter()
+    {
+        $this->resetPage();
+    }
+
     // 🔹 Validation Rules for Create
     protected function rules()
     {
         $rules = [
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:product_details,code',
-            'model' => 'nullable|string|max:255',
-            'brand' => 'required|exists:brand_lists,id',
+            'name'     => 'required|string|max:255',
+            'code'     => 'required|string|max:100|unique:product_details,code',
+            'model_id' => 'nullable|exists:product_models,id',
+            'brand'    => 'required|exists:brand_lists,id',
             'category' => 'required|exists:category_lists,id',
             'supplier' => 'nullable|exists:product_suppliers,id',
             'image' => 'nullable|string|max:10000',
@@ -449,6 +625,7 @@ class Products extends Component
                 'discount_price' => 'nullable|numeric|min:0|lte:retail_price',
                 'available_stock' => 'required|integer|min:0',
                 'damage_stock' => 'nullable|integer|min:0',
+                'low_stock' => 'nullable|integer|min:0',
             ]);
         } else {
             // Variant-based pricing validation
@@ -577,10 +754,10 @@ class Products extends Component
 
             // Step 1: Create ProductDetail
             $product = ProductDetail::create([
-                'code' => $productCode,
-                'name' => $this->name,
-                'model' => $this->model,
-                'image' => $this->image,
+                'code'       => $productCode,
+                'name'       => $this->name,
+                'model_id'   => $this->model_id ?: null,
+                'image'      => $this->image,
                 'description' => $this->description,
                 'barcode' => $this->barcode,
                 'status' => 'active',
@@ -610,6 +787,7 @@ class Products extends Component
                     'product_id' => $product->id,
                     'available_stock' => $this->available_stock ?? 0,
                     'damage_stock' => $this->damage_stock ?? 0,
+                    'low_stock' => $this->low_stock ?? 0,
                     'total_stock' => ($this->available_stock ?? 0) + ($this->damage_stock ?? 0),
                     'sold_count' => 0,
                     'restocked_quantity' => 0,
@@ -782,7 +960,7 @@ class Products extends Component
         $this->reset([
             'code',
             'name',
-            'model',
+            'model_id',
             'brand',
             'category',
             'image',
@@ -797,6 +975,7 @@ class Products extends Component
             'discount_price',
             'available_stock',
             'damage_stock',
+            'low_stock',
             'pricing_mode',
             'variant_id',
             'variant_prices'
@@ -827,11 +1006,11 @@ class Products extends Component
             }
         ])->findOrFail($id);
 
-        $this->editId = $product->id;
-        $this->editCode = $product->code;
-        $this->editName = $product->name;
-        $this->editModel = $product->model;
-        $this->editBrand = $product->brand_id;
+        $this->editId        = $product->id;
+        $this->editCode      = $product->code;
+        $this->editName      = $product->name;
+        $this->editModelId   = $product->model_id;
+        $this->editBrand     = $product->brand_id;
         $this->editCategory = $product->category_id;
         $this->existingImage = $product->image;
         $this->editDescription = $product->description;
@@ -841,7 +1020,8 @@ class Products extends Component
         $this->editRetailPrice = $product->price->retail_price ?? 0;
         $this->editWholesalePrice = $product->price->wholesale_price ?? 0;
         $this->editDiscountPrice = $product->price->discount_price ?? 0;
-        $this->editDamageStock = $product->stock->damage_stock ?? 0;
+        $this->editDamageStock = optional($product->stock)->damage_stock ?? 0;
+        $this->editLowStock = optional($product->stock)->low_stock ?? 0;
 
         // If variant data exists, prepare variant edit state
         if (($product->variant_id ?? null) !== null || ($product->prices && $product->prices->isNotEmpty())) {
@@ -900,20 +1080,21 @@ class Products extends Component
     protected function updateRules()
     {
         return [
-            'editName' => 'required|string|max:255',
-            'editCode' => 'required|string|max:100|unique:product_details,code,' . $this->editId,
-            'editModel' => 'nullable|string|max:255',
-            'editBrand' => 'required|exists:brand_lists,id',
-            'editCategory' => 'required|exists:category_lists,id',
-            'editImage' => 'nullable|string|max:100000',
-            'editDescription' => 'nullable|string|max:1000',
-            'editBarcode' => 'nullable|string|max:255|unique:product_details,barcode,' . $this->editId,
-            'editStatus' => 'required|in:active,inactive',
+            'editName'          => 'required|string|max:255',
+            'editCode'          => 'required|string|max:100|unique:product_details,code,' . $this->editId,
+            'editModelId'       => 'nullable|exists:product_models,id',
+            'editBrand'         => 'required|exists:brand_lists,id',
+            'editCategory'      => 'required|exists:category_lists,id',
+            'editImage'         => 'nullable|string|max:100000',
+            'editDescription'   => 'nullable|string|max:1000',
+            'editBarcode'       => 'nullable|string|max:255|unique:product_details,barcode,' . $this->editId,
+            'editStatus'        => 'required|in:active,inactive',
             'editSupplierPrice' => 'required|numeric|min:0',
-            'editRetailPrice' => 'required|numeric|min:0',
-            'editWholesalePrice' => 'required|numeric|min:0',
+            'editRetailPrice'   => 'required|numeric|min:0',
+            'editWholesalePrice'=> 'required|numeric|min:0',
             'editDiscountPrice' => 'nullable|numeric|min:0|lte:editRetailPrice',
-            'editDamageStock' => 'required|integer|min:0',
+            'editDamageStock'   => 'required|integer|min:0',
+            'editLowStock'      => 'nullable|integer|min:0',
         ];
     }
 
@@ -958,15 +1139,15 @@ class Products extends Component
 
             // Update basic product details
             $product->update([
-                'code' => $this->editCode,
-                'name' => $this->editName,
-                'model' => $this->editModel,
-                'brand_id' => $this->editBrand,
+                'code'        => $this->editCode,
+                'name'        => $this->editName,
+                'model_id'    => $this->editModelId ?: null,
+                'brand_id'    => $this->editBrand,
                 'category_id' => $this->editCategory,
-                'image' => $this->editImage ?: $this->existingImage,
+                'image'       => $this->editImage ?: $this->existingImage,
                 'description' => $this->editDescription,
-                'barcode' => $this->editBarcode,
-                'status' => $this->editStatus,
+                'barcode'     => $this->editBarcode,
+                'status'      => $this->editStatus,
             ]);
 
             // Determine effective pricing mode
@@ -1021,6 +1202,7 @@ class Products extends Component
                     ],
                     [
                         'damage_stock' => $this->editDamageStock ?? 0,
+                        'low_stock' => $this->editLowStock ?? 0,
                         // Don't override available_stock or total_stock here
                     ]
                 );
@@ -1214,13 +1396,15 @@ class Products extends Component
                     $q->orderBy('variant_value');
                 },
                 'brand',
-                'category'
+                'category',
+                'productModel',
             ])->find($id);
 
             if ($product) {
                 // Maintain backward compatible attributes for the blade (was using brand/category strings)
-                $product->brand = $product->brand->brand_name ?? null;
-                $product->category = $product->category->category_name ?? null;
+                $product->brand    = $product->brand?->brand_name;
+                $product->category = $product->category?->category_name;
+                $product->model    = $product->productModel?->model_name;
 
                 // Prepare a sorted list of variant values for predictable display order
                 $variantValues = [];
@@ -1247,13 +1431,15 @@ class Products extends Component
                     $q->orderBy('variant_value');
                 },
                 'brand',
-                'category'
+                'category',
+                'productModel',
             ])->find($id);
 
             if ($product) {
                 // Maintain backward compatible attributes for the blade (was using brand/category strings)
-                $product->brand = $product->brand->brand_name ?? null;
-                $product->category = $product->category->category_name ?? null;
+                $product->brand    = $product->brand?->brand_name;
+                $product->category = $product->category?->category_name;
+                $product->model    = $product->productModel?->model_name;
 
                 // Prepare a sorted list of variant values for predictable display order
                 $variantValues = [];

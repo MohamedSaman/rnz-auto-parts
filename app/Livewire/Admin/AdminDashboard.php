@@ -251,7 +251,7 @@ class AdminDashboard extends Component
                 'product_details.id',
                 'product_details.code',
                 'product_details.name',
-                'product_details.model',
+                
                 'brand_lists.brand_name as brand',
                 'product_stocks.available_stock',
                 'product_stocks.total_stock',

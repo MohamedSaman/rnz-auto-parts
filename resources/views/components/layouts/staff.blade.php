@@ -27,7 +27,7 @@
             --surface: #ffffff;
 
             /* Professional Brand Palette - Vibrant Orange & Neutral Accents */
-            --primary: #f58320;
+            --primary: #e11d48;
             --primary-600: #e07010;
             --primary-700: #c66008;
             --primary-50: #fff7ed;
@@ -64,7 +64,7 @@
         }
 
         .fw-800 { font-weight: 800 !important; }
-        .text-orange { color: #f58320 !important; }
+        .text-orange { color: #e11d48 !important; }
 
         /* Ensure dropdowns in table are not clipped */
         .table-responsive {
@@ -567,6 +567,14 @@
                             <li class="nav-item">
                                 <a class="nav-link py-2" href="{{ route('staff.Product-category') }}">
                                     <i class="bi bi-tags-fill"></i> <span>Product Category</span>
+                                </a>
+                            </li>
+                            @endif
+                            @if(auth()->user()->hasPermission('menu_products_model'))
+                            <li class="nav-item">
+                                <a class="nav-link py-2 {{ request()->routeIs('staff.Product-model') ? 'active' : '' }}"
+                                   href="{{ route('staff.Product-model') }}">
+                                    <i class="bi bi-cpu"></i> <span>Product Model</span>
                                 </a>
                             </li>
                             @endif

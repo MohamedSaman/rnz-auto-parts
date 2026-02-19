@@ -18,7 +18,8 @@ class ProductStock extends Model
         'damage_stock',
         'total_stock',
         'sold_count',
-        'restocked_quantity'
+        'restocked_quantity',
+        'low_stock',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class ProductStock extends Model
         'total_stock' => 'integer',
         'sold_count' => 'integer',
         'restocked_quantity' => 'integer',
+        'low_stock' => 'integer',
     ];
 
     /**

@@ -15,7 +15,7 @@ class ProductDetail extends Model
     protected $fillable = [
         'code',
         'name',
-        'model',
+        'model_id',
         'image',
         'description',
         'barcode',
@@ -50,6 +50,11 @@ class ProductDetail extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(ProductSupplier::class, 'supplier_id');
+    }
+
+    public function productModel(): BelongsTo
+    {
+        return $this->belongsTo(ProductModel::class, 'model_id');
     }
 
     /**

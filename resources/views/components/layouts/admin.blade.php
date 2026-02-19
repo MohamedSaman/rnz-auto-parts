@@ -891,12 +891,12 @@
 
         .btn-outline-primary {
             background: transparent;
-            color: #f58320;
-            border: 1px solid #f58320;
+            color: #e11d48;
+            border: 1px solid #e11d48;
         }
 
         .btn-outline-primary:hover {
-            background: #f58320;
+            background: #e11d48;
             color: #ffffff;
         }
 
@@ -913,7 +913,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #f58320 0%, #d16d0e 100%);
+            background: linear-gradient(135deg, #e11d48 0%, #d16d0e 100%);
             color: #ffffff;
         }
 
@@ -1171,6 +1171,12 @@
                             <li class="nav-item">
                                 <a class="nav-link py-2" href="{{ route('admin.Product-category') }}">
                                     <i class="bi bi-tags-fill"></i> <span>Product Category</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-2 {{ request()->routeIs('admin.Product-model') ? 'active' : '' }}"
+                                   href="{{ route('admin.Product-model') }}">
+                                    <i class="bi bi-cpu"></i> <span>Product Model</span>
                                 </a>
                             </li>
                             {{--<li class="nav-item">
@@ -1497,7 +1503,7 @@
 
             <!-- Centered Company Name (hidden on small screens) -->
             <div class="flex-grow-1 d-none d-md-flex justify-content-center">
-                <h5 class="m-0 fw-bold" style="letter-spacing: -0.02em; color:#f58320;">RNZ AUTO PARTS</h5>
+                <h5 class="m-0 fw-bold" style="letter-spacing: -0.02em; color:#e11d48;">RNZ AUTO PARTS</h5>
             </div>
             @php
             use App\Models\CashInHand as CashModel;

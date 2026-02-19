@@ -477,8 +477,55 @@
                 border-right: none;
             }
         }
+
+        /* Quick-create "+" button (inline with select dropdowns) */
+        .btn-add-quick {
+            border-radius: 0 10px 10px 0 !important;
+            padding: 0.45rem 0.9rem;
+            font-size: 1rem;
+            line-height: 1;
+            border-left: none;
+            border-color: #e2e8f0;
+            color: #4f46e5; /* Modern Indigo */
+            background-color: #f8fafc;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-add-quick:hover,
+        .btn-add-quick:focus {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            color: #ffffff;
+            border-color: #4f46e5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+        .btn-add-quick:active {
+            transform: translateY(0);
+        }
+
+        /* Modern Gradient Headers for Quick-Create Modals */
+        .quick-modal-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 0;
+            padding: 1.25rem 1.5rem;
+        }
+        
+        /* Nested quick-create modals sit on top of the product modal */
+        #quickCreateCategoryModal,
+        #quickCreateBrandModal,
+        #quickCreateSupplierModal {
+            z-index: 1070 !important;
+        }
+        
+        /* Backdrop adjustment for nested modals */
+        .modal-backdrop.show {
+            opacity: 0.6;
+        }
     </style>
     @endpush
+
 
     <div class="container-fluid p-3">
 
@@ -495,14 +542,17 @@
             <div class="inventory-header w-100 mb-1">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100 gap-3">
 
-                    <div class="search-bar flex-grow-1">
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0">
-                                <i class="bi bi-search text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" id="product-search"
-                                wire:model.live="search" placeholder="Search Products...">
+                    <div class="d-flex flex-grow-1 gap-2">
+                        <div class="search-bar flex-grow-1">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0" id="product-search"
+                                    wire:model.live="search" placeholder="Search Products...">
+                            </div>
                         </div>
+                        
                     </div>
 
                     <div class="d-flex gap-2 justify-content-md-end">
@@ -531,7 +581,16 @@
                                 </h5>
                                 <p class="text-muted small mb-0">View and manage all products in your inventory</p>
                             </div>
+                            
                             <div class="d-flex align-items-center gap-2">
+                                <div style="min-width: 160px;">
+                                    <select class="form-select" wire:model.live="stockFilter">
+                                        <option value="all">All Stock</option>
+                                        <option value="low">Low Stock (< 5)</option>
+                                        <option value="out">Out of Stock</option>
+                                        <option value="available">Available Stock</option>
+                                    </select>
+                                </div>
                                 <label class="text-sm text-muted fw-medium">Show</label>
                                 <select wire:model.live="perPage" class="form-select form-select-sm" style="width: 80px;">
                                     <option value="10">10</option>
@@ -589,7 +648,11 @@
                                                 <span class="fw-medium text-dark">{{ $product->brand }}</span>
                                             </td>
                                             <td wire:click="viewProductDetails({{ $product->id }})">
-                                                <span class="fw-medium text-dark">{{ $product->model }}</span>
+                                                @if($product->model)
+                                                    <span class="fw-medium text-dark">{{ $product->model }}</span>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
                                             </td>
                                             @if ($isStaff)
                                                 @if ($staffType === 'shop_staff')
@@ -1200,9 +1263,20 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="mb-1">
-                                            <label for="model" class="form-label fw-semibold">Model:</label>
-                                            <input type="text" class="form-control" id="model" wire:model="model">
-                                            @error('model')
+                                            <label for="model_id" class="form-label fw-semibold">Model:</label>
+                                            <div class="input-group">
+                                                <select class="form-select" id="model_id" wire:model="model_id">
+                                                    <option value="">Select Model</option>
+                                                    @foreach ($models as $m)
+                                                    <option value="{{ $m->id }}">{{ $m->model_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new model" onclick="openQuickModal('quickCreateModelModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                            @error('model_id')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
                                         </div>
@@ -1222,16 +1296,24 @@
                                     <div class="col-md-4">
                                         <div class="mb-1">
                                             <label for="brand" class="form-label fw-semibold">Brand:</label>
-                                            <select class="form-select" id="brand" wire:model="brand">
-                                                <option value="">Select Brand</option>
-                                                @foreach ($brands as $brand)
-                                                <option value="{{ $brand->id }}" {{ $brand->id == 'Default Brand' ?
-                                                    'selected' : '' }}>
-                                                    {{ $brand->brand_name }}
-                                                    @if($brand->id == 'Default Brand') (Default) @endif
-                                                </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-select" id="brand" wire:model="brand">
+                                                    <option value="">Select Brand</option>
+                                                    @foreach ($brands as $brand)
+                                                    <option value="{{ $brand->id }}" {{ $brand->id == 'Default Brand' ?
+                                                        'selected' : '' }}>
+                                                        {{ $brand->brand_name }}
+                                                        @if($brand->id == 'Default Brand') (Default) @endif
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new brand"
+                                                    onclick="openQuickModal('quickCreateBrandModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
                                             @error('brand')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
@@ -1240,16 +1322,24 @@
                                     <div class="col-md-4">
                                         <div class="mb-1">
                                             <label for="category" class="form-label fw-semibold">Category:</label>
-                                            <select class="form-select" id="category" wire:model="category">
-                                                <option value="">Select Category</option>
-                                                @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}" {{ $category->id == 'Default
-                                                    Category' ? 'selected' : '' }}>
-                                                    {{ $category->category_name }}
-                                                    @if($category->id == 'Default Category') (Default) @endif
-                                                </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-select" id="category" wire:model="category">
+                                                    <option value="">Select Category</option>
+                                                    @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}" {{ $category->id == 'Default
+                                                        Category' ? 'selected' : '' }}>
+                                                        {{ $category->category_name }}
+                                                        @if($category->id == 'Default Category') (Default) @endif
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new category"
+                                                    onclick="openQuickModal('quickCreateCategoryModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
                                             @error('category')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
@@ -1258,16 +1348,24 @@
                                     <div class="col-md-4">
                                         <div class="mb-1">
                                             <label for="supplier" class="form-label fw-semibold">Supplier:</label>
-                                            <select class="form-select" id="supplier" wire:model="supplier">
-                                                <option value="">Select Supplier</option>
-                                                @foreach ($suppliers as $supplier)
-                                                <option value="{{ $supplier->id }}" {{ $supplier->id == 'Default
-                                                    Supplier' ? 'selected' : '' }}>
-                                                    {{ $supplier->name }}
-                                                    @if($supplier->id == 'Default Supplier') (Default) @endif
-                                                </option>
-                                                @endforeach
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-select" id="supplier" wire:model="supplier">
+                                                    <option value="">Select Supplier</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}" {{ $supplier->id == 'Default
+                                                        Supplier' ? 'selected' : '' }}>
+                                                        {{ $supplier->name }}
+                                                        @if($supplier->id == 'Default Supplier') (Default) @endif
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new supplier"
+                                                    onclick="openQuickModal('quickCreateSupplierModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
                                             @error('supplier')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
@@ -1276,6 +1374,7 @@
                                 </div>
                             </div>
                         </div>
+
 
                         <div class="card mb-4">
                             <div class="card-header">
@@ -1427,6 +1526,18 @@
                                             <input type="number" class="form-control" id="damage_stock"
                                                 wire:model="damage_stock">
                                             @error('damage_stock')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-1">
+                                            <label for="low_stock" class="form-label fw-semibold text-danger">Low Stock Alert:</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-danger-subtle text-danger"><i class="bi bi-bell"></i></span>
+                                                <input type="number" class="form-control" id="low_stock" wire:model="low_stock" placeholder="Alert Qty">
+                                            </div>
+                                            @error('low_stock')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
                                         </div>
@@ -1782,10 +1893,20 @@
 
                                     <div class="col-md-4">
                                         <div class="mb-1">
-                                            <label for="editModel" class="form-label fw-semibold">Model:</label>
-                                            <input type="text" class="form-control" id="editModel"
-                                                wire:model="editModel">
-                                            @error('editModel')
+                                            <label for="editModelId" class="form-label fw-semibold">Model:</label>
+                                            <div class="input-group">
+                                                <select class="form-select" id="editModelId" wire:model="editModelId">
+                                                    <option value="">Select Model</option>
+                                                    @foreach ($models as $m)
+                                                    <option value="{{ $m->id }}">{{ $m->model_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new model" onclick="openQuickModal('quickCreateModelModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                            @error('editModelId')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
                                         </div>
@@ -1805,13 +1926,18 @@
                                     <div class="col-md-4">
                                         <div class="mb-1">
                                             <label for="editCategory" class="form-label fw-semibold">Category:</label>
-                                            <select class="form-select" id="editCategory" wire:model="editCategory">
-                                                <option value="">Select Category</option>
-                                                @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}" {{ $category->id == 1 ? 'selected' :
-                                                    '' }}>{{ $category->category_name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-select" id="editCategory" wire:model="editCategory">
+                                                    <option value="">Select Category</option>
+                                                    @foreach ($categories as $category)
+                                                    <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new category" onclick="openQuickModal('quickCreateCategoryModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
                                             @error('editCategory')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
@@ -1820,14 +1946,39 @@
                                     <div class="col-md-4">
                                         <div class="mb-1">
                                             <label for="editBrand" class="form-label fw-semibold">Brand:</label>
-                                            <select class="form-select" id="editBrand" wire:model="editBrand">
-                                                <option value="">Select Brand</option>
-                                                @foreach ($brands as $brand)
-                                                <option value="{{ $brand->id }}" {{ $brand->id == 1 ? 'selected' : ''
-                                                    }}>{{ $brand->brand_name }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="input-group">
+                                                <select class="form-select" id="editBrand" wire:model="editBrand">
+                                                    <option value="">Select Brand</option>
+                                                    @foreach ($brands as $brand)
+                                                    <option value="{{ $brand->id }}">{{ $brand->brand_name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new brand" onclick="openQuickModal('quickCreateBrandModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
                                             @error('editBrand')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-1">
+                                            <label for="editSupplier" class="form-label fw-semibold">Supplier:</label>
+                                            <div class="input-group">
+                                                <select class="form-select" id="editSupplier" wire:model="editSupplier">
+                                                    <option value="">Select Supplier</option>
+                                                    @foreach ($suppliers as $supplier)
+                                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="btn btn-outline-primary btn-add-quick"
+                                                    title="Add new supplier" onclick="openQuickModal('quickCreateSupplierModal')">
+                                                    <i class="bi bi-plus-lg"></i>
+                                                </button>
+                                            </div>
+                                            @error('editSupplier')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
                                         </div>
@@ -1946,6 +2097,18 @@
                                                 <option value="inactive">Inactive</option>
                                             </select>
                                             @error('editStatus')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-1">
+                                            <label for="editLowStock" class="form-label fw-semibold text-danger">Low Stock Alert:</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-danger-subtle text-danger"><i class="bi bi-bell"></i></span>
+                                                <input type="number" class="form-control" id="editLowStock" wire:model="editLowStock" placeholder="Alert Qty">
+                                            </div>
+                                            @error('editLowStock')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
                                         </div>
@@ -2388,9 +2551,248 @@
             </div>
         </div>
 
+        {{-- ═══════════════════════════════════════════════════════════
+             QUICK-CREATE: Category Modal
+        ═══════════════════════════════════════════════════════════ --}}
+        <div wire:ignore.self class="modal fade" id="quickCreateCategoryModal" tabindex="-1"
+            aria-labelledby="quickCreateCategoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg overflow-hidden">
+                    <div class="modal-header text-white quick-modal-header">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="quickCreateCategoryModalLabel">
+                            <i class="bi bi-tags-fill me-2"></i> Add New Category
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="quickCategoryName" class="form-label fw-semibold">
+                                <i class="bi bi-tag text-primary me-1"></i> Category Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                class="form-control @error('quickCategoryName') is-invalid @enderror"
+                                id="quickCategoryName"
+                                wire:model.defer="quickCategoryName"
+                                placeholder="e.g. Brake Parts">
+                            @error('quickCategoryName')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="alert alert-info border-0 py-2 mb-0 small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            The new category will be automatically selected after creation.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" wire:click="saveQuickCategory">
+                            <span wire:loading wire:target="saveQuickCategory">
+                                <i class="spinner-border spinner-border-sm me-1"></i> Saving...
+                            </span>
+                            <span wire:loading.remove wire:target="saveQuickCategory">
+                                <i class="bi bi-check-lg me-1"></i> Save Category
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        {{-- ═══════════════════════════════════════════════════════════
+             QUICK-CREATE: Brand Modal
+        ═══════════════════════════════════════════════════════════ --}}
+        <div wire:ignore.self class="modal fade" id="quickCreateBrandModal" tabindex="-1"
+            aria-labelledby="quickCreateBrandModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg overflow-hidden">
+                    <div class="modal-header text-white quick-modal-header">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="quickCreateBrandModalLabel">
+                            <i class="bi bi-bookmark-star-fill me-2"></i> Add New Brand
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="quickBrandName" class="form-label fw-semibold">
+                                <i class="bi bi-bookmark text-primary me-1"></i> Brand Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                class="form-control @error('quickBrandName') is-invalid @enderror"
+                                id="quickBrandName"
+                                wire:model.defer="quickBrandName"
+                                placeholder="e.g. Toyota">
+                            @error('quickBrandName')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="alert alert-info border-0 py-2 mb-0 small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            The new brand will be automatically selected after creation.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" wire:click="saveQuickBrand">
+                            <span wire:loading wire:target="saveQuickBrand">
+                                <i class="spinner-border spinner-border-sm me-1"></i> Saving...
+                            </span>
+                            <span wire:loading.remove wire:target="saveQuickBrand">
+                                <i class="bi bi-check-lg me-1"></i> Save Brand
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    </div>
+        {{-- ═══════════════════════════════════════════════════════════
+             QUICK-CREATE: Supplier Modal
+        ═══════════════════════════════════════════════════════════ --}}
+        <div wire:ignore.self class="modal fade" id="quickCreateSupplierModal" tabindex="-1"
+            aria-labelledby="quickCreateSupplierModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg overflow-hidden">
+                    <div class="modal-header text-white quick-modal-header">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="quickCreateSupplierModalLabel">
+                            <i class="bi bi-truck-front-fill me-2"></i> Add New Supplier
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="quickSupplierName" class="form-label fw-semibold">
+                                    <i class="bi bi-person text-primary me-1"></i> Supplier Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                    class="form-control @error('quickSupplierName') is-invalid @enderror"
+                                    id="quickSupplierName"
+                                    wire:model.defer="quickSupplierName"
+                                    placeholder="e.g. ABC Auto Parts Ltd">
+                                @error('quickSupplierName')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="quickSupplierPhone" class="form-label fw-semibold">
+                                    <i class="bi bi-telephone text-primary me-1"></i> Phone
+                                </label>
+                                <input type="text"
+                                    class="form-control @error('quickSupplierPhone') is-invalid @enderror"
+                                    id="quickSupplierPhone"
+                                    wire:model.defer="quickSupplierPhone"
+                                    placeholder="e.g. 0771234567">
+                                @error('quickSupplierPhone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="quickSupplierEmail" class="form-label fw-semibold">
+                                    <i class="bi bi-envelope text-primary me-1"></i> Email
+                                </label>
+                                <input type="email"
+                                    class="form-control @error('quickSupplierEmail') is-invalid @enderror"
+                                    id="quickSupplierEmail"
+                                    wire:model.defer="quickSupplierEmail"
+                                    placeholder="e.g. supplier@example.com">
+                                @error('quickSupplierEmail')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="quickSupplierAddress" class="form-label fw-semibold">
+                                    <i class="bi bi-geo-alt text-primary me-1"></i> Address
+                                </label>
+                                <input type="text"
+                                    class="form-control @error('quickSupplierAddress') is-invalid @enderror"
+                                    id="quickSupplierAddress"
+                                    wire:model.defer="quickSupplierAddress"
+                                    placeholder="e.g. 123, Main Street, Colombo">
+                                @error('quickSupplierAddress')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="alert alert-info border-0 py-2 mt-3 mb-0 small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            The new supplier will be automatically selected after creation.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" wire:click="saveQuickSupplier">
+                            <span wire:loading wire:target="saveQuickSupplier">
+                                <i class="spinner-border spinner-border-sm me-1"></i> Saving...
+                            </span>
+                            <span wire:loading.remove wire:target="saveQuickSupplier">
+                                <i class="bi bi-check-lg me-1"></i> Save Supplier
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>{{-- end .container-fluid --}}
+
+        {{-- ═══════════════════════════════════════════════════════════
+             QUICK-CREATE: Model Modal
+        ═══════════════════════════════════════════════════════════ --}}
+        <div wire:ignore.self class="modal fade" id="quickCreateModelModal" tabindex="-1"
+            aria-labelledby="quickCreateModelModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg overflow-hidden">
+                    <div class="modal-header text-white quick-modal-header">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="quickCreateModelModalLabel">
+                            <i class="bi bi-cpu-fill me-2"></i> Add New Model
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="quickModelName" class="form-label fw-semibold">
+                                <i class="bi bi-cpu text-primary me-1"></i> Model Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                class="form-control @error('quickModelName') is-invalid @enderror"
+                                id="quickModelName"
+                                wire:model.defer="quickModelName"
+                                placeholder="e.g. Toyota Corolla 2020">
+                            @error('quickModelName')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="alert alert-info border-0 py-2 mb-0 small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            The new model will be automatically selected after creation.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" wire:click="saveQuickModel">
+                            <span wire:loading wire:target="saveQuickModel">
+                                <i class="spinner-border spinner-border-sm me-1"></i> Saving...
+                            </span>
+                            <span wire:loading.remove wire:target="saveQuickModel">
+                                <i class="bi bi-check-lg me-1"></i> Save Model
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     @push('scripts')
     <script>
@@ -2496,8 +2898,89 @@
                 console.error('🚨 Global Error:', event.error);
             });
 
-            console.log('✅ Product History scripts loaded successfully');
+            // ═══════════════════════════════════════════════════════════
+            //  QUICK-CREATE: Nested Modal Management
+            // ═══════════════════════════════════════════════════════════
+
+            // Open a quick-create modal WITHOUT closing the parent modal
+            window.openQuickModal = function(modalId) {
+                const quickModalEl = document.getElementById(modalId);
+                if (!quickModalEl) return;
+
+                // Show the quick-create modal on top — do NOT use data-bs-toggle
+                const quickModal = bootstrap.Modal.getOrCreateInstance(quickModalEl, {
+                    backdrop: false,   // We'll manage backdrop manually
+                    keyboard: true
+                });
+                quickModal.show();
+
+                // Add a second backdrop manually with a higher z-index
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show quick-modal-backdrop';
+                backdrop.style.zIndex = '1065';
+                document.body.appendChild(backdrop);
+
+                // Keep body modal-open class active
+                document.body.classList.add('modal-open');
+            };
+
+            // Clean up when a quick-create modal is hidden
+            const quickModalIds = ['quickCreateCategoryModal', 'quickCreateBrandModal', 'quickCreateSupplierModal'];
+            quickModalIds.forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('hidden.bs.modal', function() {
+                        // Remove our custom backdrop
+                        const extraBackdrops = document.querySelectorAll('.quick-modal-backdrop');
+                        extraBackdrops.forEach(function(bd) { bd.remove(); });
+
+                        // Ensure the parent modal is still scrollable and body stays modal-open
+                        document.body.classList.add('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    });
+                }
+            });
+
+            // Listen for Livewire events to close the quick-create modals after saving
+            Livewire.on('quickModalClosed', function(data) {
+                const modalId = (data && data.length > 0) ? data[0] : null;
+                if (modalId) {
+                    const modalEl = document.getElementById(modalId);
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) modal.hide();
+                    }
+                }
+
+                // Remove any stray quick-modal backdrops
+                document.querySelectorAll('.quick-modal-backdrop').forEach(function(bd) { bd.remove(); });
+
+                // Ensure the parent modal stays interactive
+                document.body.classList.add('modal-open');
+            });
+
+            console.log('✅ Product scripts loaded successfully');
         });
     </script>
-    @endpush
+@endpush
+
+    @if(isset($lowStockCount) && $lowStockCount > 0)
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+        <div class="toast show text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+            <div class="d-flex align-items-center justify-content-between p-2">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                    <div>
+                        <strong class="d-block">Low Stock Alert</strong>
+                        <span>{{ $lowStockCount }} products are running low!</span>
+                        <a href="#" wire:click.prevent="$set('stockFilter', 'low')" class="text-white text-decoration-underline ms-1 fw-bold">View</a>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    @endif
+
 </div>

@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\AdminDashboard;
 use App\Livewire\Admin\ManageCustomer;
 use App\Livewire\Admin\ProductBrandlist;
+use App\Livewire\Admin\ProductModelList;
 use App\Livewire\Staff\StaffDashboard;
 use App\Livewire\Admin\StaffDueDetails;
 use App\Livewire\Admin\PaymentApprovals;
@@ -175,6 +176,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/manage-variants', \App\Livewire\Admin\ProductVariants::class)->name('manage-variants');
         Route::get('/add-Product-brand', ProductBrandlist::class)->name('Product-brand');
         Route::get('/Product-category', ProductCategorylist::class)->name('Product-category');
+        Route::get('/Product-model', ProductModelList::class)->name('Product-model');
         Route::get('/billing-page', BillingPage::class)->name('billing-page');
         Route::get('/manage-admin', ManageAdmin::class)->name('manage-admin');
         Route::get('/manage-staff', ManageStaff::class)->name('manage-staff');
@@ -255,6 +257,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/Product-list', Products::class)->name('Productes');
         Route::get('/add-Product-brand', ProductBrandlist::class)->name('Product-brand');
         Route::get('/Product-category', ProductCategorylist::class)->name('Product-category');
+        Route::get('/Product-model', ProductModelList::class)->name('Product-model');
         Route::get('/Product-stock-details', ProductStockDetails::class)->name('Product-stock-details');
 
         // Sales

@@ -592,9 +592,9 @@
                                     <td class="text-end fw-bold">- Rs.{{ number_format($totalDiscount, 2) }}</td>
                                 </tr>
                                 @endif
-                                <tr class="border-top border-2" style="border-color: #f58320 !important;">
+                                <tr class="border-top border-2" style="border-color: #e11d48 !important;">
                                     <td class="text-end"><strong>Grand Total:</strong></td>
-                                    <td class="text-end fw-bold" style="color: #f58320; font-size: 1.1rem;">Rs.{{ number_format($selectedQuotation->total_amount, 2) }}</td>
+                                    <td class="text-end fw-bold" style="color: #e11d48; font-size: 1.1rem;">Rs.{{ number_format($selectedQuotation->total_amount, 2) }}</td>
                                 </tr>
                             </table>
                         </div>
