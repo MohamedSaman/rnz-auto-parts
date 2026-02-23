@@ -153,7 +153,7 @@
     <div class="header">
         <img src="{{ public_path('images/RNZ') }}" alt="RNZ Logo">
         <p>254, Warana Road, Thihariya, Kalagedihena.</p>
-        <p><strong>TEL:</strong> (076) 1792767 | <strong>EMAIL:</strong> rnz@gmail.com</p>
+        <p><strong>TEL:</strong> 072 3797070 | <strong>EMAIL:</strong> amharprofessional10765@gmail.com</p>
         <h1>CLOSE REGISTER SUMMARY</h1>
     </div>
 

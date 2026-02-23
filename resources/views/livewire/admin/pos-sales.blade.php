@@ -360,7 +360,7 @@ use App\Models\Sale;
                                     <h2 class="mb-0">RNZ AUTO PARTS</h2>
                                     <p class="mb-0 text-muted" style="color:#666; font-size:12px;">All type of auto parts</p>
                                     <p style="margin:0; text-align:center;"><strong>254, Warana Road, Thihariya, Kalagedihena.</strong></p>
-                                    <p style="margin:0; text-align:center;"><strong>TEL:</strong> (076) 1792767, <strong>EMAIL:</strong> rnz@gmail.com</p>
+                                    <p style="margin:0; text-align:center;"><strong>TEL:</strong> 072 3797070, <strong>EMAIL:</strong> amharprofessional10765@gmail.com</p>
                                 </div>
                             </div>
                         </div>
@@ -516,7 +516,7 @@ use App\Models\Sale;
                             
                             <div>
                                 <p style="margin:0; font-size:12px;">Thank you for your business!</p>
-                                <p style="margin:0; font-size:12px;">www.rnz.lk | info@rnz.lk</p>
+                                <p style="margin:0; font-size:12px;">www.rnz.lk | amharprofessional10765@gmail.com</p>
                             </div>
                         </div>
                     </div>

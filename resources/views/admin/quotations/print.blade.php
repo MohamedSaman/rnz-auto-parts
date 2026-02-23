@@ -353,7 +353,7 @@
         {{-- Company Footer --}}
         <div class="company-footer">
             <p><strong>ADDRESS :</strong> 254, Warana Road, Thihariya, Kalagedihena.</p>
-            <p><strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com</p>
+            <p><strong>TEL :</strong> 072 3797070, <strong>EMAIL :</strong> amharprofessional10765@gmail.com</p>
             <p class="small-text">This quotation is valid until {{ \Carbon\Carbon::parse($quotation->valid_until)->format('d/m/Y') }}.</p>
         </div>
     </div>

@@ -609,7 +609,7 @@
                             {{-- Footer Note --}}
                             <div class="text-center small text-muted mt-4 pt-3 border-top">
                                 <p class="text-center mb-0"><strong>ADDRESS :</strong> 254, Warana Road, Thihariya, Kalagedihena.</p>
-                                <p class="text-center mb-0"><strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com</p>
+                                <p class="text-center mb-0"><strong>TEL :</strong> 072 3797070, <strong>EMAIL :</strong> amharprofessional10765@gmail.com</p>
                                 <p class="mb-0 mt-2"><i class="bi bi-info-circle me-1"></i> Thank you for your business!</p>
                             </div>
 

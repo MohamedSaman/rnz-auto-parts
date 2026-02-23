@@ -215,7 +215,7 @@
                         
                         <p class="mb-0">
                             <strong>ADDRESS :</strong> 254, Warana Road, Thihariya, Kalagedihena.<br>
-                            <strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com
+                            <strong>TEL :</strong> 072 3797070, <strong>EMAIL :</strong> amharprofessional10765@gmail.com
                         </p>
                         <p class="mt-1 text-muted">
                             

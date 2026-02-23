@@ -896,7 +896,7 @@
                                 <h2 class="mb-0">RNZ AUTO PARTS</h2>
                                 <p class="mb-0 text-muted" style="color:#666; font-size:12px;">All type of auto parts</p>
                                 <p style="margin:0; text-align:center;"><strong> 254, Warana Road, Thihariya, Kalagedihena.</strong></p>
-                                <p style="margin:0; text-align:center;"><strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com</p>
+                                <p style="margin:0; text-align:center;"><strong>TEL :</strong> 072 3797070, <strong>EMAIL :</strong> amharprofessional10765@gmail.com</p>
                                 <p style="margin:0; text-align:center; font-size:11px; margin-top:8px;"><strong></strong></p>
                             </div>
                         </div>
@@ -1015,7 +1015,7 @@
                             <p style="margin:0; font-size:12px;">Thank you for your business!</p>
                             <p style="margin:0; font-size:12px; display:flex; align-items:center; justify-content:center; gap:12px;">
                                 <span class="material-symbols-outlined" style="font-size:14px;"></span> www.rnz.lk
-                                <span class="material-symbols-outlined" style="font-size:14px;"></span> info@rnz.lk
+                                <span class="material-symbols-outlined" style="font-size:14px;"></span> amharprofessional10765@gmail.com
                             </p>
                             
                         </div>
@@ -1038,7 +1038,7 @@
                 <h3 class="text-xl font-black text-white uppercase tracking-[0.2em] relative z-10">Terminal Summary</h3>
                 <p class="text-slate-400 text-[10px] font-bold mt-2 relative z-10">{{ date('d M Y | H:i') }}</p>
             </div>
-            <div class="p-8 space-y-6">
+            <div class="p-8 space-y-6"
                 <div class="grid grid-cols-2 gap-4">
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
                         <label class="text-[8px] font-black text-slate-300 uppercase tracking-widest block mb-1">Session Inflow</label>
