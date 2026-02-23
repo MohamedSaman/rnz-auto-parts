@@ -152,8 +152,8 @@
     {{-- Header --}}
     <div class="header">
         <img src="{{ public_path('images/RNZ') }}" alt="RNZ Logo">
-        <p>sample address</p>
-        <p><strong>TEL:</strong> (077) 1234567 | <strong>EMAIL:</strong> rnz@gmail.com</p>
+        <p>254, Warana Road, Thihariya, Kalagedihena.</p>
+        <p><strong>TEL:</strong> (076) 1792767 | <strong>EMAIL:</strong> rnz@gmail.com</p>
         <h1>CLOSE REGISTER SUMMARY</h1>
     </div>
 

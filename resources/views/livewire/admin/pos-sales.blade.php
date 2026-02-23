@@ -359,8 +359,8 @@ use App\Models\Sale;
                                 <div class="receipt-center">
                                     <h2 class="mb-0">RNZ AUTO PARTS</h2>
                                     <p class="mb-0 text-muted" style="color:#666; font-size:12px;">All type of auto parts</p>
-                                    <p style="margin:0; text-align:center;"><strong>sample address</strong></p>
-                                    <p style="margin:0; text-align:center;"><strong>TEL:</strong> (077) 1234567, <strong>EMAIL:</strong> rnz@gmail.com</p>
+                                    <p style="margin:0; text-align:center;"><strong>254, Warana Road, Thihariya, Kalagedihena.</strong></p>
+                                    <p style="margin:0; text-align:center;"><strong>TEL:</strong> (076) 1792767, <strong>EMAIL:</strong> rnz@gmail.com</p>
                                 </div>
                             </div>
                         </div>

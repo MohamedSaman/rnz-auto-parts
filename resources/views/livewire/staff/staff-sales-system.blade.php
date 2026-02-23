@@ -472,8 +472,8 @@
                                 </div>
                             </div>
                             <div class="border-top pt-3" style="font-size: 0.7rem; line-height: 1.2;">
-                                <p class="text-center mb-1" style="margin-bottom: 0.3rem;"><strong>ADDRESS :</strong> sample address</p>
-                                <p class="text-center mb-1" style="margin-bottom: 0.3rem;"><strong>TEL :</strong> (077) 1234567, <strong>EMAIL :</strong> rnz@gmail.com</p>
+                                <p class="text-center mb-1" style="margin-bottom: 0.3rem;"><strong>ADDRESS :</strong> 254, Warana Road, Thihariya, Kalagedihena.</p>
+                                <p class="text-center mb-1" style="margin-bottom: 0.3rem;"><strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com</p>
                                 <p class="text-center mt-2" style="font-size: 0.65rem; margin-bottom: 0;"><strong></strong></p>
                             </div>
                         </div>

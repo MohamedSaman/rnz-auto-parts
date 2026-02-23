@@ -408,8 +408,8 @@
                 </div>
             </div>
             <div style="border-top: 1px solid #000000; padding-top: 10px;">
-                <p style="text-align: center;"><strong>ADDRESS :</strong> sample address</p>
-                <p style="text-align: center;"><strong>TEL :</strong> (077) 1234567, <strong>EMAIL :</strong> rnz@gmail.com</p>
+                <p style="text-align: center;"><strong>ADDRESS :</strong> 254, Warana Road, Thihariya, Kalagedihena.</p>
+                <p style="text-align: center;"><strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com</p>
                 <p style="text-align: center; font-size: 11px; margin-top: 8px;"><strong></strong></p>
             </div>
         </div>

@@ -214,8 +214,8 @@
                     <div class="mt-4 text-center small">
                         
                         <p class="mb-0">
-                            <strong>ADDRESS :</strong> sample address<br>
-                            <strong>TEL :</strong> (077) 1234567, <strong>EMAIL :</strong> rnz@gmail.com
+                            <strong>ADDRESS :</strong> 254, Warana Road, Thihariya, Kalagedihena.<br>
+                            <strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com
                         </p>
                         <p class="mt-1 text-muted">
                             

@@ -81,7 +81,7 @@
                 </div>
                 {{--<div>
                     <h1 class="font-bold text-sm leading-tight tracking-tight text-slate-900 uppercase">
-                        Hardmen <span class="text-[#e11d48]">(Pvt) Ltd</span>
+                        RNZ <span class="text-[#e11d48]">(Pvt) Ltd</span>
                     </h1>
                     <p class="text-[10px] text-slate-500 font-medium tracking-wide">ADVANCED POS TERMINAL</p>
                 </div>--}}
@@ -895,8 +895,8 @@
                             <div class="receipt-center">
                                 <h2 class="mb-0">RNZ AUTO PARTS</h2>
                                 <p class="mb-0 text-muted" style="color:#666; font-size:12px;">All type of auto parts</p>
-                                <p style="margin:0; text-align:center;"><strong> sample address</strong></p>
-                                <p style="margin:0; text-align:center;"><strong>TEL :</strong> (077) 1234567, <strong>EMAIL :</strong> rnz@gmail.com</p>
+                                <p style="margin:0; text-align:center;"><strong> 254, Warana Road, Thihariya, Kalagedihena.</strong></p>
+                                <p style="margin:0; text-align:center;"><strong>TEL :</strong> (076) 1792767, <strong>EMAIL :</strong> rnz@gmail.com</p>
                                 <p style="margin:0; text-align:center; font-size:11px; margin-top:8px;"><strong></strong></p>
                             </div>
                         </div>
@@ -1034,7 +1034,7 @@
         @if($showCloseRegisterModal)
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden relative transform transition-all border border-slate-100">
             <div class="bg-slate-900 p-8 text-center relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10 bg-[url('https://hardmen.lk/logo.png')] bg-center bg-no-repeat bg-contain scale-150"></div>
+                <div class="absolute inset-0 opacity-10 bg-[url('https://rnz.lk/logo.png')] bg-center bg-no-repeat bg-contain scale-150"></div>
                 <h3 class="text-xl font-black text-white uppercase tracking-[0.2em] relative z-10">Terminal Summary</h3>
                 <p class="text-slate-400 text-[10px] font-bold mt-2 relative z-10">{{ date('d M Y | H:i') }}</p>
             </div>

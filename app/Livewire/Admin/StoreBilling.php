@@ -422,8 +422,7 @@ class StoreBilling extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('code', 'like', '%' . $this->search . '%')
-                    ->orWhere('model', 'like', '%' . $this->search . '%');
+                    ->orWhere('code', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -475,7 +474,7 @@ class StoreBilling extends Component
                             'variant_value' => $stock->variant_value,
                             'name' => $product->name . ' (' . $stock->variant_value . ')',
                             'code' => $product->code,
-                            'model' => $product->model,
+                            
                             'price' => $priceValue,
                             'retail_price' => $priceRecord->retail_price ?? 0,
                             'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -508,7 +507,7 @@ class StoreBilling extends Component
                             'variant_value' => $stock->variant_value,
                             'name' => $product->name . ' (' . $stock->variant_value . ')',
                             'code' => $product->code,
-                            'model' => $product->model,
+                            
                             'price' => $priceValue,
                             'retail_price' => $priceRecord->retail_price ?? 0,
                             'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -544,7 +543,7 @@ class StoreBilling extends Component
                             'variant_value' => $stock->variant_value,
                             'name' => $product->name . ' (' . $stock->variant_value . ')',
                             'code' => $product->code,
-                            'model' => $product->model,
+                            
                             'price' => $priceValue,
                             'retail_price' => $priceRecord->retail_price ?? 0,
                             'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -579,7 +578,7 @@ class StoreBilling extends Component
                     'variant_value' => null,
                     'name' => $product->name,
                     'code' => $product->code,
-                    'model' => $product->model,
+                   
                     'price' => $priceValue,
                     'retail_price' => $priceRecord->retail_price ?? 0,
                     'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -1240,8 +1239,8 @@ class StoreBilling extends Component
                 // Search by full term in product fields
                 $query->where(function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%")
-                        ->orWhere('code', 'like', "%{$searchTerm}%")
-                        ->orWhere('model', 'like', "%{$searchTerm}%");
+                        ->orWhere('code', 'like', "%{$searchTerm}%");
+                        
                 })
                     // OR search by full term in variant values
                     ->orWhereHas('stocks', function ($q) use ($searchTerm) {

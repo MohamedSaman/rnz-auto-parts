@@ -951,7 +951,7 @@
             </button>
 
             <div class="topbar-brand">
-                Hardmen
+                RNZ
             </div>
 
             <div class="dropdown ms-auto">
