@@ -38,6 +38,9 @@ class ProductValueReportExport implements FromCollection, WithHeadings, WithMapp
             'Variant',
             'Available Stock',
             'Supplier Price',
+            'Retail Price',
+            'Wholesale Price',
+            'Distributor Price',
             'Total Value',
         ];
     }
@@ -54,6 +57,9 @@ class ProductValueReportExport implements FromCollection, WithHeadings, WithMapp
             $row['variant_value'] ?? 'N/A',
             $row['available_stock'] ?? 0,
             $row['supplier_price'] ?? 0,
+            $row['retail_price'] ?? 0,
+            $row['wholesale_price'] ?? 0,
+            $row['distributor_price'] ?? 0,
             $row['total_value'] ?? 0,
         ];
     }

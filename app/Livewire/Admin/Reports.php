@@ -780,8 +780,11 @@ class Reports extends Component
                                 ? $product->prices->firstWhere('variant_value', $stock->variant_value)
                                 : null;
 
-                            // Get supplier price or default to 0
+                            // Get all price types or default to 0
                             $supplierPrice = $price ? ($price->supplier_price ?? 0) : 0;
+                            $retailPrice = $price ? ($price->retail_price ?? 0) : 0;
+                            $wholesalePrice = $price ? ($price->wholesale_price ?? 0) : 0;
+                            $distributorPrice = $price ? ($price->distributor_price ?? 0) : 0;
 
                             // Calculate total value
                             $totalValue = $availableStock * $supplierPrice;
@@ -793,6 +796,9 @@ class Reports extends Component
                                 'display_name' => $product->name . ' (' . $stock->variant_value . ')',
                                 'available_stock' => $availableStock,
                                 'supplier_price' => $supplierPrice,
+                                'retail_price' => $retailPrice,
+                                'wholesale_price' => $wholesalePrice,
+                                'distributor_price' => $distributorPrice,
                                 'total_value' => $totalValue,
                             ];
                         }
@@ -822,8 +828,11 @@ class Reports extends Component
                             ? $product->prices->first()
                             : null;
 
-                        // Get supplier price or default to 0
+                        // Get all price types or default to 0
                         $supplierPrice = $price ? ($price->supplier_price ?? 0) : 0;
+                        $retailPrice = $price ? ($price->retail_price ?? 0) : 0;
+                        $wholesalePrice = $price ? ($price->wholesale_price ?? 0) : 0;
+                        $distributorPrice = $price ? ($price->distributor_price ?? 0) : 0;
 
                         // Calculate total value
                         $totalValue = $availableStock * $supplierPrice;
@@ -835,6 +844,9 @@ class Reports extends Component
                             'display_name' => $product->name,
                             'available_stock' => $availableStock,
                             'supplier_price' => $supplierPrice,
+                            'retail_price' => $retailPrice,
+                            'wholesale_price' => $wholesalePrice,
+                            'distributor_price' => $distributorPrice,
                             'total_value' => $totalValue,
                         ];
                     }
