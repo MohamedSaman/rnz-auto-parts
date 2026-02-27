@@ -243,14 +243,13 @@ class QuotationSystem extends Component
                     ->join('product_details', 'staff_products.product_id', '=', 'product_details.id')
                     ->where(function ($query) {
                         $query->where('product_details.name', 'like', '%' . $this->search . '%')
-                            ->orWhere('product_details.code', 'like', '%' . $this->search . '%')
-                            ->orWhere('product_details.model', 'like', '%' . $this->search . '%');
+                            ->orWhere('product_details.code', 'like', '%' . $this->search . '%');
+                            
                     })
                     ->select(
                         'product_details.id',
                         'product_details.name',
                         'product_details.code',
-                        'product_details.model',
                         'product_details.image',
                         'staff_products.unit_price as price',
                         'staff_products.quantity',
@@ -262,7 +261,6 @@ class QuotationSystem extends Component
                         return [
                             'id' => $product->id,
                             'name' => $product->name,
-                            'code' => $product->code,
                             'model' => $product->model,
                             'price' => $product->price,
                             'stock' => ($product->quantity - $product->sold_quantity),
@@ -274,8 +272,8 @@ class QuotationSystem extends Component
                 $products = ProductDetail::with(['stocks', 'prices', 'variant'])
                     ->where(function ($query) {
                         $query->where('name', 'like', '%' . $this->search . '%')
-                            ->orWhere('code', 'like', '%' . $this->search . '%')
-                            ->orWhere('model', 'like', '%' . $this->search . '%');
+                            ->orWhere('code', 'like', '%' . $this->search . '%');
+                            
                     })
                     ->orWhereHas('stocks', function ($query) {
                         $query->where('variant_value', 'like', '%' . $this->search . '%');
@@ -303,7 +301,6 @@ class QuotationSystem extends Component
                                 'variant_value' => $variantStock->variant_value,
                                 'name' => $product->name . ' (' . $variantStock->variant_value . ')',
                                 'code' => $product->code,
-                                'model' => $product->model,
                                 'price' => $price,
                                 'stock' => $variantStock->available_stock ?? 0,
                                 'image' => $product->image
@@ -322,7 +319,6 @@ class QuotationSystem extends Component
                             'variant_value' => null,
                             'name' => $product->name,
                             'code' => $product->code,
-                            'model' => $product->model,
                             'price' => $price,
                             'stock' => $productStock->available_stock ?? 0,
                             'image' => $product->image
