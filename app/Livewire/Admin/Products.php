@@ -1102,7 +1102,7 @@ class Products extends Component
             'editStatus'        => 'required|in:active,inactive',
             'editSupplierPrice' => 'required|numeric|min:0',
             'editRetailPrice'   => 'required|numeric|min:0',
-            'editWholesalePrice'=> 'required|numeric|min:0',
+            'editWholesalePrice' => 'required|numeric|min:0',
             'editDiscountPrice' => 'nullable|numeric|min:0|lte:editRetailPrice',
             'editDamageStock'   => 'required|integer|min:0',
             'editLowStock'      => 'nullable|integer|min:0',
