@@ -1225,7 +1225,9 @@
 
         <!-- Create Product Modal -->
         <div wire:ignore.self class="modal fade" id="createProductModal" tabindex="-1"
-            aria-labelledby="createProductModalLabel" aria-hidden="true">
+            aria-labelledby="createProductModalLabel" aria-hidden="true"
+            x-data="productKeyboardNav('create')"
+            x-on:shown.bs.modal="focusFirstInput()">
             <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1543,6 +1545,46 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Warehouse Information -->
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="fast_moving" class="form-label fw-semibold">
+                                                <i class="bi bi-lightning-charge text-warning"></i> Fast Moving:
+                                            </label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="fast_moving" 
+                                                    wire:model="fast_moving">
+                                                <label class="form-check-label" for="fast_moving">Mark as fast moving product</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="store_location" class="form-label fw-semibold">
+                                                <i class="bi bi-geo-alt text-info"></i> Store Location:
+                                            </label>
+                                            <input type="text" class="form-control" id="store_location" 
+                                                wire:model="store_location" placeholder="e.g., Shelf A1">
+                                            @error('store_location')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="rack_number" class="form-label fw-semibold">
+                                                <i class="bi bi-stack text-success"></i> Rack Number:
+                                            </label>
+                                            <input type="text" class="form-control" id="rack_number" 
+                                                wire:model="rack_number" placeholder="e.g., R-05">
+                                            @error('rack_number')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
                                 @else
                                 <!-- Variant-Based Pricing Mode -->
                                 <div class="alert alert-info border-info">
@@ -1852,7 +1894,9 @@
 
         <!-- Edit Product Modal -->
         <div wire:ignore.self wire:key="edit-modal-{{ $editId ?? 'new' }}" class="modal fade" id="editProductModal"
-            tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+            tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true"
+            x-data="productKeyboardNav('edit')"
+            x-on:shown.bs.modal="focusFirstInput()">
             <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -2109,6 +2153,46 @@
                                                 <input type="number" class="form-control" id="editLowStock" wire:model="editLowStock" placeholder="Alert Qty">
                                             </div>
                                             @error('editLowStock')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Warehouse Information -->
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editFastMoving" class="form-label fw-semibold">
+                                                <i class="bi bi-lightning-charge text-warning"></i> Fast Moving:
+                                            </label>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="editFastMoving" 
+                                                    wire:model="editFastMoving">
+                                                <label class="form-check-label" for="editFastMoving">Mark as fast moving product</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editStoreLocation" class="form-label fw-semibold">
+                                                <i class="bi bi-geo-alt text-info"></i> Store Location:
+                                            </label>
+                                            <input type="text" class="form-control" id="editStoreLocation" 
+                                                wire:model="editStoreLocation" placeholder="e.g., Shelf A1">
+                                            @error('editStoreLocation')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editRackNumber" class="form-label fw-semibold">
+                                                <i class="bi bi-stack text-success"></i> Rack Number:
+                                            </label>
+                                            <input type="text" class="form-control" id="editRackNumber" 
+                                                wire:model="editRackNumber" placeholder="e.g., R-05">
+                                            @error('editRackNumber')
                                             <span class="text-danger small">* {{ $message }}</span>
                                             @enderror
                                         </div>
@@ -2958,6 +3042,115 @@
 
                 // Ensure the parent modal stays interactive
                 document.body.classList.add('modal-open');
+            });
+
+            // ═══════════════════════════════════════════════════════════
+            //  KEYBOARD NAVIGATION FOR PRODUCT MODALS
+            // ═══════════════════════════════════════════════════════════
+            window.productKeyboardNav = function(modalType) {
+                return {
+                    modalType: modalType,
+                    fields: [],
+                    currentIndex: -1,
+
+                    focusFirstInput() {
+                        const modalId = this.modalType === 'create' ? 'createProductModal' : 'editProductModal';
+                        const modal = document.getElementById(modalId);
+                        if (!modal) return;
+
+                        // Get all relevant form inputs in order
+                        this.fields = modal.querySelectorAll(
+                            'input[type="text"]:not([readonly]), ' +
+                            'input[type="number"], ' +
+                            'input[type="checkbox"], ' +
+                            'select, ' +
+                            'textarea, ' +
+                            'button[wire\\:click="' + (modalType === 'create' ? 'createProduct' : 'updateProduct') + '"]'
+                        );
+
+                        if (this.fields.length > 0) {
+                            this.currentIndex = 0;
+                            this.fields[0].focus();
+                        }
+                    },
+
+                    moveToNext() {
+                        if (this.currentIndex < this.fields.length - 1) {
+                            this.currentIndex++;
+                            this.fields[this.currentIndex].focus();
+                            if (this.fields[this.currentIndex].tagName === 'TEXTAREA') {
+                                this.fields[this.currentIndex].select();
+                            }
+                        }
+                    },
+
+                    moveToPrev() {
+                        if (this.currentIndex > 0) {
+                            this.currentIndex--;
+                            this.fields[this.currentIndex].focus();
+                        }
+                    }
+                };
+            };
+
+            // ═══════════════════════════════════════════════════════════
+            //  TAB & ENTER KEY HANDLING
+            // ═══════════════════════════════════════════════════════════
+            document.addEventListener('keydown', function(event) {
+                const createModal = document.getElementById('createProductModal');
+                const editModal = document.getElementById('editProductModal');
+                const isCreateModalOpen = createModal && createModal.classList.contains('show');
+                const isEditModalOpen = editModal && editModal.classList.contains('show');
+
+                if (!isCreateModalOpen && !isEditModalOpen) return;
+
+                const modalId = isCreateModalOpen ? 'createProductModal' : 'editProductModal';
+                const modal = document.getElementById(modalId);
+
+                // Get all form inputs
+                const inputs = modal.querySelectorAll(
+                    'input[type="text"]:not([readonly]), ' +
+                    'input[type="number"], ' +
+                    'input[type="checkbox"], ' +
+                    'select, ' +
+                    'textarea'
+                );
+
+                const activeElement = document.activeElement;
+                let currentIdx = Array.from(inputs).indexOf(activeElement);
+
+                // Tab key: Move to next input
+                if (event.key === 'Tab') {
+                    event.preventDefault();
+                    if (event.shiftKey) {
+                        // Shift+Tab: Previous input
+                        if (currentIdx > 0) {
+                            inputs[currentIdx - 1].focus();
+                        }
+                    } else {
+                        // Tab: Next input
+                        if (currentIdx < inputs.length - 1) {
+                            inputs[currentIdx + 1].focus();
+                        } else {
+                            // Last input reached, move to save button
+                            const saveBtn = modal.querySelector('button[wire\\:click="' + 
+                                (isCreateModalOpen ? 'createProduct' : 'updateProduct') + '"]');
+                            if (saveBtn) {
+                                saveBtn.focus();
+                            }
+                        }
+                    }
+                }
+
+                // Enter key: Save only if on the save button
+                if (event.key === 'Enter') {
+                    const saveBtn = modal.querySelector('button[wire\\:click="' + 
+                        (isCreateModalOpen ? 'createProduct' : 'updateProduct') + '"]');
+                    if (document.activeElement === saveBtn) {
+                        event.preventDefault();
+                        saveBtn.click();
+                    }
+                }
             });
 
             console.log('✅ Product scripts loaded successfully');

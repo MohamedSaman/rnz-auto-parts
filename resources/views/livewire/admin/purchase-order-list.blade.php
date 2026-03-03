@@ -8,9 +8,9 @@
             <p class="text-muted mb-0">Create and manage purchase orders from suppliers</p>
         </div>
         <div>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPurchaseOrderModal">
+            <a href="{{ route(auth()->user()->role === 'staff' ? 'staff.purchase-create' : 'admin.purchase-create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle me-2"></i> New Purchase Order
-            </button>
+            </a>
         </div>
     </div>
 
@@ -199,9 +199,9 @@
 
                                             <!-- Edit Order -->
                                             <li>
-                                                <button type="button" class="dropdown-item" wire:click="editOrder({{ $order->id }})">
+                                                <a href="{{ route(auth()->user()->role === 'staff' ? 'staff.purchase-create' : 'admin.purchase-create') }}?edit={{ $order->id }}" class="dropdown-item">
                                                     <i class="bi bi-pencil-square text-warning me-2"></i> Edit
-                                                </button>
+                                                </a>
                                             </li>
 
                                             <!-- Cancel Order -->
@@ -380,7 +380,7 @@
                                 <th style="width: 120px;">Code</th>
                                 <th>Product Name</th>
                                 <th style="width: 120px;">Order Quantity</th>
-                                
+                                <th style="width: 100px;">Free Qty</th>
                                 <th style="width: 150px;">Supplier Price</th>
                                 <th style="width: 150px;">Total Price</th>
                                 <th style="width: 80px;">Action</th>
@@ -409,6 +409,13 @@
                                 <td>
                                     <input type="number"
                                         class="form-control form-control-sm"
+                                        wire:model.live.debounce.300ms="orderItems.{{ $index }}.free_qty"
+                                        min="0"
+                                        style="width: 100%;">
+                                </td>
+                                <td>
+                                    <input type="number"
+                                        class="form-control form-control-sm"
                                         wire:model.live.debounce.300ms="orderItems.{{ $index }}.supplier_price"
                                         wire:change="updateOrderItemPrice({{ $index }}, $event.target.value)"
                                         min="0"
@@ -428,7 +435,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
+                                <td colspan="8" class="text-center text-muted py-4">
                                     <i class="bi bi-cart-x display-4 d-block mb-2"></i>
                                     <p class="mb-0">No items added yet. Search and select products above to add them.</p>
                                 </td>
@@ -500,6 +507,7 @@
                                 <th style="min-width: 90px;">Code</th>
                                 <th style="min-width: 250px;">Product</th>
                                 <th class="text-center" style="width: 80px;">Ord Qty</th>
+                                <th class="text-center" style="width: 80px;">Free Qty</th>
                                 <th class="text-center" style="width: 100px;">Recv Qty</th>
                                 <th class="text-end" style="width: 130px;">Supplier Price</th>
                                 <th class="text-center" style="width: 100px;">Discount</th>
@@ -579,6 +587,13 @@
                                     @endif
                                 </td>
                                 <td class="align-middle text-center">{{ $item['ordered_qty'] ?? 0 }}</td>
+                                <td class="align-middle">
+                                    <input type="number"
+                                        class="form-control form-control-sm text-center fw-bold"
+                                        wire:model.live="grnItems.{{ $index }}.free_qty"
+                                        min="0"
+                                        placeholder="0">
+                                </td>
                                 <td class="align-middle">
                                     <input type="number"
                                         class="form-control form-control-sm text-center fw-bold"
@@ -712,6 +727,7 @@
                             <th>Product</th>
                             <th>Status</th>
                             <th>Order Qty</th>
+                            <th>Free Qty</th>
                             <th>Received Qty</th>
                             <th>Price</th>
                             <th>Total Price</th>
@@ -745,6 +761,7 @@
                                 @endif
                             </td>
                             <td>{{ $item->quantity }}</td>
+                            <td>{{ $item->free_qty ?? 0 }}</td>
                             <td>
                                 @if($item->status == 'received')
                                 <span class="text-success fw-bold">{{ $item->received_quantity }}</span>
@@ -885,6 +902,7 @@
                             <th style="width: 90px;">Code</th>
                             <th>Product</th>
                             <th style="width: 120px;">Quantity</th>
+                            <th style="width: 100px;">Free Qty</th>
                             <th style="width: 120px;">Unit Price</th>
                             <th style="width: 150px;">Total</th>
                             <th style="width: 80px;">Action</th>
@@ -912,6 +930,12 @@
                             <td>
                                 <input type="number"
                                     class="form-control form-control-sm"
+                                    min="0"
+                                    wire:model.live.debounce.300ms="editOrderItems.{{ $index }}.free_qty">
+                            </td>
+                            <td>
+                                <input type="number"
+                                    class="form-control form-control-sm"
                                     step="0.01"
                                     wire:model.live.debounce.300ms="editOrderItems.{{ $index }}.unit_price"
                                     wire:change="updateEditItemTotal({{ $index }})">
@@ -932,7 +956,7 @@
                         @endforeach
                         @if(empty($editOrderItems))
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">
+                            <td colspan="8" class="text-center text-muted py-3">
                                 <i class="bi bi-cart-x display-6 d-block mb-2"></i>
                                 <p class="mb-0">No items in this order. Search and add products above.</p>
                             </td>

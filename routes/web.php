@@ -58,6 +58,7 @@ use App\Livewire\Admin\SalesSystem;
 use App\Livewire\Admin\SalesList;
 use App\Livewire\Admin\PosSales;
 use App\Livewire\Admin\PurchaseOrderList;
+use App\Livewire\Admin\PurchaseCreate;
 use App\Livewire\Admin\StaffProductAllocation;
 use App\Livewire\Admin\StaffAllocatedList;
 use App\Livewire\Admin\ViewStaffAllocatedProducts;
@@ -225,6 +226,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/settings', Settings::class)->name('settings');
         Route::get('/return-product', ReturnProduct::class)->name('return-product');
         Route::get('/purchase-order-list', PurchaseOrderList::class)->name('purchase-order-list');
+        Route::get('/purchase-create', PurchaseCreate::class)->name('purchase-create');
         Route::get('/return-list', ReturnList::class)->name('return-list');
         Route::get('/add-customer-receipt', AddCustomerReceipt::class)->name('add-customer-receipt');
         Route::get('/cheque-list', ChequeList::class)->name('cheque-list');
@@ -282,6 +284,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // Purchases
         Route::get('/goods-receive-note', GRN::class)->name('grn');
         Route::get('/purchase-order-list', PurchaseOrderList::class)->name('purchase-order-list');
+        Route::get('/purchase-create', PurchaseCreate::class)->name('purchase-create');
         Route::get('/supplier-management', SupplierManage::class)->name('supplier-management');
 
         // Customers

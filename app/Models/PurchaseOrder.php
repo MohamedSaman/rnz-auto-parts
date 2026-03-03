@@ -11,18 +11,22 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'order_code',
+        'invoice_number',
         'supplier_id',
         'order_date',
         'received_date',
         'status',
         'total_amount',
         'due_amount',
+        'transport_cost',
+        'payment_type',
         'discount_amount',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
         'due_amount' => 'decimal:2',
+        'transport_cost' => 'decimal:2',
         'discount_amount' => 'decimal:2',
     ];
 

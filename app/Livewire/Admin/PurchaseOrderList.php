@@ -522,6 +522,7 @@ class PurchaseOrderList extends Component
                     'variant_id' => $item['variant_id'] ?? null,
                     'variant_value' => $item['variant_value'] ?? null,
                     'quantity' => floatval($item['quantity']),
+                    'free_qty' => floatval($item['free_qty'] ?? 0),
                     'unit_price' => $supplierPrice,
                     'discount' => 0,
                     'status' => 'pending',
@@ -760,6 +761,7 @@ class PurchaseOrderList extends Component
                         'variant_id' => $item['variant_id'] ?? null,
                         'variant_value' => $item['variant_value'] ?? null,
                         'quantity' => $qty,
+                        'free_qty' => floatval($item['free_qty'] ?? 0),
                         'unit_price' => $unitPrice,
                         'discount' => $discount,
                         'status' => 'pending',
@@ -1462,7 +1464,8 @@ class PurchaseOrderList extends Component
         $item = $this->grnItems[$index];
 
         // Convert to numbers and ensure they are valid
-        $receivedQty = floatval($item['received_quantity'] ?? 0);
+        // Only calculate cost for PAID quantity, not free items
+        $orderedQty = floatval($item['ordered_qty'] ?? 0);
         $unitPrice = floatval($item['unit_price'] ?? 0);
         $discount = floatval($item['discount'] ?? 0);
 
@@ -1470,10 +1473,10 @@ class PurchaseOrderList extends Component
         $discountAmountPerUnit = ($unitPrice * $discount) / 100;
         $costPerUnit = $unitPrice - $discountAmountPerUnit;
 
-        // Total = cost per unit × quantity
-        $total = $costPerUnit * $receivedQty;
+        // Total = cost per unit × PAID quantity (only charge for ordered qty, not free qty)
+        $total = $costPerUnit * $orderedQty;
 
-        Log::info("GRN Total Calc: Qty={$receivedQty}, UnitPrice={$unitPrice}, Discount={$discount}%, CostPerUnit={$costPerUnit}, Total={$total}");
+        Log::info("GRN Total Calc: PaidQty={$orderedQty}, UnitPrice={$unitPrice}, Discount={$discount}%, CostPerUnit={$costPerUnit}, Total={$total}");
 
         // Ensure total is not negative
         return floatval(max(0, $total));
@@ -1609,6 +1612,8 @@ class PurchaseOrderList extends Component
             // Set default discount_type to 'percent'
             $discountType = $item->discount_type ?? 'percent';
 
+            $freeQty = $item->free_qty ?? 0;
+            $orderedQty = $item->quantity;
             $this->grnItems[] = [
                 'id' => $item->id,
                 'product_id' => $item->product_id,
@@ -1616,8 +1621,9 @@ class PurchaseOrderList extends Component
                 'variant_value' => $item->variant_value ?? null,
                 'code' => $item->product->code ?? 'N/A',
                 'name' => $this->formatProductName($item->product ?? null, $item->unit_price ?? null),
-                'ordered_qty' => $item->quantity,
-                'received_quantity' => $item->quantity,
+                'ordered_qty' => $orderedQty,
+                'free_qty' => $freeQty,
+                'received_quantity' => $orderedQty + $freeQty,
                 'unit_price' => $item->unit_price,
                 'discount' => $item->discount ?? 0,
                 'discount_type' => $discountType,
@@ -1682,6 +1688,8 @@ class PurchaseOrderList extends Component
                 // Set default discount_type to 'percent'
                 $discountType = $item->discount_type ?? 'percent';
 
+                $freeQty = $item->free_qty ?? 0;
+                $orderedQty = $item->quantity;
                 $this->grnItems[] = [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
@@ -1689,8 +1697,9 @@ class PurchaseOrderList extends Component
                     'variant_value' => $item->variant_value ?? null,
                     'code' => $item->product->code ?? 'N/A',
                     'name' => $this->formatProductName($item->product ?? null, $item->unit_price ?? null),
-                    'ordered_qty' => $item->quantity,
-                    'received_quantity' => $item->quantity,
+                    'ordered_qty' => $orderedQty,
+                    'free_qty' => $freeQty,
+                    'received_quantity' => $orderedQty + $freeQty,
                     'unit_price' => $item->unit_price,
                     'discount' => $item->discount ?? 0,
                     'discount_type' => $discountType,

@@ -46,6 +46,7 @@ class Products extends Component
     // Create form fields
     public $code, $name, $model_id, $brand, $category, $image, $description, $barcode, $status, $supplier;
     public $supplier_price, $retail_price, $wholesale_price, $distributor_price, $discount_price, $available_stock, $damage_stock, $low_stock;
+    public $fast_moving = false, $store_location = '', $rack_number = '';
 
     // Pricing mode: 'single' or 'variant'
     public $pricing_mode = 'single';
@@ -69,6 +70,7 @@ class Products extends Component
     public $editId, $editCode, $editName, $editModelId, $editBrand, $editCategory, $editImage, $existingImage,
         $editDescription, $editBarcode, $editStatus, $editSupplierPrice, $editRetailPrice, $editWholesalePrice,
         $editDiscountPrice, $editDamageStock, $editSupplier, $editLowStock;
+    public $editFastMoving = false, $editStoreLocation = '', $editRackNumber = '';
 
     // Track original pricing mode when opening edit modal so we don't accidentally delete variant rows
     public $original_pricing_mode = 'single';
@@ -764,7 +766,10 @@ class Products extends Component
                 'brand_id' => $this->brand,
                 'category_id' => $this->category,
                 'supplier_id' => $this->supplier,
-                'variant_id' => $this->variant_id, // Set variant if product uses variants
+                'variant_id' => $this->variant_id,
+                'fast_moving' => $this->fast_moving,
+                'store_location' => $this->store_location ?: null,
+                'rack_number' => $this->rack_number ?: null,
             ]);
 
             if ($this->pricing_mode === 'single') {
@@ -976,6 +981,9 @@ class Products extends Component
             'available_stock',
             'damage_stock',
             'low_stock',
+            'fast_moving',
+            'store_location',
+            'rack_number',
             'pricing_mode',
             'variant_id',
             'variant_prices'
@@ -1022,6 +1030,9 @@ class Products extends Component
         $this->editDiscountPrice = $product->price->discount_price ?? 0;
         $this->editDamageStock = optional($product->stock)->damage_stock ?? 0;
         $this->editLowStock = optional($product->stock)->low_stock ?? 0;
+        $this->editFastMoving = (bool) $product->fast_moving;
+        $this->editStoreLocation = $product->store_location ?? '';
+        $this->editRackNumber = $product->rack_number ?? '';
 
         // If variant data exists, prepare variant edit state
         if (($product->variant_id ?? null) !== null || ($product->prices && $product->prices->isNotEmpty())) {
@@ -1148,6 +1159,9 @@ class Products extends Component
                 'description' => $this->editDescription,
                 'barcode'     => $this->editBarcode,
                 'status'      => $this->editStatus,
+                'fast_moving' => $this->editFastMoving,
+                'store_location' => $this->editStoreLocation ?: null,
+                'rack_number' => $this->editRackNumber ?: null,
             ]);
 
             // Determine effective pricing mode
