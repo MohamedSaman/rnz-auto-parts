@@ -1070,9 +1070,18 @@
                                         @if(!$viewProduct || !$viewProduct->hasVariants())
                                         <div class="row g-3">
                                             <div class="col-md-3">
-                                                <div class="price-card text-center p-3 border rounded-3 h-100">
+                                                <div class="price-card text-center p-3 border rounded-3 h-100 position-relative"
+                                                     style="cursor:pointer;" onclick="toggleCostPrice(this)"
+                                                     title="Click to reveal cost price">
                                                     <small class="text-muted d-block mb-2">Cost (Supplier)</small>
-                                                    <h4 class="fw-bold text-secondary mb-0">
+                                                    {{-- Hidden placeholder --}}
+                                                    <div class="cost-hidden">
+                                                        <span class="badge bg-secondary bg-opacity-25 text-secondary px-3 py-2" style="font-size:0.85rem;letter-spacing:0.08em;">
+                                                            <i class="bi bi-eye-slash me-1"></i>Click to view
+                                                        </span>
+                                                    </div>
+                                                    {{-- Actual price (hidden by default) --}}
+                                                    <h4 class="fw-bold text-secondary mb-0 cost-value" style="display:none;">
                                                         Rs.{{ number_format($viewProduct->price->supplier_price ?? 0, 2) }}
                                                     </h4>
                                                 </div>
@@ -1115,7 +1124,16 @@
                                                         <thead class="table-light">
                                                             <tr>
                                                                 <th>Value</th>
-                                                                <th>Cost</th>
+                                                                <th>
+                                                                    Cost
+                                                                    <button type="button"
+                                                                        class="btn btn-sm p-0 border-0 text-secondary ms-1"
+                                                                        style="font-size:0.7rem;vertical-align:middle;"
+                                                                        onclick="toggleVariantCost(this)"
+                                                                        title="Show / hide cost prices">
+                                                                        <i class="bi bi-eye-slash"></i>
+                                                                    </button>
+                                                                </th>
                                                                 <th>Wholesale</th>
                                                                 <th>Distributor</th>
                                                                 <th>Retail</th>
@@ -1147,7 +1165,7 @@
                                                             @endphp
                                                             <tr>
                                                                 <td>{{ $value }}</td>
-                                                                <td>Rs.{{ number_format($price->supplier_price ?? 0, 2) }}</td>
+                                                                <td class="variant-cost-cell" style="filter:blur(5px);user-select:none;transition:filter 0.25s;">Rs.{{ number_format($price->supplier_price ?? 0, 2) }}</td>
                                                                 <td>Rs.{{ number_format($price->wholesale_price ?? 0, 2) }}</td>
                                                                 <td>Rs.{{ number_format($price->distributor_price ?? 0, 2) }}</td>
                                                                 <td>Rs.{{ number_format($price->retail_price ?? 0, 2) }}</td>
@@ -3154,7 +3172,57 @@
             });
 
             console.log('✅ Product scripts loaded successfully');
+
+            // ═══════════════════════════════════════════════════════════
+            //  COST PRICE REVEAL — reset on modal open
+            // ═══════════════════════════════════════════════════════════
+            const viewProductModal = document.getElementById('viewProductModal');
+            if (viewProductModal) {
+                viewProductModal.addEventListener('show.bs.modal', function() {
+                    // Hide cost price card back to default every time modal opens
+                    const hidden = viewProductModal.querySelector('.cost-hidden');
+                    const value  = viewProductModal.querySelector('.cost-value');
+                    if (hidden) hidden.style.display = '';
+                    if (value)  value.style.display  = 'none';
+
+                    // Reset variant cost cells to blurred
+                    viewProductModal.querySelectorAll('.variant-cost-cell').forEach(function(td) {
+                        td.style.filter = 'blur(5px)';
+                        td.style.userSelect = 'none';
+                    });
+                    // Reset eye icon
+                    const eyeBtn = viewProductModal.querySelector('[onclick="toggleVariantCost(this)"] i');
+                    if (eyeBtn) { eyeBtn.className = 'bi bi-eye-slash'; }
+                });
+            }
         });
+
+        // Reveal / hide the single-price cost card
+        window.toggleCostPrice = function(card) {
+            var hidden = card.querySelector('.cost-hidden');
+            var value  = card.querySelector('.cost-value');
+            if (!hidden || !value) return;
+            var revealed = value.style.display !== 'none';
+            if (revealed) {
+                value.style.display  = 'none';
+                hidden.style.display = '';
+            } else {
+                hidden.style.display = 'none';
+                value.style.display  = '';
+            }
+        };
+
+        // Reveal / hide cost column in the variant prices table
+        window.toggleVariantCost = function(btn) {
+            var icon  = btn.querySelector('i');
+            var cells = document.querySelectorAll('#viewProductModal .variant-cost-cell');
+            var isBlurred = cells.length > 0 && cells[0].style.filter !== 'none' && cells[0].style.filter !== '';
+            cells.forEach(function(td) {
+                td.style.filter     = isBlurred ? 'none' : 'blur(5px)';
+                td.style.userSelect = isBlurred ? ''     : 'none';
+            });
+            if (icon) icon.className = isBlurred ? 'bi bi-eye' : 'bi bi-eye-slash';
+        };
     </script>
 @endpush
 
