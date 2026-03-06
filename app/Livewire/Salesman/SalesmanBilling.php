@@ -10,6 +10,7 @@ use App\Models\ProductStock;
 use App\Models\ProductBatch;
 use App\Services\StockAvailabilityService;
 use App\Services\FIFOStockService;
+use App\Services\AccountingService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -1019,6 +1020,7 @@ class SalesmanBilling extends Component
                 SaleItem::where('sale_id', $sale->id)->delete();
 
                 // Create new Sale Items and deduct stock only if sale was already confirmed
+                $totalCOGS = 0;
                 foreach ($this->cart as $item) {
                     $baseProductId = $item['id'];
                     $variantId = $item['variant_id'] ?? null;
@@ -1043,7 +1045,8 @@ class SalesmanBilling extends Component
                     // Pending sales will have stock deducted when admin approves
                     if ($sale->status === 'confirm') {
                         try {
-                            FIFOStockService::deductStock($baseProductId, $quantity, $variantId, $variantValue);
+                            $fifoResult = FIFOStockService::deductStock($baseProductId, $quantity, $variantId, $variantValue);
+                            $totalCOGS += floatval($fifoResult['total_cost'] ?? 0);
                         } catch (\Exception $e) {
                             Log::error('Stock deduction failed for product: ' . $baseProductId, [
                                 'error' => $e->getMessage(),
@@ -1053,6 +1056,16 @@ class SalesmanBilling extends Component
                             ]);
                             throw new \Exception('Failed to deduct stock: ' . $e->getMessage());
                         }
+                    }
+                }
+
+                // Post accounting entries for edited sale (Voucher + VoucherEntries)
+                // Note: This creates a new voucher; a proper implementation would reverse the old voucher first
+                if ($sale->status === 'confirm') {
+                    try {
+                        AccountingService::postSale($sale, $totalCOGS);
+                    } catch (\Exception $e) {
+                        Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
                     }
                 }
 
@@ -1096,6 +1109,7 @@ class SalesmanBilling extends Component
                 ]);
 
                 // Create Sale Items and deduct stock immediately (auto-approved)
+                $totalCOGS = 0;
                 foreach ($this->cart as $item) {
                     $baseProductId = $item['id'];
                     $variantId = $item['variant_id'] ?? null;
@@ -1118,7 +1132,8 @@ class SalesmanBilling extends Component
 
                     // Deduct stock using FIFO method (sale is auto-approved)
                     try {
-                        FIFOStockService::deductStock($baseProductId, $quantity, $variantId, $variantValue);
+                        $fifoResult = FIFOStockService::deductStock($baseProductId, $quantity, $variantId, $variantValue);
+                        $totalCOGS += floatval($fifoResult['total_cost'] ?? 0);
                     } catch (\Exception $e) {
                         Log::error('Stock deduction failed for product: ' . $baseProductId, [
                             'error' => $e->getMessage(),
@@ -1136,6 +1151,13 @@ class SalesmanBilling extends Component
                     $customer->due_amount = ($customer->due_amount ?? 0) + $this->grandTotal;
                     $customer->total_due = ($customer->opening_balance ?? 0) + $customer->due_amount;
                     $customer->save();
+                }
+
+                // Post accounting entries (Voucher + VoucherEntries)
+                try {
+                    AccountingService::postSale($sale, $totalCOGS);
+                } catch (\Exception $e) {
+                    Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
                 }
 
                 DB::commit();

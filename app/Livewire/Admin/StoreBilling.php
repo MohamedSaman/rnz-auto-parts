@@ -18,6 +18,7 @@ use App\Models\POSSession;
 use App\Models\ProductStock;
 use App\Models\ProductBatch;
 use App\Services\FIFOStockService;
+use App\Services\AccountingService;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -474,7 +475,7 @@ class StoreBilling extends Component
                             'variant_value' => $stock->variant_value,
                             'name' => $product->name . ' (' . $stock->variant_value . ')',
                             'code' => $product->code,
-                            
+
                             'price' => $priceValue,
                             'retail_price' => $priceRecord->retail_price ?? 0,
                             'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -507,7 +508,7 @@ class StoreBilling extends Component
                             'variant_value' => $stock->variant_value,
                             'name' => $product->name . ' (' . $stock->variant_value . ')',
                             'code' => $product->code,
-                            
+
                             'price' => $priceValue,
                             'retail_price' => $priceRecord->retail_price ?? 0,
                             'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -543,7 +544,7 @@ class StoreBilling extends Component
                             'variant_value' => $stock->variant_value,
                             'name' => $product->name . ' (' . $stock->variant_value . ')',
                             'code' => $product->code,
-                            
+
                             'price' => $priceValue,
                             'retail_price' => $priceRecord->retail_price ?? 0,
                             'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -578,7 +579,7 @@ class StoreBilling extends Component
                     'variant_value' => null,
                     'name' => $product->name,
                     'code' => $product->code,
-                   
+
                     'price' => $priceValue,
                     'retail_price' => $priceRecord->retail_price ?? 0,
                     'wholesale_price' => $priceRecord->wholesale_price ?? 0,
@@ -1240,7 +1241,6 @@ class StoreBilling extends Component
                 $query->where(function ($q) use ($searchTerm) {
                     $q->where('name', 'like', "%{$searchTerm}%")
                         ->orWhere('code', 'like', "%{$searchTerm}%");
-                        
                 })
                     // OR search by full term in variant values
                     ->orWhereHas('stocks', function ($q) use ($searchTerm) {
@@ -2197,6 +2197,7 @@ class StoreBilling extends Component
             }
 
             // Create sale items and deduct stock using FIFO method
+            $totalCOGS = 0; // Track cost of goods sold for accounting
             foreach ($this->cart as $item) {
                 // Resolve base product id (handle variant entries where 'product_id' exists)
                 $baseProductId = $item['product_id'] ?? $item['id'];
@@ -2223,12 +2224,14 @@ class StoreBilling extends Component
 
                 // Deduct stock using FIFO method (updates both ProductBatch and ProductStock)
                 try {
-                    FIFOStockService::deductStock(
+                    $fifoResult = FIFOStockService::deductStock(
                         $baseProductId,
                         $quantity,
                         $variantId,
                         $variantValue
                     );
+                    // Accumulate cost of goods sold from FIFO result
+                    $totalCOGS += floatval($fifoResult['total_cost'] ?? 0);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error('Stock deduction failed', [
@@ -2396,6 +2399,13 @@ class StoreBilling extends Component
 
                 // Save updated customer balance
                 $customer->save();
+            }
+
+            // Post accounting entries (Voucher + VoucherEntries)
+            try {
+                AccountingService::postSale($sale, $totalCOGS);
+            } catch (\Exception $e) {
+                Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
             }
 
             DB::commit();

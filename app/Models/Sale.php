@@ -34,6 +34,9 @@ class Sale extends Model
         'delivered_by',
         'delivered_at',
         'delivery_status',
+        'voucher_id',
+        'branch_id',
+        'tax_amount',
     ];
 
     protected $casts = [
@@ -59,6 +62,14 @@ class Sale extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relationship: Associated accounting voucher
+     */
+    public function voucher()
+    {
+        return $this->belongsTo(Voucher::class);
     }
 
     // Generate unique sale ID
@@ -104,7 +115,7 @@ class Sale extends Model
             }
 
             // If the last number is less than 678, start from 678, otherwise increment
-            $nextNumber = max(678, $lastNumber + 1);
+            $nextNumber = max(1, $lastNumber + 1);
         }
 
         return str_pad($nextNumber, 4, '0', STR_PAD_LEFT);

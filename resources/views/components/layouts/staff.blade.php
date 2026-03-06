@@ -515,13 +515,520 @@
             }
         }
     </style>
+
+    {{-- ===== ERP TOP NAVIGATION STYLES ===== --}}
+    <style>
+        /* Hide old sidebar & top-bar — replaced by ERP top navigation */
+        .sidebar { display: none !important; }
+        .top-bar { display: none !important; }
+
+        /* Override main content for full-width top-nav layout */
+        .main-content {
+            margin-left: 0 !important;
+            margin-top: 54px !important;
+            width: 100% !important;
+            padding: 24px !important;
+            min-height: calc(100vh - 54px) !important;
+        }
+        .main-content.collapsed {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        /* ===== ERP TOP NAVIGATION BAR ===== */
+        .erp-topnav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 54px;
+            background: var(--sidebar-bg, #0f172a);
+            z-index: 1050;
+            border-bottom: 2px solid var(--primary, #e11d48);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+        .erp-topnav-inner {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 12px;
+        }
+        .erp-brand {
+            display: flex;
+            align-items: center;
+            padding: 0 16px 0 4px;
+            margin-right: 8px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+            height: 100%;
+        }
+        .erp-brand a { display: flex; align-items: center; }
+        .erp-brand img { height: 28px; width: auto; }
+
+        .erp-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            height: 100%;
+            flex: 1;
+            min-width: 0;
+        }
+        .erp-menu-item {
+            position: relative;
+            height: 100%;
+        }
+        .erp-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 13px;
+            height: 100%;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s, background 0.15s;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .erp-menu-link:hover { color: #ffffff; background: rgba(255,255,255,0.06); text-decoration: none; }
+        .erp-menu-link.active { color: #ffffff; background: rgba(255,255,255,0.08); box-shadow: inset 0 -2px 0 var(--primary, #e11d48); }
+        .erp-menu-link i:first-child { font-size: 0.88rem; opacity: 0.8; }
+        .erp-chevron { font-size: 0.5rem; opacity: 0.45; margin-left: 2px; }
+
+        .erp-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 260px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #1e293b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-top: 2px solid var(--primary, #e11d48);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+            padding: 6px 0;
+            z-index: 1060;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+        .erp-dropdown::-webkit-scrollbar { width: 5px; }
+        .erp-dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+        .erp-dropdown-right { left: auto; right: 0; }
+        .erp-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.78rem;
+            transition: color 0.12s, background 0.12s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .erp-dropdown-item:hover { color: #ffffff; background: rgba(255,255,255,0.06); text-decoration: none; }
+        .erp-dropdown-item.active { color: var(--primary, #e11d48); background: rgba(225,29,72,0.08); }
+        .erp-dropdown-item i { width: 18px; text-align: center; font-size: 0.85rem; opacity: 0.6; flex-shrink: 0; }
+        .erp-dropdown-danger { color: #f87171 !important; }
+        .erp-dropdown-danger:hover { background: rgba(248,113,113,0.1) !important; }
+        .erp-dropdown-divider { border-top: 1px solid rgba(255,255,255,0.06); margin: 4px 0; }
+        .erp-dropdown-header { padding: 8px 16px 4px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary, #e11d48); opacity: 0.85; }
+        .erp-kbd { margin-left: auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 3px; padding: 1px 6px; font-size: 0.58rem; font-family: monospace; color: rgba(255,255,255,0.4); line-height: 1.6; }
+
+        .erp-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            flex-shrink: 0;
+            height: 100%;
+            padding-left: 12px;
+        }
+        .erp-user-dropdown { position: relative; height: 100%; display: flex; align-items: center; }
+        .erp-user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        .erp-user-btn:hover { background: rgba(255,255,255,0.1); color: #ffffff; }
+        .erp-user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--primary, #e11d48); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.7rem; }
+        .erp-user-menu { min-width: 180px; }
+
+        .erp-hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 1.15rem;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .erp-hamburger:hover { background: rgba(255,255,255,0.06); }
+
+        /* ===== KEYBOARD NAVIGATION FOCUS RINGS ===== */
+        .erp-menu-link:focus-visible,
+        .erp-menu-link:focus {
+            outline: 2px solid var(--primary, #e11d48) !important;
+            outline-offset: 2px;
+            background: rgba(255,255,255,0.07) !important;
+        }
+        .erp-dropdown-item:focus-visible,
+        .erp-dropdown-item:focus {
+            outline: none !important;
+            background: rgba(255,255,255,0.09) !important;
+            color: #fff !important;
+            box-shadow: inset 3px 0 0 var(--primary, #e11d48);
+        }
+        .erp-menu-link[aria-expanded="true"] .erp-chevron {
+            transform: rotate(180deg);
+        }
+            .erp-hamburger { display: flex; }
+            .erp-menu {
+                position: fixed; top: 54px; left: 0; right: 0; bottom: 0;
+                background: var(--sidebar-bg, #0f172a);
+                flex-direction: column; align-items: stretch; overflow-y: auto;
+                padding: 8px 0; z-index: 1049; height: auto;
+                border-top: 1px solid rgba(255,255,255,0.06);
+            }
+            .erp-menu:not(.show) { display: none !important; }
+            .erp-menu.show { display: flex !important; }
+            .erp-menu-item { height: auto; }
+            .erp-menu-link { height: auto; padding: 12px 20px; justify-content: flex-start; }
+            .erp-dropdown { position: static; box-shadow: none; border: none; border-radius: 0; background: rgba(0,0,0,0.15); min-width: 100%; }
+            .erp-dropdown-item { padding: 10px 32px; }
+            .main-content { padding: 16px !important; }
+        }
+        @media (max-width: 575.98px) {
+            .erp-topnav-inner { padding: 0 8px; }
+            .erp-brand { padding: 0 8px 0 0; margin-right: 4px; }
+            .erp-brand img { height: 22px; }
+            .erp-right { gap: 6px; padding-left: 6px; }
+        }
+    </style>
+
     @stack('styles')
     @livewireStyles
 </head>
 
-<body>
-    <div class="d-flex">
-        <!-- Sidebar -->
+<body data-erp-context="{{ $erpContext ?? 'general' }}">
+    <div>
+        {{-- ============================================= --}}
+        {{-- BUSY-STYLE ERP TOP NAVIGATION BAR (Staff)     --}}
+        {{-- ============================================= --}}
+        <nav class="erp-topnav">
+            <div class="erp-topnav-inner">
+                {{-- Mobile Hamburger --}}
+                <button class="erp-hamburger d-lg-none" onclick="document.getElementById('staffErpMenu').classList.toggle('show');" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                {{-- Logo / Brand --}}
+                <div class="erp-brand">
+                    <a href="{{ route('staff.dashboard') }}">
+                        <img src="{{ asset('images/RNZ.png') }}" alt="RNZ Auto Parts" height="30">
+                    </a>
+                </div>
+
+                {{-- ── BUSY-style 5-Menu Structure (Staff) ── --}}
+                <ul class="erp-menu d-none d-lg-flex" id="staffErpMenu">
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  1. ACCOUNTS                         ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    @if(auth()->user()->hasPermission('menu_customer') || auth()->user()->hasPermission('menu_supplier') || auth()->user()->hasPermission('menu_people') || auth()->user()->hasPermission('menu_banks'))
+                    <x-erp-nav-dropdown label="Accounts" icon="journal-bookmark-fill" :active="request()->routeIs('staff.manage-customers', 'staff.supplier-management', 'staff.manage-staff', 'staff.income', 'staff.cheque-list', 'staff.return-cheque')">
+                        @if(auth()->user()->hasPermission('menu_people') || auth()->user()->hasPermission('menu_customer') || auth()->user()->hasPermission('menu_supplier'))
+                        <div class="erp-dropdown-header">Account Master</div>
+                        @if(auth()->user()->hasPermission('menu_people_customers') || auth()->user()->hasPermission('menu_customer'))
+                        <a href="{{ route('staff.manage-customers') }}" class="erp-dropdown-item {{ request()->routeIs('staff.manage-customers') ? 'active' : '' }}">
+                            <i class="bi bi-person-lines-fill"></i> Customers (Debtors)
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_people_suppliers') || auth()->user()->hasPermission('menu_supplier'))
+                        <a href="{{ route('staff.supplier-management') }}" class="erp-dropdown-item {{ request()->routeIs('staff.supplier-management') ? 'active' : '' }}">
+                            <i class="bi bi-people"></i> Suppliers (Creditors)
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_people_staff'))
+                        <a href="{{ route('staff.manage-staff') }}" class="erp-dropdown-item {{ request()->routeIs('staff.manage-staff') ? 'active' : '' }}">
+                            <i class="bi bi-person-badge"></i> Staff Accounts
+                        </a>
+                        @endif
+                        @endif
+
+                        @if(auth()->user()->hasPermission('menu_banks'))
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Finance Accounts</div>
+                        @if(auth()->user()->hasPermission('menu_banks_deposit'))
+                        <a href="{{ route('staff.income') }}" class="erp-dropdown-item {{ request()->routeIs('staff.income') ? 'active' : '' }}">
+                            <i class="bi bi-cash-stack"></i> Cash &amp; Bank Deposit
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_banks_cheque_list'))
+                        <a href="{{ route('staff.cheque-list') }}" class="erp-dropdown-item {{ request()->routeIs('staff.cheque-list') ? 'active' : '' }}">
+                            <i class="bi bi-card-text"></i> Cheque Register
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_banks_return_cheque'))
+                        <a href="{{ route('staff.return-cheque') }}" class="erp-dropdown-item {{ request()->routeIs('staff.return-cheque') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-left-right"></i> Return Cheque
+                        </a>
+                        @endif
+                        @endif
+                    </x-erp-nav-dropdown>
+                    @endif
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  2. TRANSACTIONS                     ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    @if(auth()->user()->hasPermission('menu_sales') || auth()->user()->hasPermission('menu_purchase') || auth()->user()->hasPermission('menu_payment') || auth()->user()->hasPermission('menu_return') || auth()->user()->hasPermission('menu_quotation') || auth()->user()->hasPermission('menu_expenses'))
+                    <x-erp-nav-dropdown label="Transactions" icon="arrow-left-right" :active="request()->routeIs('staff.sales-system', 'staff.sales-list', 'staff.pos-sales', 'staff.quotation-system', 'staff.quotation-list', 'staff.purchase-order-list', 'staff.grn', 'staff.add-customer-receipt', 'staff.list-customer-receipt', 'staff.add-supplier-receipt', 'staff.list-supplier-receipt', 'staff.return-add', 'staff.return-list', 'staff.return-supplier', 'staff.list-supplier-return', 'staff.due-payments', 'staff.payments-list', 'staff.expenses')">
+                        @if(auth()->user()->hasPermission('menu_sales'))
+                        <div class="erp-dropdown-header">Sales Voucher</div>
+                        @if(auth()->user()->hasPermission('menu_sales_add'))
+                        <a href="{{ route('staff.sales-system') }}" class="erp-dropdown-item {{ request()->routeIs('staff.sales-system') ? 'active' : '' }}">
+                            <i class="bi bi-plus-circle"></i> Add
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_sales_list'))
+                        <a href="{{ route('staff.sales-list') }}" class="erp-dropdown-item {{ request()->routeIs('staff.sales-list') ? 'active' : '' }}">
+                            <i class="bi bi-list-ul"></i> List
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_sales_pos'))
+                        <a href="{{ route('staff.pos-sales') }}" class="erp-dropdown-item {{ request()->routeIs('staff.pos-sales') ? 'active' : '' }}">
+                            <i class="bi bi-shop"></i> POS Sales
+                        </a>
+                        @endif
+                        @endif
+
+                        @if(auth()->user()->hasPermission('menu_quotation'))
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Quotation</div>
+                        @if(auth()->user()->hasPermission('menu_quotation_add'))
+                        <a href="{{ route('staff.quotation-system') }}" class="erp-dropdown-item {{ request()->routeIs('staff.quotation-system') ? 'active' : '' }}">
+                            <i class="bi bi-file-plus"></i> Add Quotation
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_quotation_list'))
+                        <a href="{{ route('staff.quotation-list') }}" class="erp-dropdown-item {{ request()->routeIs('staff.quotation-list') ? 'active' : '' }}">
+                            <i class="bi bi-card-list"></i> List Quotation
+                        </a>
+                        @endif
+                        @endif
+
+                        @if(auth()->user()->hasPermission('menu_purchase'))
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Purchase Voucher</div>
+                        @if(auth()->user()->hasPermission('menu_purchase_order'))
+                        <a href="{{ route('staff.purchase-order-list') }}" class="erp-dropdown-item {{ request()->routeIs('staff.purchase-order-list') ? 'active' : '' }}">
+                            <i class="bi bi-list-ul"></i> Purchase Order List
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_purchase_grn'))
+                        <a href="{{ route('staff.grn') }}" class="erp-dropdown-item {{ request()->routeIs('staff.grn') ? 'active' : '' }}">
+                            <i class="bi bi-boxes"></i> GRN (Goods Receive)
+                        </a>
+                        @endif
+                        @endif
+
+                        @if(auth()->user()->hasPermission('menu_payment'))
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Receipt &amp; Payment Voucher</div>
+                        <a href="{{ route('staff.due-payments') }}" class="erp-dropdown-item {{ request()->routeIs('staff.due-payments') ? 'active' : '' }}">
+                            <i class="bi bi-cash-coin"></i> Add Payment
+                        </a>
+                        <a href="{{ route('staff.payments-list') }}" class="erp-dropdown-item {{ request()->routeIs('staff.payments-list') ? 'active' : '' }}">
+                            <i class="bi bi-list-check"></i> Payment List
+                        </a>
+                        @if(auth()->user()->hasPermission('menu_payment_customer_receipt_add'))
+                        <a href="{{ route('staff.add-customer-receipt') }}" class="erp-dropdown-item {{ request()->routeIs('staff.add-customer-receipt') ? 'active' : '' }}">
+                            <i class="bi bi-plus-circle"></i> Add Customer Receipt
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_payment_customer_receipt_list'))
+                        <a href="{{ route('staff.list-customer-receipt') }}" class="erp-dropdown-item {{ request()->routeIs('staff.list-customer-receipt') ? 'active' : '' }}">
+                            <i class="bi bi-list-ul"></i> List Customer Receipt
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_payment_supplier_add'))
+                        <a href="{{ route('staff.add-supplier-receipt') }}" class="erp-dropdown-item {{ request()->routeIs('staff.add-supplier-receipt') ? 'active' : '' }}">
+                            <i class="bi bi-plus-circle"></i> Add Supplier Payment
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_payment_supplier_list'))
+                        <a href="{{ route('staff.list-supplier-receipt') }}" class="erp-dropdown-item {{ request()->routeIs('staff.list-supplier-receipt') ? 'active' : '' }}">
+                            <i class="bi bi-list-ul"></i> List Supplier Payment
+                        </a>
+                        @endif
+                        @endif
+
+                        @if(auth()->user()->hasPermission('menu_expenses'))
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Journal / Expense Voucher</div>
+                        @if(auth()->user()->hasPermission('menu_expenses_list'))
+                        <a href="{{ route('staff.expenses') }}" class="erp-dropdown-item {{ request()->routeIs('staff.expenses') ? 'active' : '' }}">
+                            <i class="bi bi-wallet2"></i> Expenses
+                        </a>
+                        @endif
+                        @endif
+
+                        @if(auth()->user()->hasPermission('menu_return'))
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Returns (Credit / Debit Note)</div>
+                        @if(auth()->user()->hasPermission('menu_return_customer_add'))
+                        <a href="{{ route('staff.return-add') }}" class="erp-dropdown-item {{ request()->routeIs('staff.return-add') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-return-left"></i> Sales Return (Credit Note)
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_return_customer_list'))
+                        <a href="{{ route('staff.return-list') }}" class="erp-dropdown-item {{ request()->routeIs('staff.return-list') ? 'active' : '' }}">
+                            <i class="bi bi-list-check"></i> List Sales Returns
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_return_supplier_add'))
+                        <a href="{{ route('staff.return-supplier') }}" class="erp-dropdown-item {{ request()->routeIs('staff.return-supplier') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-return-left"></i> Purchase Return (Debit Note)
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_return_supplier_list'))
+                        <a href="{{ route('staff.list-supplier-return') }}" class="erp-dropdown-item {{ request()->routeIs('staff.list-supplier-return') ? 'active' : '' }}">
+                            <i class="bi bi-list-check"></i> List Purchase Returns
+                        </a>
+                        @endif
+                        @endif
+                    </x-erp-nav-dropdown>
+                    @endif
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  3. INVENTORY                        ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    @if(auth()->user()->hasPermission('menu_products'))
+                    <x-erp-nav-dropdown label="Inventory" icon="box-seam" :active="request()->routeIs('staff.Productes', 'staff.Product-brand', 'staff.Product-category', 'staff.Product-model')">
+                        <div class="erp-dropdown-header">Item Master</div>
+                        @if(auth()->user()->hasPermission('menu_products_list'))
+                        <a href="{{ route('staff.Productes') }}" class="erp-dropdown-item {{ request()->routeIs('staff.Productes') ? 'active' : '' }}">
+                            <i class="bi bi-card-list"></i> Item List
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_products_brand'))
+                        <a href="{{ route('staff.Product-brand') }}" class="erp-dropdown-item {{ request()->routeIs('staff.Product-brand') ? 'active' : '' }}">
+                            <i class="bi bi-tags"></i> Brand Master
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_products_category'))
+                        <a href="{{ route('staff.Product-category') }}" class="erp-dropdown-item {{ request()->routeIs('staff.Product-category') ? 'active' : '' }}">
+                            <i class="bi bi-tags-fill"></i> Category Master
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_products_model'))
+                        <a href="{{ route('staff.Product-model') }}" class="erp-dropdown-item {{ request()->routeIs('staff.Product-model') ? 'active' : '' }}">
+                            <i class="bi bi-cpu"></i> Model Master
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_products_variant'))
+                        <a href="{{ route('admin.manage-variants') }}" class="erp-dropdown-item">
+                            <i class="bi bi-layers"></i> Item Variants
+                        </a>
+                        @endif
+                    </x-erp-nav-dropdown>
+                    @endif
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  4. DISPLAY                          ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    @if(auth()->user()->hasPermission('menu_reports') || auth()->user()->hasPermission('menu_analytics'))
+                    <x-erp-nav-dropdown label="Display" icon="bar-chart-line" :active="request()->routeIs('staff.reports', 'staff.analytics')">
+                        <div class="erp-dropdown-header">Reports</div>
+                        @if(auth()->user()->hasPermission('menu_reports'))
+                        <a href="{{ route('staff.reports') }}" class="erp-dropdown-item {{ request()->routeIs('staff.reports') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-bar-graph"></i> Account Reports
+                        </a>
+                        @endif
+                        @if(auth()->user()->hasPermission('menu_analytics'))
+                        <a href="{{ route('staff.analytics') }}" class="erp-dropdown-item {{ request()->routeIs('staff.analytics') ? 'active' : '' }}">
+                            <i class="bi bi-bar-chart"></i> Analytics
+                        </a>
+                        @endif
+                    </x-erp-nav-dropdown>
+                    @endif
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  5. ADMINISTRATION                   ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    @if(auth()->user()->hasPermission('menu_settings'))
+                    <x-erp-nav-dropdown label="Administration" icon="gear-wide-connected" :active="request()->routeIs('staff.settings')">
+                        <div class="erp-dropdown-header">Configuration</div>
+                        <a href="{{ route('staff.settings') }}" class="erp-dropdown-item {{ request()->routeIs('staff.settings') ? 'active' : '' }}">
+                            <i class="bi bi-gear"></i> System Settings
+                        </a>
+                    </x-erp-nav-dropdown>
+                    @endif
+
+                </ul>
+
+                {{-- Right Side Controls --}}
+                <div class="erp-right">
+                    {{-- Shortcut Help Toggle --}}
+                    <button class="erp-user-btn" onclick="window.erpShortcuts && window.erpShortcuts.toggleHelp()" title="Keyboard Shortcuts (Ctrl+/)" type="button" style="padding:4px 8px;">
+                        <i class="bi bi-keyboard" style="font-size:0.85rem;"></i>
+                    </button>
+
+                    {{-- User Dropdown --}}
+                    <div class="erp-user-dropdown" x-data="{ userOpen: false }" @click.away="userOpen = false">
+                        <button class="erp-user-btn" @click="userOpen = !userOpen" type="button">
+                            <div class="erp-user-avatar">S</div>
+                            <span class="d-none d-xl-inline" style="font-size:0.78rem;">Staff</span>
+                            <i class="bi bi-chevron-down" style="font-size:0.5rem;opacity:0.5;"></i>
+                        </button>
+                        <div class="erp-dropdown erp-dropdown-right erp-user-menu" x-show="userOpen" x-transition x-cloak style="display:none;">
+                            <a href="{{ route('profile.show') }}" class="erp-dropdown-item">
+                                <i class="bi bi-person"></i> My Profile
+                            </a>
+                            <a href="{{ route('staff.settings') }}" class="erp-dropdown-item">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                            <div class="erp-dropdown-divider"></div>
+                            <form method="POST" action="{{ route('logout') }}" class="m-0">
+                                @csrf
+                                <button type="submit" class="erp-dropdown-item erp-dropdown-danger">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        {{-- Old sidebar (hidden by CSS — preserved for rollback) --}}
         <div class="sidebar">
             <div class="sidebar-header d-flex justify-content-center">
                 <div class="sidebar-title">
@@ -1220,6 +1727,38 @@
             }
         });
     </script>
+
+    {{-- ERP Top Navigation: Mobile menu logic --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const staffMenu = document.getElementById('staffErpMenu');
+        if (!staffMenu) return;
+
+        staffMenu.querySelectorAll('.erp-menu-link[href], .erp-dropdown-item[href]').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) staffMenu.classList.remove('show');
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 992 && staffMenu.classList.contains('show')) {
+                const nav = document.querySelector('.erp-topnav');
+                if (nav && !nav.contains(e.target)) staffMenu.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992 && staffMenu.classList.contains('show')) staffMenu.classList.remove('show');
+        });
+    });
+    </script>
+
+    {{-- ===== BUSY-style ERP Shortcut System ===== --}}
+    <script src="{{ asset('js/erp-shortcuts.js') }}"></script>
+
+    {{-- ===== ERP Top Navigation Keyboard Controller ===== --}}
+    <script src="{{ asset('js/erp-nav-keyboard.js') }}"></script>
+
     @stack('scripts')
 </body>
 

@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\POSSession;
 use App\Services\FIFOStockService;
+use App\Services\AccountingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -483,6 +484,7 @@ class SalesSystem extends Component
             ]);
 
             // Create sale items and update stock using FIFO
+            $totalCOGS = 0;
             foreach ($this->cart as $item) {
                 // Update product stock using FIFO method
                 try {
@@ -508,6 +510,9 @@ class SalesSystem extends Component
                         ]);
                     }
 
+                    // Accumulate COGS for accounting
+                    $totalCOGS += floatval($fifoResult['total_cost'] ?? 0);
+
                     // Log FIFO deduction details
                     Log::info("FIFO Stock Deduction for Product {$item['id']}", [
                         'quantity' => $item['quantity'],
@@ -519,6 +524,13 @@ class SalesSystem extends Component
                     // If FIFO fails, throw exception to rollback transaction
                     throw new \Exception("Failed to deduct stock for {$item['name']}: " . $e->getMessage());
                 }
+            }
+
+            // Post accounting entries (Voucher + VoucherEntries)
+            try {
+                AccountingService::postSale($sale, $totalCOGS);
+            } catch (\Exception $e) {
+                Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
             }
 
             DB::commit();

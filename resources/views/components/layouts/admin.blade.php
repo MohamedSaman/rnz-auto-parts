@@ -1093,14 +1093,821 @@
             display: flex;
         }
     </style>
+
+    {{-- ===== ERP TOP NAVIGATION STYLES ===== --}}
+    <style>
+        /* Hide old sidebar & top-bar — replaced by ERP top navigation */
+        .sidebar { display: none !important; }
+        .top-bar { display: none !important; }
+
+        /* Override main content for full-width top-nav layout */
+        .main-content {
+            margin-left: 0 !important;
+            margin-top: 54px !important;
+            width: 100% !important;
+            padding: 24px !important;
+            min-height: calc(100vh - 54px) !important;
+        }
+        .main-content.collapsed {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        /* ===== ERP TOP NAVIGATION BAR ===== */
+        .erp-topnav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 54px;
+            background: var(--sidebar-bg, #0f172a);
+            z-index: 1050;
+            border-bottom: 2px solid var(--primary, #e11d48);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+
+        .erp-topnav-inner {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 12px;
+        }
+
+        /* Brand / Logo */
+        .erp-brand {
+            display: flex;
+            align-items: center;
+            padding: 0 16px 0 4px;
+            margin-right: 8px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+            height: 100%;
+        }
+        .erp-brand a { display: flex; align-items: center; }
+        .erp-brand img { height: 28px; width: auto; }
+
+        /* Menu Container */
+        .erp-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            height: 100%;
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Menu Items */
+        .erp-menu-item {
+            position: relative;
+            height: 100%;
+        }
+
+        .erp-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 13px;
+            height: 100%;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.78rem;
+            font-weight: 500;
+            background: none;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.15s, background 0.15s;
+            font-family: inherit;
+            line-height: 1;
+        }
+        .erp-menu-link:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.06);
+            text-decoration: none;
+        }
+        .erp-menu-link.active {
+            color: #ffffff;
+            background: rgba(255,255,255,0.08);
+            box-shadow: inset 0 -2px 0 var(--primary, #e11d48);
+        }
+        .erp-menu-link i:first-child {
+            font-size: 0.88rem;
+            opacity: 0.8;
+        }
+        .erp-chevron {
+            font-size: 0.5rem;
+            opacity: 0.45;
+            margin-left: 2px;
+        }
+
+        /* Dropdown Panel */
+        .erp-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 260px;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #1e293b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-top: 2px solid var(--primary, #e11d48);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+            padding: 6px 0;
+            z-index: 1060;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.15) transparent;
+        }
+        .erp-dropdown::-webkit-scrollbar { width: 5px; }
+        .erp-dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+        .erp-dropdown-right {
+            left: auto;
+            right: 0;
+        }
+
+        /* Dropdown Items */
+        .erp-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.78rem;
+            transition: color 0.12s, background 0.12s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .erp-dropdown-item:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.06);
+            text-decoration: none;
+        }
+        .erp-dropdown-item.active {
+            color: var(--primary, #e11d48);
+            background: rgba(225,29,72,0.08);
+        }
+        .erp-dropdown-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+        .erp-dropdown-danger { color: #f87171 !important; }
+        .erp-dropdown-danger:hover { background: rgba(248,113,113,0.1) !important; }
+
+        /* Dropdown Divider & Header */
+        .erp-dropdown-divider {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 4px 0;
+        }
+        .erp-dropdown-header {
+            padding: 8px 16px 4px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--primary, #e11d48);
+            opacity: 0.85;
+        }
+
+        /* Keyboard Shortcut Badge */
+        .erp-kbd {
+            margin-left: auto;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 3px;
+            padding: 1px 6px;
+            font-size: 0.58rem;
+            font-family: monospace;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.6;
+        }
+
+        /* Right Side Controls */
+        .erp-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            flex-shrink: 0;
+            height: 100%;
+            padding-left: 12px;
+        }
+
+        /* Digital Clock */
+        .erp-clock {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary, #e11d48);
+            letter-spacing: 0.06em;
+            min-width: 72px;
+            text-align: center;
+        }
+
+        /* POS Button */
+        .erp-pos-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--primary, #e11d48);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        .erp-pos-btn:hover {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+        }
+        .erp-pos-btn .erp-kbd {
+            background: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.8);
+            border-color: transparent;
+        }
+
+        /* Reopen POS Button */
+        .erp-reopen-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: rgba(248,113,113,0.1);
+            border: 1px solid rgba(248,113,113,0.3);
+            border-radius: 6px;
+            color: #f87171;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+        .erp-reopen-btn:hover { background: rgba(248,113,113,0.2); }
+
+        /* User Dropdown */
+        .erp-user-dropdown {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+        .erp-user-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        .erp-user-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+        .erp-user-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--primary, #e11d48);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+        .erp-user-menu { min-width: 180px; }
+
+        /* Mobile Hamburger */
+        .erp-hamburger {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: none;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 1.15rem;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .erp-hamburger:hover { background: rgba(255,255,255,0.06); }
+
+        /* ===== KEYBOARD NAVIGATION FOCUS RINGS ===== */
+        /* Top-level menu button focus */
+        .erp-menu-link:focus-visible,
+        .erp-menu-link:focus {
+            outline: 2px solid var(--primary, #e11d48) !important;
+            outline-offset: 2px;
+            background: rgba(255,255,255,0.07) !important;
+        }
+        /* Dropdown item focus */
+        .erp-dropdown-item:focus-visible,
+        .erp-dropdown-item:focus {
+            outline: none !important;
+            background: rgba(255,255,255,0.09) !important;
+            color: #fff !important;
+            box-shadow: inset 3px 0 0 var(--primary, #e11d48);
+        }
+        /* Chevron animation when open */
+        .erp-menu-link[aria-expanded="true"] .erp-chevron {
+            transform: rotate(180deg);
+        }
+        .erp-topnav #kb-mode-indicator {
+            font-size: 0.68rem;
+            color: var(--primary, #e11d48);
+            font-weight: 600;
+            background: rgba(225,29,72,0.12);
+            border: 1px solid rgba(225,29,72,0.2);
+            border-radius: 4px;
+            padding: 2px 8px;
+            display: none;
+        }
+        .erp-topnav #kb-mode-indicator.active {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ===== RESPONSIVE: Mobile Top Nav ===== */
+        @media (max-width: 991.98px) {
+            .erp-hamburger { display: flex; }
+
+            .erp-menu {
+                position: fixed;
+                top: 54px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--sidebar-bg, #0f172a);
+                flex-direction: column;
+                align-items: stretch;
+                overflow-y: auto;
+                padding: 8px 0;
+                z-index: 1049;
+                height: auto;
+                border-top: 1px solid rgba(255,255,255,0.06);
+            }
+            .erp-menu:not(.show) { display: none !important; }
+            .erp-menu.show { display: flex !important; }
+
+            .erp-menu-item { height: auto; }
+            .erp-menu-link {
+                height: auto;
+                padding: 12px 20px;
+                justify-content: flex-start;
+            }
+            .erp-dropdown {
+                position: static;
+                box-shadow: none;
+                border: none;
+                border-top: none;
+                border-radius: 0;
+                background: rgba(0,0,0,0.15);
+                min-width: 100%;
+            }
+            .erp-dropdown-item { padding: 10px 32px; }
+            .erp-clock { display: none; }
+            .main-content { padding: 16px !important; }
+        }
+
+        @media (max-width: 575.98px) {
+            .erp-topnav-inner { padding: 0 8px; }
+            .erp-brand { padding: 0 8px 0 0; margin-right: 4px; }
+            .erp-brand img { height: 22px; }
+            .erp-pos-btn span { display: none; }
+            .erp-right { gap: 6px; padding-left: 6px; }
+        }
+
+        /* ===== TRANSACTION ACCORDION SUB-TOGGLES ===== */
+        .erp-sub-toggle {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-weight: 600;
+            color: rgba(255,255,255,0.75);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 0.78rem;
+            padding: 8px 16px;
+            text-align: left;
+            gap: 8px;
+        }
+        .erp-sub-toggle:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.06);
+        }
+        .erp-sub-toggle.erp-sub-open {
+            color: var(--primary, #e11d48);
+            background: rgba(225,29,72,0.08);
+        }
+        .erp-sub-toggle.erp-sub-open i:first-child {
+            opacity: 1;
+        }
+        .erp-sub-toggle > i:first-child {
+            width: 18px;
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+        .erp-sub-chevron {
+            font-size: 0.65rem !important;
+            opacity: 0.45 !important;
+            transition: transform 0.2s ease;
+            margin-left: auto !important;
+            width: auto !important;
+            flex-shrink: 0;
+        }
+        .erp-sub-toggle.erp-sub-open .erp-sub-chevron {
+            transform: rotate(180deg);
+            opacity: 0.9 !important;
+        }
+        .erp-sub-panel {
+            display: none;
+            overflow: hidden;
+        }
+        .erp-sub-panel.show {
+            display: block;
+            background: rgba(0,0,0,0.15);
+            border-left: 2px solid var(--primary, #e11d48);
+            margin: 2px 8px 4px 8px;
+            border-radius: 0 4px 4px 0;
+        }
+        .erp-sub-item {
+            padding-left: 28px !important;
+            font-size: 0.73rem !important;
+            font-weight: 400 !important;
+            color: rgba(255,255,255,0.65) !important;
+            opacity: 1 !important;
+        }
+        .erp-sub-item:hover {
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.06) !important;
+        }
+        .erp-sub-item.active {
+            color: var(--primary, #e11d48) !important;
+            background: rgba(225,29,72,0.08) !important;
+        }
+    </style>
+
     @stack('styles')
     @livewireStyles
 </head>
 
-<body x-data="adminKeyboard()" x-init="init()" @keydown.window="handleKey($event)">
+<body data-erp-context="{{ $erpContext ?? 'general' }}"
+      data-erp-route-dashboard="{{ route('admin.dashboard') }}"
+      data-erp-route-products="{{ route('admin.Productes') }}"
+      data-erp-route-manage-customer="{{ route('admin.manage-customer') }}"
+      data-erp-route-supplier-management="{{ route('admin.supplier-management') }}"
+      data-erp-route-sales-system="{{ route('admin.sales-system') }}"
+      data-erp-route-sales-list="{{ route('admin.sales-list') }}"
+      data-erp-route-pos-sales="{{ route('admin.pos-sales') }}"
+      data-erp-route-store-billing="{{ route('admin.store-billing') }}"
+      data-erp-route-purchase-create="{{ route('admin.purchase-create') }}"
+      data-erp-route-purchase-order-list="{{ route('admin.purchase-order-list') }}"
+      data-erp-route-purchase-voucher-modify="{{ route('admin.purchase-voucher-modify') }}"
+      data-erp-route-purchase-voucher-list="{{ route('admin.purchase-voucher-list') }}"
+      data-erp-route-grn="{{ route('admin.grn') }}"
+      data-erp-route-add-customer-receipt="{{ route('admin.add-customer-receipt') }}"
+      data-erp-route-list-customer-receipt="{{ route('admin.list-customer-receipt') }}"
+      data-erp-route-add-supplier-receipt="{{ route('admin.add-supplier-receipt') }}"
+      data-erp-route-list-supplier-receipt="{{ route('admin.list-supplier-receipt') }}"
+      data-erp-route-expenses="{{ route('admin.expenses') }}"
+      data-erp-route-reports="{{ route('admin.reports') }}"
+      data-erp-route-profit-loss="{{ route('admin.profit-loss') }}"
+      data-erp-route-income="{{ route('admin.income') }}"
+      data-erp-route-settings="{{ route('admin.settings') }}"
+      data-erp-route-return-product="{{ route('admin.return-product') }}"
+      data-erp-route-return-list="{{ route('admin.return-list') }}"
+      data-erp-route-quotation-list="{{ route('admin.quotation-list') }}"
+      data-erp-route-sales-voucher-add="{{ route('admin.sales-voucher-add') }}"
+      data-erp-route-sales-voucher-modify="{{ route('admin.sales-voucher-modify') }}"
+      data-erp-route-sales-voucher-list="{{ route('admin.sales-voucher-list') }}"
+>
 
-    <div class="d-flex">
-        <!-- Sidebar -->
+    <div>
+        {{-- ============================================= --}}
+        {{-- BUSY-STYLE ERP TOP NAVIGATION BAR             --}}
+        {{-- ============================================= --}}
+        <nav class="erp-topnav">
+            <div class="erp-topnav-inner">
+                {{-- Mobile Hamburger --}}
+                <button class="erp-hamburger d-lg-none" onclick="document.getElementById('erpMenu').classList.toggle('show');" type="button" aria-label="Toggle menu">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                {{-- Logo / Brand --}}
+                <div class="erp-brand">
+                    <a href="{{ route('admin.dashboard') }}">
+                        <img src="{{ asset('images/RNZ.png') }}" alt="RNZ Auto Parts" height="30">
+                    </a>
+                </div>
+
+                {{-- ── BUSY-style 5-Menu Structure ── --}}
+                <ul class="erp-menu d-none d-lg-flex" id="erpMenu">
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  1. ACCOUNTS                         ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    <x-erp-nav-dropdown label="Accounts" icon="journal-bookmark-fill" :active="request()->routeIs('admin.manage-customer', 'admin.supplier-management', 'admin.manage-staff', 'admin.manage-admin')">
+                        <div class="erp-dropdown-header">Account Master</div>
+                        <a href="{{ route('admin.manage-customer') }}" class="erp-dropdown-item {{ request()->routeIs('admin.manage-customer') ? 'active' : '' }}">
+                            <i class="bi bi-person-lines-fill"></i> Customers (Debtors) <kbd class="erp-kbd">Alt+Ctrl+F1</kbd>
+                        </a>
+                        <a href="{{ route('admin.supplier-management') }}" class="erp-dropdown-item {{ request()->routeIs('admin.supplier-management') ? 'active' : '' }}">
+                            <i class="bi bi-people"></i> Suppliers (Creditors)
+                        </a>
+                        <a href="{{ route('admin.manage-staff') }}" class="erp-dropdown-item {{ request()->routeIs('admin.manage-staff') ? 'active' : '' }}">
+                            <i class="bi bi-person-badge"></i> Staff Accounts
+                        </a>
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Finance Accounts</div>
+                        <a href="{{ route('admin.day-summary') }}" class="erp-dropdown-item {{ request()->routeIs('admin.day-summary') ? 'active' : '' }}">
+                            <i class="bi bi-cash-stack"></i> Cash &amp; Bank Deposit
+                        </a>
+                        <a href="{{ route('admin.cheque-list') }}" class="erp-dropdown-item {{ request()->routeIs('admin.cheque-list') ? 'active' : '' }}">
+                            <i class="bi bi-card-text"></i> Cheque Register
+                        </a>
+                        <a href="{{ route('admin.return-cheque') }}" class="erp-dropdown-item {{ request()->routeIs('admin.return-cheque') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-left-right"></i> Return Cheque
+                        </a>
+                    </x-erp-nav-dropdown>
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  2. TRANSACTIONS                     ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    <x-erp-nav-dropdown label="Transactions" icon="arrow-left-right" :active="request()->routeIs('admin.pos-sales', 'admin.sale-approval', 'admin.sales-system', 'admin.sales-list', 'admin.store-billing', 'admin.quotation-list', 'admin.quotation-system', 'admin.purchase-order-list', 'admin.purchase-create', 'admin.purchase-voucher-modify', 'admin.purchase-voucher-list', 'admin.grn', 'admin.add-customer-receipt', 'admin.list-customer-receipt', 'admin.add-supplier-receipt', 'admin.list-supplier-receipt', 'admin.return-product', 'admin.return-list', 'admin.return-supplier', 'admin.list-supplier-return', 'admin.expenses', 'admin.sales-voucher-add', 'admin.sales-voucher-modify', 'admin.sales-voucher-list')">
+
+                        {{-- ── Sales Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.sales-voucher-add','admin.sales-voucher-modify','admin.sales-voucher-list') ? 'erp-sub-open' : '' }}" data-sub="txn-sv">
+                            <i class="bi bi-receipt"></i> Sales Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.sales-voucher-add','admin.sales-voucher-modify','admin.sales-voucher-list') ? 'show' : '' }}" id="txn-sv">
+                            <a href="{{ route('admin.sales-voucher-add') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-voucher-add') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle-fill"></i> Add Voucher <kbd class="erp-kbd">Alt+A</kbd>
+                            </a>
+                            <a href="{{ route('admin.sales-voucher-modify') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-voucher-modify') ? 'active' : '' }}">
+                                <i class="bi bi-pencil-square"></i> Modify Voucher <kbd class="erp-kbd">Alt+M</kbd>
+                            </a>
+                            <a href="{{ route('admin.sales-voucher-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-voucher-list') ? 'active' : '' }}">
+                                <i class="bi bi-list-ul"></i> List Voucher <kbd class="erp-kbd">Alt+L</kbd>
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Purchase Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.purchase-create','admin.purchase-voucher-modify','admin.purchase-voucher-list') ? 'erp-sub-open' : '' }}" data-sub="txn-pv">
+                            <i class="bi bi-cart4"></i> Purchase Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.purchase-create','admin.purchase-voucher-modify','admin.purchase-voucher-list') ? 'show' : '' }}" id="txn-pv">
+                            <a href="{{ route('admin.purchase-create') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-create') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle-fill"></i> Add Voucher <kbd class="erp-kbd">Alt+Ctrl+F9</kbd>
+                            </a>
+                            <a href="{{ route('admin.purchase-voucher-modify') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-voucher-modify') ? 'active' : '' }}">
+                                <i class="bi bi-pencil-square"></i> Modify Voucher <kbd class="erp-kbd">Alt+Shift+M</kbd>
+                            </a>
+                            <a href="{{ route('admin.purchase-voucher-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-voucher-list') ? 'active' : '' }}">
+                                <i class="bi bi-list-ul"></i> List Voucher <kbd class="erp-kbd">Alt+Shift+L</kbd>
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Purchase Legacy ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.purchase-order-list','admin.grn') ? 'erp-sub-open' : '' }}" data-sub="txn-pl">
+                            <i class="bi bi-box-arrow-in-down"></i> Purchase (Legacy)
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.purchase-order-list','admin.grn') ? 'show' : '' }}" id="txn-pl">
+                            <a href="{{ route('admin.purchase-order-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-order-list') ? 'active' : '' }}">
+                                <i class="bi bi-list-task"></i> Order List
+                            </a>
+                            <a href="{{ route('admin.grn') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.grn') ? 'active' : '' }}">
+                                <i class="bi bi-boxes"></i> GRN (Goods Receive)
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Receipt Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.add-customer-receipt','admin.list-customer-receipt') ? 'erp-sub-open' : '' }}" data-sub="txn-rv">
+                            <i class="bi bi-cash-coin"></i> Receipt Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.add-customer-receipt','admin.list-customer-receipt') ? 'show' : '' }}" id="txn-rv">
+                            <a href="{{ route('admin.add-customer-receipt') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.add-customer-receipt') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle"></i> Add <kbd class="erp-kbd">Alt+Ctrl+F6</kbd>
+                            </a>
+                            <a href="{{ route('admin.list-customer-receipt') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.list-customer-receipt') ? 'active' : '' }}">
+                                <i class="bi bi-list-ul"></i> List
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Payment Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.add-supplier-receipt','admin.list-supplier-receipt') ? 'erp-sub-open' : '' }}" data-sub="txn-pmv">
+                            <i class="bi bi-wallet2"></i> Payment Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.add-supplier-receipt','admin.list-supplier-receipt') ? 'show' : '' }}" id="txn-pmv">
+                            <a href="{{ route('admin.add-supplier-receipt') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.add-supplier-receipt') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle"></i> Add <kbd class="erp-kbd">Alt+Ctrl+F5</kbd>
+                            </a>
+                            <a href="{{ route('admin.list-supplier-receipt') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.list-supplier-receipt') ? 'active' : '' }}">
+                                <i class="bi bi-list-ul"></i> List
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Journal / Expense Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.expenses') ? 'erp-sub-open' : '' }}" data-sub="txn-jv">
+                            <i class="bi bi-journal-text"></i> Journal / Expense Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.expenses') ? 'show' : '' }}" id="txn-jv">
+                            <a href="{{ route('admin.expenses') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.expenses') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle"></i> Add / List <kbd class="erp-kbd">Alt+Ctrl+F7</kbd>
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Returns ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.return-product','admin.return-list','admin.return-supplier','admin.list-supplier-return') ? 'erp-sub-open' : '' }}" data-sub="txn-ret">
+                            <i class="bi bi-arrow-return-left"></i> Returns
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.return-product','admin.return-list','admin.return-supplier','admin.list-supplier-return') ? 'show' : '' }}" id="txn-ret">
+                            <a href="{{ route('admin.return-product') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-product') ? 'active' : '' }}">
+                                <i class="bi bi-arrow-return-left"></i> Sales Return (Credit Note)
+                            </a>
+                            <a href="{{ route('admin.return-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-list') ? 'active' : '' }}">
+                                <i class="bi bi-list-check"></i> List Sales Returns
+                            </a>
+                            <a href="{{ route('admin.return-supplier') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-supplier') ? 'active' : '' }}">
+                                <i class="bi bi-arrow-return-left"></i> Purchase Return (Debit Note)
+                            </a>
+                            <a href="{{ route('admin.list-supplier-return') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.list-supplier-return') ? 'active' : '' }}">
+                                <i class="bi bi-list-check"></i> List Purchase Returns
+                            </a>
+                        </div>
+
+                    </x-erp-nav-dropdown>
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  3. INVENTORY                        ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    <x-erp-nav-dropdown label="Inventory" icon="box-seam" :active="request()->routeIs('admin.Productes', 'admin.Product-brand', 'admin.Product-category', 'admin.Product-model')">
+                        <div class="erp-dropdown-header">Item Master</div>
+                        <a href="{{ route('admin.Productes') }}" class="erp-dropdown-item {{ request()->routeIs('admin.Productes') ? 'active' : '' }}">
+                            <i class="bi bi-card-list"></i> Item List <kbd class="erp-kbd">Alt+Ctrl+F2</kbd>
+                        </a>
+                        <a href="{{ route('admin.Product-brand') }}" class="erp-dropdown-item {{ request()->routeIs('admin.Product-brand') ? 'active' : '' }}">
+                            <i class="bi bi-tags"></i> Brand Master
+                        </a>
+                        <a href="{{ route('admin.Product-category') }}" class="erp-dropdown-item {{ request()->routeIs('admin.Product-category') ? 'active' : '' }}">
+                            <i class="bi bi-tags-fill"></i> Category Master
+                        </a>
+                        <a href="{{ route('admin.Product-model') }}" class="erp-dropdown-item {{ request()->routeIs('admin.Product-model') ? 'active' : '' }}">
+                            <i class="bi bi-cpu"></i> Model Master
+                        </a>
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Stock Status</div>
+                        <a href="{{ route('admin.Productes') }}?view=stock" class="erp-dropdown-item">
+                            <i class="bi bi-clipboard-data"></i> Stock Summary <kbd class="erp-kbd">Alt+Ctrl+S</kbd>
+                        </a>
+                    </x-erp-nav-dropdown>
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  4. DISPLAY                          ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    <x-erp-nav-dropdown label="Display" icon="bar-chart-line" :active="request()->routeIs('admin.income', 'admin.reports', 'admin.profit-loss', 'admin.analytics')">
+                        <div class="erp-dropdown-header">Financial Reports</div>
+                        <a href="{{ route('admin.profit-loss') }}" class="erp-dropdown-item {{ request()->routeIs('admin.profit-loss') ? 'active' : '' }}">
+                            <i class="bi bi-graph-up-arrow"></i> Profit &amp; Loss <kbd class="erp-kbd">Alt+Ctrl+B</kbd>
+                        </a>
+                        <a href="{{ route('admin.reports') }}" class="erp-dropdown-item {{ request()->routeIs('admin.reports') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-bar-graph"></i> Account Reports <kbd class="erp-kbd">Alt+Ctrl+L</kbd>
+                        </a>
+                        <a href="{{ route('admin.income') }}" class="erp-dropdown-item {{ request()->routeIs('admin.income') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-check"></i> Day Summary (Day Book)
+                        </a>
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Inventory Reports</div>
+                        <a href="{{ route('admin.Productes') }}?view=stock" class="erp-dropdown-item">
+                            <i class="bi bi-clipboard-data"></i> Stock Summary
+                        </a>
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">VAT / Tax</div>
+                        <a href="{{ route('admin.reports') }}?tab=vat" class="erp-dropdown-item">
+                            <i class="bi bi-receipt"></i> VAT Summary <kbd class="erp-kbd">Alt+V</kbd>
+                        </a>
+                    </x-erp-nav-dropdown>
+
+                    {{-- ╔══════════════════════════════════════╗ --}}
+                    {{-- ║  5. ADMINISTRATION                   ║ --}}
+                    {{-- ╚══════════════════════════════════════╝ --}}
+                    <x-erp-nav-dropdown label="Administration" icon="gear-wide-connected" :active="request()->routeIs('admin.settings', 'admin.payment-approval', 'admin.staff-expense-approval', 'admin.staff-salary-management')">
+                        <div class="erp-dropdown-header">Configuration</div>
+                        <a href="{{ route('admin.settings') }}" class="erp-dropdown-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
+                            <i class="bi bi-gear"></i> System Settings
+                        </a>
+                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-header">Staff / HR Management</div>
+                        <a href="{{ route('admin.payment-approval') }}" class="erp-dropdown-item {{ request()->routeIs('admin.payment-approval') ? 'active' : '' }}">
+                            <i class="bi bi-wallet2"></i> Staff Payment Voucher
+                        </a>
+                        <a href="{{ route('admin.staff-expense-approval') }}" class="erp-dropdown-item {{ request()->routeIs('admin.staff-expense-approval') ? 'active' : '' }}">
+                            <i class="bi bi-receipt"></i> Staff Expense Voucher
+                        </a>
+                        <a href="{{ route('admin.staff-salary-management') }}" class="erp-dropdown-item {{ request()->routeIs('admin.staff-salary-management') ? 'active' : '' }}">
+                            <i class="bi bi-cash-coin"></i> Salary Register
+                        </a>
+                    </x-erp-nav-dropdown>
+
+                </ul>
+
+                {{-- Right Side Controls --}}
+                <div class="erp-right">
+                    {{-- Shortcut Help Toggle --}}
+                    <button class="erp-user-btn" onclick="window.erpShortcuts.toggleHelp()" title="Keyboard Shortcuts (Ctrl+/)" type="button" style="padding:4px 8px;">
+                        <i class="bi bi-keyboard" style="font-size:0.85rem;"></i>
+                    </button>
+
+                    {{-- Digital Clock --}}
+                    <div id="digitalClock" class="erp-clock d-none d-md-block">00:00:00</div>
+
+                    {{-- POS Button --}}
+                    <button class="erp-pos-btn" onclick="handlePOSClick()" title="Open POS (F5)" type="button">
+                        <i class="bi bi-cart-plus-fill"></i>
+                        <span class="d-none d-sm-inline">POS</span>
+                        <kbd class="erp-kbd">F5</kbd>
+                    </button>
+
+                    {{-- Reopen POS Button --}}
+                    <div id="reopenPosBtnContainer" style="display:none;">
+                        <button type="button" class="erp-reopen-btn" onclick="showReopenPOSModal()" title="Reopen POS Session">
+                            <i class="bi bi-unlock"></i>
+                        </button>
+                    </div>
+
+                    {{-- User Dropdown --}}
+                    <div class="erp-user-dropdown" x-data="{ userOpen: false }" @click.away="userOpen = false">
+                        <button class="erp-user-btn" @click="userOpen = !userOpen" type="button">
+                            <div class="erp-user-avatar">A</div>
+                            <span class="d-none d-xl-inline" style="font-size:0.78rem;">Admin</span>
+                            <i class="bi bi-chevron-down" style="font-size:0.5rem;opacity:0.5;"></i>
+                        </button>
+                        <div class="erp-dropdown erp-dropdown-right erp-user-menu" x-show="userOpen" x-transition x-cloak style="display:none;">
+                            <a href="{{ route('profile.show') }}" class="erp-dropdown-item">
+                                <i class="bi bi-person"></i> My Profile
+                            </a>
+                            <a href="{{ route('admin.settings') }}" class="erp-dropdown-item">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                            <div class="erp-dropdown-divider"></div>
+                            <form method="POST" action="{{ route('logout') }}" class="m-0">
+                                @csrf
+                                <button type="submit" class="erp-dropdown-item erp-dropdown-danger">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        {{-- Old sidebar (hidden by CSS — preserved for rollback) --}}
         <div class="sidebar">
             <div class="sidebar-header d-flex justify-content-center">
                 <div class="sidebar-title">
@@ -1187,23 +1994,52 @@
                         </ul>
                     </div>
                 </li>
+                {{-- BUSY-Style Transaction > Sales Navigation --}}
                 <li class="nav-item">
-                    <a class="nav-link dropdown-toggle" href="#salesSubmenu" data-bs-toggle="collapse" role="button"
-                        aria-expanded="false" aria-controls="salesSubmenu">
-                        <i class="bi bi-cash-stack"></i> <span>Sales</span>
+                    <a class="nav-link dropdown-toggle" href="#transactionSubmenu" data-bs-toggle="collapse" role="button"
+                        aria-expanded="false" aria-controls="transactionSubmenu">
+                        <i class="bi bi-arrow-left-right"></i> <span>Transaction</span>
                     </a>
-                    <div class="collapse" id="salesSubmenu">
+                    <div class="collapse" id="transactionSubmenu">
                         <ul class="nav flex-column ms-3">
-                            {{--<li class="nav-item">
-                                <a class="nav-link py-2" href="{{ route('admin.sales-system') }}">
-                                    <i class="bi bi-plus-circle"></i> <span>Add Sales</span>
-                                </a>
-                            </li>
+                            {{-- Sales Sub-Section --}}
                             <li class="nav-item">
-                                <a class="nav-link py-2" href="{{ route('admin.sales-list') }}">
-                                    <i class="bi bi-table"></i> <span>List Sales</span>
+                                <a class="nav-link dropdown-toggle py-2" href="#salesSubmenu" data-bs-toggle="collapse" role="button"
+                                    aria-expanded="false" aria-controls="salesSubmenu">
+                                    <i class="bi bi-receipt-cutoff"></i> <span>Sales</span>
                                 </a>
-                            </li>--}}
+                                <div class="collapse" id="salesSubmenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link py-1 {{ request()->routeIs('admin.sales-voucher-add') ? 'active' : '' }}" href="{{ route('admin.sales-voucher-add') }}">
+                                                <i class="bi bi-plus-circle"></i> <span>Add Voucher</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link py-1 {{ request()->routeIs('admin.sales-voucher-modify') ? 'active' : '' }}" href="{{ route('admin.sales-voucher-modify') }}">
+                                                <i class="bi bi-pencil-square"></i> <span>Modify Voucher</span>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link py-1 {{ request()->routeIs('admin.sales-voucher-list') ? 'active' : '' }}" href="{{ route('admin.sales-voucher-list') }}">
+                                                <i class="bi bi-list-ul"></i> <span>List Voucher</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+                {{-- Legacy Sales Links --}}
+                <li class="nav-item">
+                    <a class="nav-link dropdown-toggle" href="#salesLegacySubmenu" data-bs-toggle="collapse" role="button"
+                        aria-expanded="false" aria-controls="salesLegacySubmenu">
+                        <i class="bi bi-cash-stack"></i> <span>Sales (Legacy)</span>
+                    </a>
+                    <div class="collapse" id="salesLegacySubmenu">
+                        <ul class="nav flex-column ms-3">
                             <li class="nav-item">
                                 <a class="nav-link py-2" href="{{ route('admin.pos-sales') }}">
                                     <i class="bi bi-shop"></i> <span>POS Sales list</span>
@@ -2196,17 +3032,15 @@
         });
     </script>
 
+    {{-- ===== OLD adminKeyboard() Alpine component REPLACED by erp-shortcuts.js ===== --}}
+    {{-- Kept as backup — start --}}
     <script>
-    // ===== Alpine.js Keyboard Navigation Component =====
     function adminKeyboard() {
         return {
             showHelp: false,
-            kbMode: false,       // true when user is navigating sidebar via keyboard
-            focusedIndex: -1,    // index into the flat list of visible nav links
-
-            init() {
-                // Nothing extra needed; Alpine handles @keydown.window
-            },
+            kbMode: false,
+            focusedIndex: -1,
+            init() {},
 
             // Returns all currently VISIBLE (not hidden by collapsed submenu) sidebar nav-links
             getVisibleLinks() {
@@ -2491,7 +3325,77 @@
         };
     }
     </script>
+    {{-- Kept as backup — end --}}
+
+    {{-- ===== BUSY-style ERP Shortcut System ===== --}}
+    <script src="{{ asset('js/erp-shortcuts.js') }}"></script>
+
+    {{-- ===== ERP Top Navigation Keyboard Controller ===== --}}
+    <script src="{{ asset('js/erp-nav-keyboard.js') }}"></script>
+
+    {{-- ERP Top Navigation: Mobile menu logic --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const erpMenu = document.getElementById('erpMenu');
+        if (!erpMenu) return;
+
+        // ===== Accordion sub-toggles for Transactions dropdown =====
+        document.querySelectorAll('.erp-sub-toggle').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var panelId = btn.getAttribute('data-sub');
+                var panel = document.getElementById(panelId);
+                if (!panel) return;
+                var isOpen = panel.classList.contains('show');
+                // Close all sibling panels in the same dropdown
+                var parentDropdown = btn.closest('.erp-dropdown');
+                if (parentDropdown) {
+                    parentDropdown.querySelectorAll('.erp-sub-panel.show').forEach(function(p) {
+                        p.classList.remove('show');
+                    });
+                    parentDropdown.querySelectorAll('.erp-sub-toggle.erp-sub-open').forEach(function(t) {
+                        t.classList.remove('erp-sub-open');
+                    });
+                } else {
+                    // Fallback: directly toggle current panel
+                    panel.classList.remove('show');
+                    btn.classList.remove('erp-sub-open');
+                }
+                if (!isOpen) {
+                    panel.classList.add('show');
+                    btn.classList.add('erp-sub-open');
+                }
+            });
+        });
+
+        // Close mobile menu when clicking a navigation link
+        erpMenu.querySelectorAll('.erp-menu-link[href], .erp-dropdown-item[href]').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) {
+                    erpMenu.classList.remove('show');
+                }
+            });
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 992 && erpMenu.classList.contains('show')) {
+                const nav = document.querySelector('.erp-topnav');
+                if (nav && !nav.contains(e.target)) {
+                    erpMenu.classList.remove('show');
+                }
+            }
+        });
+
+        // Close mobile menu on window resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992 && erpMenu.classList.contains('show')) {
+                erpMenu.classList.remove('show');
+            }
+        });
+    });
+    </script>
     @stack('scripts')
 </body>
-
 </html>

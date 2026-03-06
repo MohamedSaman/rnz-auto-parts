@@ -1,22 +1,22 @@
 <div x-data="purchaseCreateApp()" x-init="init()" @keydown.window="handleKeyboard($event)" style="min-height:100vh; background:var(--page-bg);">
 
-    {{-- ═══ Top Bar ═══ --}}
-    <div style="background:var(--sidebar-bg); border-bottom:3px solid var(--primary); padding:0 24px;">
-        <div class="d-flex justify-content-between align-items-center" style="height:56px;">
-            <div class="d-flex align-items-center gap-3">
-                <div style="background:var(--primary); border-radius:8px; width:32px; height:32px; display:flex; align-items:center; justify-content:center;">
-                    <i class="bi bi-cart-plus-fill text-white" style="font-size:1rem;"></i>
-                </div>
-                <div>
-                    <div class="fw-700 text-white" style="font-size:1rem; letter-spacing:-0.02em;">Create Purchase Order</div>
-                    <div style="font-size:11px; color:var(--text-light); margin-top:1px;">Add products and save a new purchasing record</div>
-                </div>
-            </div>
-            <a href="{{ route(auth()->user()->role === 'staff' ? 'staff.purchase-order-list' : 'admin.purchase-order-list') }}"
-               style="font-size:12px; color:var(--text-light); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:6px; padding:5px 14px; text-decoration:none; display:flex; align-items:center; gap:6px; transition:all .2s;"
-               onmouseover="this.style.background='rgba(255,255,255,.16)'"
-               onmouseout="this.style.background='rgba(255,255,255,.08)'">
-                <i class="bi bi-arrow-left"></i> Back to List
+    <!-- BUSY-Style Header -->
+    <div class="d-flex align-items-center justify-content-between px-3 py-2 mb-2" style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom:2px solid var(--primary); border-radius:4px;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-cart-check-fill text-white" style="font-size:1.2rem;"></i>
+            <h5 class="fw-bold text-white mb-0" style="font-size:15px;">
+                {{ $editOrderId ? 'Modify Purchase Voucher' : 'Add Purchase Voucher' }}
+            </h5>
+            @if($invoiceNumber)
+                <span class="badge" style="background:var(--primary); font-size:11px;">{{ $invoiceNumber }}</span>
+            @endif
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('admin.purchase-voucher-modify') }}" class="btn btn-sm btn-outline-light" style="font-size:11px;">
+                <i class="bi bi-pencil-square me-1"></i> Modify <kbd class="ms-1" style="font-size:9px;">Alt+M</kbd>
+            </a>
+            <a href="{{ route('admin.purchase-voucher-list') }}" class="btn btn-sm btn-outline-light" style="font-size:11px;">
+                <i class="bi bi-list-ul me-1"></i> List <kbd class="ms-1" style="font-size:9px;">Alt+L</kbd>
             </a>
         </div>
     </div>

@@ -18,6 +18,7 @@ use App\Livewire\Admin\ViewPayments;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\AdminDashboard;
+use App\Livewire\Admin\AdminHome;
 use App\Livewire\Admin\ManageCustomer;
 use App\Livewire\Admin\ProductBrandlist;
 use App\Livewire\Admin\ProductModelList;
@@ -84,6 +85,15 @@ use App\Livewire\Admin\ListSupplierReturn;
 use App\Livewire\Admin\ProfitLoss;
 use App\Livewire\Admin\StaffSalesView;
 use App\Livewire\Admin\StaffPaymentApproval;
+
+// BUSY-style Sales Voucher Components
+use App\Livewire\Admin\SalesVoucherAdd;
+use App\Livewire\Admin\SalesVoucherModify;
+use App\Livewire\Admin\SalesVoucherList;
+
+// BUSY-style Purchase Voucher Components
+use App\Livewire\Admin\PurchaseVoucherModify;
+use App\Livewire\Admin\PurchaseVoucherList;
 
 // Staff Type Components
 use App\Livewire\Admin\SaleApproval;
@@ -172,7 +182,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
     // !! Admin routes
     Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+        Route::get('/dashboard', AdminHome::class)->name('dashboard');
+        Route::get('/analytics', AdminDashboard::class)->name('analytics'); // Old dashboard with widgets
         Route::get('/Product-list', Products::class)->name('Productes');
         Route::get('/manage-variants', \App\Livewire\Admin\ProductVariants::class)->name('manage-variants');
         Route::get('/add-Product-brand', ProductBrandlist::class)->name('Product-brand');
@@ -223,6 +234,16 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/quotation-system', QuotationSystem::class)->name('quotation-system');
         Route::get('/quotation-list', QuotationList::class)->name('quotation-list');
         Route::get('/sales-list', SalesList::class)->name('sales-list');
+
+        // BUSY-style Sales Voucher routes
+        Route::get('/sales-voucher-add', SalesVoucherAdd::class)->name('sales-voucher-add');
+        Route::get('/sales-voucher-modify', SalesVoucherModify::class)->name('sales-voucher-modify');
+        Route::get('/sales-voucher-list', SalesVoucherList::class)->name('sales-voucher-list');
+
+        // BUSY-style Purchase Voucher routes
+        Route::get('/purchase-voucher-modify', PurchaseVoucherModify::class)->name('purchase-voucher-modify');
+        Route::get('/purchase-voucher-list', PurchaseVoucherList::class)->name('purchase-voucher-list');
+
         Route::get('/settings', Settings::class)->name('settings');
         Route::get('/return-product', ReturnProduct::class)->name('return-product');
         Route::get('/purchase-order-list', PurchaseOrderList::class)->name('purchase-order-list');
@@ -285,6 +306,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/goods-receive-note', GRN::class)->name('grn');
         Route::get('/purchase-order-list', PurchaseOrderList::class)->name('purchase-order-list');
         Route::get('/purchase-create', PurchaseCreate::class)->name('purchase-create');
+        Route::get('/purchase-voucher-modify', PurchaseVoucherModify::class)->name('purchase-voucher-modify');
+        Route::get('/purchase-voucher-list', PurchaseVoucherList::class)->name('purchase-voucher-list');
         Route::get('/supplier-management', SupplierManage::class)->name('supplier-management');
 
         // Customers

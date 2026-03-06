@@ -11,6 +11,8 @@ use App\Models\Customer;
 use App\Models\ProductDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Services\AccountingService;
 use App\Livewire\Concerns\WithDynamicLayout;
 
 #[\Livewire\Attributes\Title('Quotation Management')]
@@ -561,6 +563,14 @@ class QuotationList extends Component
                     'status' => 'converted',
                     'converted_at' => now()
                 ]);
+
+                // Post accounting entries (Voucher + VoucherEntries)
+                // Note: COGS is 0 as quotation conversion does not use FIFO tracking
+                try {
+                    AccountingService::postSale($sale, 0);
+                } catch (\Exception $e) {
+                    Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
+                }
 
                 $this->dispatch('show-success', 'Sale created successfully from quotation!');
 

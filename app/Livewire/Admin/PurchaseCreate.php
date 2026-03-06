@@ -3,8 +3,8 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use App\Livewire\Concerns\WithDynamicLayout;
 use App\Models\ProductSupplier;
 use App\Models\ProductDetail;
 use App\Models\PurchaseOrder;
@@ -15,15 +15,16 @@ use App\Models\ProductStock;
 use App\Models\BrandList;
 use App\Models\CategoryList;
 use App\Models\ProductModel;
+use App\Services\VoucherService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-#[Layout('components.layouts.blank')]
-#[Title('Create Purchase')]
+#[Title('Add Purchase Voucher')]
 
 class PurchaseCreate extends Component
 {
+    use WithDynamicLayout;
     // ── Header fields ──────────────────────────────────────────
     public $suppliers = [];
     public $supplier_id = '';
@@ -527,7 +528,7 @@ class PurchaseCreate extends Component
         $this->grandTotal = floatval(collect($this->cart)->sum('total_price'));
     }
 
-    // ─── Save Purchase Order ───────────────────────────────────
+    // ─── Save Purchase Order (BUSY-style Voucher) ───────────────────────────
 
     public function savePurchaseOrder()
     {
@@ -553,135 +554,71 @@ class PurchaseCreate extends Component
         }
 
         try {
-            DB::beginTransaction();
+            $voucherService = app(VoucherService::class);
 
-            $orderDateTime = \Carbon\Carbon::createFromFormat('Y-m-d', $this->purchaseDate)->startOfDay();
-            $totalAmount = floatval(collect($this->cart)->sum('total_price'));
+            // Build voucher data
+            $voucherData = [
+                'supplier_id'    => $this->supplier_id,
+                'date'           => $this->purchaseDate,
+                'invoice_number' => $this->invoiceNumber,
+                'billing_type'   => $this->paymentType,
+                'transport_cost' => floatval($this->transportCost),
+                'discount'       => 0,
+            ];
 
-            // Check if we're editing an existing order
+            // Build items array
+            $items = collect($this->cart)->map(function ($item) {
+                return [
+                    'product_id'    => $item['product_id'],
+                    'variant_id'    => $item['variant_id'] ?? null,
+                    'variant_value' => $item['variant_value'] ?? null,
+                    'quantity'      => intval($item['quantity']),
+                    'free_qty'      => intval($item['free_qty'] ?? 0),
+                    'rate'          => floatval($item['supplier_price']),
+                    'discount'      => 0,
+                    'tax_amount'    => 0,
+                    'wholesale_price'   => floatval($item['wholesale_price'] ?? 0),
+                    'distributor_price' => floatval($item['distributor_price'] ?? 0),
+                    'retail_price'      => floatval($item['retail_price'] ?? 0),
+                ];
+            })->toArray();
+
             if ($this->editOrderId) {
-                // UPDATE EXISTING ORDER
-                $order = PurchaseOrder::find($this->editOrderId);
-                if (!$order) {
-                    throw new \Exception('Order not found');
-                }
-
-                $order->update([
-                    'invoice_number' => $this->invoiceNumber,
-                    'supplier_id' => $this->supplier_id,
-                    'order_date' => $this->purchaseDate,
-                    'total_amount' => $totalAmount,
-                    'transport_cost' => floatval($this->transportCost),
-                    'payment_type' => $this->paymentType,
-                    'updated_at' => now(),
-                ]);
-
-                // Delete old items and create new ones
-                $order->items()->delete();
-
-                foreach ($this->cart as $item) {
-                    PurchaseOrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item['product_id'],
-                        'variant_id' => $item['variant_id'] ?? null,
-                        'variant_value' => $item['variant_value'] ?? null,
-                        'quantity' => intval($item['quantity']),
-                        'free_qty' => intval($item['free_qty'] ?? 0),
-                        'unit_price' => floatval($item['supplier_price']),
-                        'discount' => 0,
-                        'status' => 'pending',
-                        'created_at' => $orderDateTime,
-                        'updated_at' => $orderDateTime,
-                    ]);
-                }
-
-                DB::commit();
-
-                $redirectRoute = auth()->user()->role === 'staff'
-                    ? route('staff.purchase-order-list')
-                    : route('admin.purchase-order-list');
-
-                $this->js("
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Purchase Order {$order->order_code} ({$this->invoiceNumber}) updated successfully!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = '{$redirectRoute}';
-                    });
-                ");
-
-                Log::info("Purchase Order updated: {$order->order_code} / {$this->invoiceNumber}");
+                // MODIFY existing order via VoucherService (reverse & re-apply)
+                $order = $voucherService->modifyPurchaseVoucher(
+                    $this->editOrderId,
+                    $voucherData,
+                    $items
+                );
+                $message = "Purchase Voucher {$order->order_code} updated successfully!";
+                Log::info("Purchase Voucher modified via PurchaseCreate: {$order->order_code}");
             } else {
-                // CREATE NEW ORDER
-                // Generate order_code (keeping old pattern for backward compat)
-                $year = \Carbon\Carbon::createFromFormat('Y-m-d', $this->purchaseDate)->format('Ymd');
-                $lastOrder = PurchaseOrder::where('order_code', 'like', 'ORD-' . $year . '-%')
-                    ->orderByDesc('order_code')
-                    ->first();
-
-                if ($lastOrder && preg_match('/ORD-' . $year . '-(\d+)/', $lastOrder->order_code, $matches)) {
-                    $nextNumber = intval($matches[1]) + 1;
-                } else {
-                    $nextNumber = 1;
-                }
-                $orderCode = 'ORD-' . $year . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-
-                $order = PurchaseOrder::create([
-                    'order_code' => $orderCode,
-                    'invoice_number' => $this->invoiceNumber,
-                    'supplier_id' => $this->supplier_id,
-                    'order_date' => $this->purchaseDate,
-                    'status' => 'pending',
-                    'total_amount' => $totalAmount,
-                    'transport_cost' => floatval($this->transportCost),
-                    'payment_type' => $this->paymentType,
-                    'created_at' => $orderDateTime,
-                    'updated_at' => $orderDateTime,
-                ]);
-
-                foreach ($this->cart as $item) {
-                    PurchaseOrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item['product_id'],
-                        'variant_id' => $item['variant_id'] ?? null,
-                        'variant_value' => $item['variant_value'] ?? null,
-                        'quantity' => intval($item['quantity']),
-                        'free_qty' => intval($item['free_qty'] ?? 0),
-                        'unit_price' => floatval($item['supplier_price']),
-                        'discount' => 0,
-                        'status' => 'pending',
-                        'created_at' => $orderDateTime,
-                        'updated_at' => $orderDateTime,
-                    ]);
-                }
-
-                DB::commit();
-
-                $redirectRoute = auth()->user()->role === 'staff'
-                    ? route('staff.purchase-order-list')
-                    : route('admin.purchase-order-list');
-
-                $this->js("
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Purchase Order {$orderCode} ({$this->invoiceNumber}) created successfully!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        window.location.href = '{$redirectRoute}';
-                    });
-                ");
-
-                Log::info("Purchase Order created: {$orderCode} / {$this->invoiceNumber}");
+                // CREATE new order via VoucherService (stock ↑ + accounting)
+                $order = $voucherService->createPurchaseVoucher($voucherData, $items);
+                $message = "Purchase Voucher {$order->order_code} ({$this->invoiceNumber}) created successfully!";
+                Log::info("Purchase Voucher created via PurchaseCreate: {$order->order_code}");
             }
+
+            $redirectRoute = auth()->user()->role === 'staff'
+                ? route('staff.purchase-order-list')
+                : route('admin.purchase-voucher-list');
+
+            $escapedMessage = addslashes($message);
+            $this->js("
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '{$escapedMessage}',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = '{$redirectRoute}';
+                });
+            ");
+
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Error creating purchase order: " . $e->getMessage());
-            $this->js("Swal.fire('Error', 'Failed to create purchase order: " . addslashes($e->getMessage()) . "', 'error');");
+            Log::error("Error saving purchase voucher: " . $e->getMessage());
+            $this->js("Swal.fire('Error', 'Failed to save purchase voucher: " . addslashes($e->getMessage()) . "', 'error');");
         }
     }
 
@@ -813,6 +750,7 @@ class PurchaseCreate extends Component
 
     public function render()
     {
-        return view('livewire.admin.purchase-create');
+        return view('livewire.admin.purchase-create')
+            ->layout($this->layout, ['erpContext' => 'voucher']);
     }
 }

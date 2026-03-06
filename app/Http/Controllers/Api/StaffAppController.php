@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Services\AccountingService;
 
 /**
  * Staff App Controller
@@ -495,14 +496,14 @@ class StaffAppController extends ApiController
             'prices',
             'price',
         ])
-        ->where(function ($q) use ($searchLower) {
-            $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
-              ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchLower}%"])
-              ->orWhereRaw('LOWER(model) LIKE ?', ["%{$searchLower}%"]);
-        })
-        ->where('status', 'active')
-        ->take(50)
-        ->get();
+            ->where(function ($q) use ($searchLower) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
+                    ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchLower}%"])
+                    ->orWhereRaw('LOWER(model) LIKE ?', ["%{$searchLower}%"]);
+            })
+            ->where('status', 'active')
+            ->take(50)
+            ->get();
 
         $expandedProducts = collect();
 
@@ -789,6 +790,14 @@ class StaffAppController extends ApiController
                 }
             }
 
+            // Post accounting entries (Voucher + VoucherEntries)
+            // Note: COGS is 0 as staff sales use allocation system, not FIFO stock deduction
+            try {
+                AccountingService::postSale($sale, 0);
+            } catch (\Exception $e) {
+                Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
+            }
+
             DB::commit();
 
             $sale->load(['customer', 'items', 'payments']);
@@ -814,7 +823,6 @@ class StaffAppController extends ApiController
                 'message' => $message,
                 'is_pending' => !$isAllocationEnabled,
             ], $isAllocationEnabled ? 'Sale created' : 'Sale pending approval', 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Staff create sale error: ' . $e->getMessage());
@@ -965,7 +973,6 @@ class StaffAppController extends ApiController
                 'payment' => $payment,
                 'message' => 'Payment added. Pending admin approval.',
             ], 'Payment added', 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Staff add payment error: ' . $e->getMessage());
@@ -1187,7 +1194,6 @@ class StaffAppController extends ApiController
             }
 
             return $this->success(null, 'Payments collected successfully and sent for approval', 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Staff collection error: ' . $e->getMessage());
@@ -1220,9 +1226,9 @@ class StaffAppController extends ApiController
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('sale_id', 'like', "%{$search}%")
-                  ->orWhere('invoice_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', "%{$search}%"));
+                    ->orWhere('invoice_number', 'like', "%{$search}%")
+                    ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -1286,8 +1292,8 @@ class StaffAppController extends ApiController
                     $stock = \App\Models\ProductStock::where('product_id', $item->product_id)
                         ->where(function ($q) {
                             $q->whereNull('variant_value')
-                              ->orWhere('variant_value', '')
-                              ->orWhere('variant_value', 'null');
+                                ->orWhere('variant_value', '')
+                                ->orWhere('variant_value', 'null');
                         })
                         ->whereNull('variant_id')
                         ->first();
@@ -1355,7 +1361,6 @@ class StaffAppController extends ApiController
             return $this->success([
                 'sale' => $sale,
             ], 'Sale approved successfully');
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('API Sale approval error: ' . $e->getMessage());
@@ -1397,7 +1402,6 @@ class StaffAppController extends ApiController
             return $this->success([
                 'sale' => $sale->load(['customer', 'user']),
             ], 'Sale rejected');
-
         } catch (\Exception $e) {
             Log::error('API Sale rejection error: ' . $e->getMessage());
             return $this->error('Failed to reject sale: ' . $e->getMessage(), 500);
@@ -1444,7 +1448,6 @@ class StaffAppController extends ApiController
             return $this->success([
                 'location' => $location,
             ], 'Location recorded successfully');
-
         } catch (\Exception $e) {
             Log::error('API Location recording error: ' . $e->getMessage(), [
                 'staff_id' => Auth::id(),

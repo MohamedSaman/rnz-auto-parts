@@ -12,6 +12,7 @@ use App\Models\SaleItem;
 use App\Models\POSSession;
 use App\Models\StaffProduct;
 use App\Services\FIFOStockService;
+use App\Services\AccountingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -440,6 +441,14 @@ class StaffBilling extends Component
                     'total_discount' => $item['discount'] * $item['quantity'],
                     'total' => ($item['price'] - $item['discount']) * $item['quantity']
                 ]);
+            }
+
+            // Post accounting entries (Voucher + VoucherEntries)
+            // Note: COGS is 0 as stock was transferred to staff assignments, not deducted via FIFO here
+            try {
+                AccountingService::postSale($sale, 0);
+            } catch (\Exception $e) {
+                Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
             }
 
             DB::commit();

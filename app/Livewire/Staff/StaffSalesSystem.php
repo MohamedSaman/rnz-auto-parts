@@ -12,6 +12,8 @@ use App\Models\StaffProduct;
 use App\Models\ProductStock;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Services\AccountingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 #[Layout('components.layouts.staff')]
@@ -378,6 +380,14 @@ class StaffSalesSystem extends Component
 
                 // Reduce staff product allocation using FIFO
                 $this->reduceStaffProduct($item['id'], $item['quantity']);
+            }
+
+            // Post accounting entries (Voucher + VoucherEntries)
+            // Note: COGS is 0 as stock was transferred to staff assignments, not deducted via FIFO here
+            try {
+                AccountingService::postSale($sale, 0);
+            } catch (\Exception $e) {
+                Log::warning('Accounting posting failed for sale ' . $sale->id . ': ' . $e->getMessage());
             }
 
             DB::commit();
