@@ -1308,6 +1308,13 @@ class Products extends Component
                     ]);
                 }
 
+                // Save low_stock threshold to all variant stock records
+                if ($this->editLowStock !== null) {
+                    ProductStock::where('product_id', $product->id)
+                        ->where('variant_id', $this->variant_id)
+                        ->update(['low_stock' => $this->editLowStock ?? 0]);
+                }
+
                 Log::info('updateProduct: Updated to variant pricing mode', [
                     'product_id' => $product->id,
                     'variant_id' => $this->variant_id,

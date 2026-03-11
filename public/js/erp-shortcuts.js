@@ -204,6 +204,7 @@
         if (helpOverlayVisible) {
             if (e.key === "Escape") {
                 e.preventDefault();
+                e.stopPropagation(); // prevent global ESC→history.back from also firing
                 hideHelp();
             }
             return;

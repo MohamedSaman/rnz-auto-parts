@@ -95,6 +95,10 @@ use App\Livewire\Admin\SalesVoucherList;
 use App\Livewire\Admin\PurchaseVoucherModify;
 use App\Livewire\Admin\PurchaseVoucherList;
 
+// BUSY-style Journal & Contra Voucher Components
+use App\Livewire\Admin\JournalVoucher;
+use App\Livewire\Admin\ContraVoucher;
+
 // Staff Type Components
 use App\Livewire\Admin\SaleApproval;
 use App\Livewire\Admin\PaymentApproval;
@@ -243,6 +247,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         // BUSY-style Purchase Voucher routes
         Route::get('/purchase-voucher-modify', PurchaseVoucherModify::class)->name('purchase-voucher-modify');
         Route::get('/purchase-voucher-list', PurchaseVoucherList::class)->name('purchase-voucher-list');
+
+        // BUSY-style Journal & Contra Voucher routes
+        Route::get('/journal-voucher', JournalVoucher::class)->name('journal-voucher');
+        Route::get('/contra-voucher', ContraVoucher::class)->name('contra-voucher');
 
         Route::get('/settings', Settings::class)->name('settings');
         Route::get('/return-product', ReturnProduct::class)->name('return-product');

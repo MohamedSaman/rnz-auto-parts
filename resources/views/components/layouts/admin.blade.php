@@ -1660,7 +1660,7 @@
                     {{-- ╔══════════════════════════════════════╗ --}}
                     {{-- ║  2. TRANSACTIONS                     ║ --}}
                     {{-- ╚══════════════════════════════════════╝ --}}
-                    <x-erp-nav-dropdown label="Transactions" icon="arrow-left-right" :active="request()->routeIs('admin.pos-sales', 'admin.sale-approval', 'admin.sales-system', 'admin.sales-list', 'admin.store-billing', 'admin.quotation-list', 'admin.quotation-system', 'admin.purchase-order-list', 'admin.purchase-create', 'admin.purchase-voucher-modify', 'admin.purchase-voucher-list', 'admin.grn', 'admin.add-customer-receipt', 'admin.list-customer-receipt', 'admin.add-supplier-receipt', 'admin.list-supplier-receipt', 'admin.return-product', 'admin.return-list', 'admin.return-supplier', 'admin.list-supplier-return', 'admin.expenses', 'admin.sales-voucher-add', 'admin.sales-voucher-modify', 'admin.sales-voucher-list')">
+                    <x-erp-nav-dropdown label="Transactions" icon="arrow-left-right" :active="request()->routeIs('admin.pos-sales', 'admin.sale-approval', 'admin.sales-system', 'admin.sales-list', 'admin.store-billing', 'admin.quotation-list', 'admin.quotation-system', 'admin.purchase-order-list', 'admin.purchase-create', 'admin.purchase-voucher-modify', 'admin.purchase-voucher-list', 'admin.grn', 'admin.add-customer-receipt', 'admin.list-customer-receipt', 'admin.add-supplier-receipt', 'admin.list-supplier-receipt', 'admin.return-product', 'admin.return-list', 'admin.return-supplier', 'admin.list-supplier-return', 'admin.expenses', 'admin.sales-voucher-add', 'admin.sales-voucher-modify', 'admin.sales-voucher-list', 'admin.journal-voucher', 'admin.contra-voucher')">
 
                         {{-- ── Sales Voucher ── --}}
                         <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.sales-voucher-add','admin.sales-voucher-modify','admin.sales-voucher-list') ? 'erp-sub-open' : '' }}" data-sub="txn-sv">
@@ -1748,12 +1748,38 @@
 
                         <div class="erp-dropdown-divider"></div>
 
-                        {{-- ── Journal / Expense Voucher ── --}}
-                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.expenses') ? 'erp-sub-open' : '' }}" data-sub="txn-jv">
-                            <i class="bi bi-journal-text"></i> Journal / Expense Voucher
+                        {{-- ── Journal Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.journal-voucher') ? 'erp-sub-open' : '' }}" data-sub="txn-jv">
+                            <i class="bi bi-journal-bookmark"></i> Journal Voucher
                             <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
                         </button>
-                        <div class="erp-sub-panel {{ request()->routeIs('admin.expenses') ? 'show' : '' }}" id="txn-jv">
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.journal-voucher') ? 'show' : '' }}" id="txn-jv">
+                            <a href="{{ route('admin.journal-voucher') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.journal-voucher') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle"></i> Add / List
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Contra Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.contra-voucher') ? 'erp-sub-open' : '' }}" data-sub="txn-ctr">
+                            <i class="bi bi-arrow-left-right"></i> Contra Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.contra-voucher') ? 'show' : '' }}" id="txn-ctr">
+                            <a href="{{ route('admin.contra-voucher') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.contra-voucher') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle"></i> Add / List
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Expense Voucher ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.expenses') ? 'erp-sub-open' : '' }}" data-sub="txn-exp">
+                            <i class="bi bi-journal-text"></i> Expense Voucher
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.expenses') ? 'show' : '' }}" id="txn-exp">
                             <a href="{{ route('admin.expenses') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.expenses') ? 'active' : '' }}">
                                 <i class="bi bi-plus-circle"></i> Add / List <kbd class="erp-kbd">Alt+Ctrl+F7</kbd>
                             </a>

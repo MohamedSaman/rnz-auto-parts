@@ -194,7 +194,14 @@
                         break;
                     }
                     case "Escape": {
+                        var anyOpen = getTopItems().some(function (it) {
+                            return isOpen(it);
+                        });
                         closeAll();
+                        if (anyOpen) {
+                            /* A dropdown was closed — don't also go back in history */
+                            e.stopPropagation();
+                        }
                         break;
                     }
                 }
@@ -252,9 +259,27 @@
                 }
                 case "Escape": {
                     e.preventDefault();
-                    closeItem(curItem);
-                    var rb = getItemBtn(curItem);
-                    if (rb) rb.focus();
+                    e.stopPropagation(); /* handled here — don't also go back in history */
+
+                    /* ── Level 3 → Level 2: focused inside a sub-panel ── */
+                    var subPanel = focused.closest(".erp-sub-panel");
+                    if (subPanel) {
+                        /* Find the toggle button whose data-sub matches this panel's id */
+                        var subToggle = curItem.querySelector(
+                            '[data-sub="' + subPanel.id + '"]',
+                        );
+                        if (subToggle) {
+                            subToggle.click(); /* closes the sub-panel */
+                            setTimeout(function () {
+                                subToggle.focus();
+                            }, 20);
+                        }
+                    } else {
+                        /* ── Level 2 → Level 1: at a plain dropdown item ── */
+                        closeItem(curItem);
+                        var rb = getItemBtn(curItem);
+                        if (rb) rb.focus();
+                    }
                     break;
                 }
                 case "Enter": {
@@ -285,4 +310,48 @@
             }, 400);
         }
     }); /* end DOMContentLoaded */
+
+    /* ── ESC = go back one page (global, except on home) ────
+     *
+     *  Fires only when:
+     *   - Not typing in an input / textarea / select
+     *   - No Bootstrap modal is open
+     *   - Help overlay is NOT visible (erp-shortcuts.js handles that
+     *     via a capture listener that calls stopPropagation, so this
+     *     listener will never see that keydown)
+     *   - Current page is NOT the home/dashboard screen
+     *      (data-erp-context="home")
+     *
+     *  When a nav dropdown is open, the nav keydown listener (above)
+     *  calls e.stopPropagation() so this global handler is skipped —
+     *  one ESC press closes the dropdown without also navigating back.
+     * ────────────────────────────────────────────────────── */
+    document.addEventListener(
+        "keydown",
+        function (e) {
+            if (e.key !== "Escape") return;
+
+            /* skip if user is typing */
+            var active = document.activeElement;
+            if (active) {
+                var tag = active.tagName.toLowerCase();
+                if (tag === "input" || tag === "textarea" || tag === "select")
+                    return;
+                if (active.isContentEditable) return;
+            }
+
+            /* skip if a Bootstrap modal is open */
+            if (document.querySelector(".modal.show")) return;
+
+            /* skip on the home / dashboard screen */
+            var ctx = (
+                document.body.getAttribute("data-erp-context") || ""
+            ).toLowerCase();
+            if (ctx === "home") return;
+
+            e.preventDefault();
+            window.history.back();
+        },
+        false,
+    );
 })();

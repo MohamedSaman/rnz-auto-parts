@@ -132,7 +132,6 @@
                                 <th class="text-end">Total (Rs)</th>
                                 <th class="text-center">Type</th>
                                 <th class="text-center">Status</th>
-                                <th class="text-center" style="width:130px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -165,7 +164,7 @@
                                             {{ ucfirst($voucher->status) }}
                                         </span>
                                     </td>
-                                    <td class="text-center">
+                                    {{--<td class="text-center">
                                         <div class="btn-group btn-group-sm">
                                             <button class="btn btn-outline-primary px-2" title="Modify" wire:click="modifyVoucher({{ $voucher->id }})" style="font-size:11px;">
                                                 <i class="bi bi-pencil"></i>
@@ -179,7 +178,7 @@
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
-                                    </td>
+                                    </td>--}}
                                 </tr>
                             @empty
                                 <tr>

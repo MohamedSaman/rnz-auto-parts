@@ -946,12 +946,21 @@
                                         </div>
                                     </div>
 
-                                    <h4 class="fw-bold text-dark mb-1">{{ $viewProduct->name }}</h4>
-                                    <p class="text-muted mb-1">
-                                        <i class="bi bi-upc-scan me-1"></i>
-                                        <span class="font-monospace">{{ $viewProduct->code }}</span>
-                                    </p>
-
+                                    <h4 class="fw-bold text-dark mb-2">{{ $viewProduct->name }}</h4>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-6">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="bi bi-geo-alt text-info"></i> Store Location
+                                            </small>
+                                            <span class="fw-semibold text-dark">{{ $viewProduct->store_location ?? '-' }}</span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="bi bi-stack text-success"></i> Rack Number
+                                            </small>
+                                            <span class="fw-semibold text-dark">{{ $viewProduct->rack_number ?? '-' }}</span>
+                                        </div>
+                                    </div>
                                     @php
                                         // Compute totals: for variant products sum all variant stocks (available & damaged),
                                         // otherwise use the single stock record
@@ -1180,7 +1189,7 @@
                                         @endif
                                     </div>
 
-                                    <div class="info-section mb-4">
+                                   {{-- <div class="info-section mb-4">
                                         <div class="section-header d-flex align-items-center mb-1">
                                             <div class="icon-box bg-warning bg-opacity-10 text-warning rounded-circle me-3"
                                                 style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
@@ -1204,7 +1213,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div>--}}
 
                                     @if($viewProduct->description)
                                     <div class="info-section">
@@ -1604,35 +1613,7 @@
                                     </div>
                                 </div>
                                 @else
-                                <!-- Variant-Based Pricing Mode -->
-                                <div class="alert alert-info border-info">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    <strong>Note:</strong> Select an existing variant type to manage prices and stock for each value.
-                                    <a href="{{ route('admin.manage-variants') }}" target="_blank" class="alert-link">
-                                        <i class="bi bi-plus-circle me-1"></i>Manage Variants
-                                    </a>
-                                </div>
-
-                                <!-- Select Existing Variant -->
-                                <div class="row mb-4">
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-semibold">
-                                            <i class="bi bi-folder2-open text-primary me-2"></i>Select Variant Type:
-                                        </label>
-                                        <select class="form-select form-select-lg" 
-                                            wire:model="variant_id" wire:change="selectVariant($event.target.value)">
-                                            <option value="">-- Choose a variant --</option>
-                                            @foreach($availableVariants as $variant)
-                                            <option value="{{ $variant['id'] }}">
-                                                {{ $variant['variant_name'] }} ({{ count($variant['variant_values'] ?? []) }} values)
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                        @error('variant_id')
-                                        <span class="text-danger small">* {{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
+                                
 
                                 <!-- Pricing Table for Each Value (shown when variant is selected) -->
                                 @if(!empty($variant_id) && count($variant_prices) > 0)
@@ -2163,88 +2144,10 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-1">
-                                            <label for="editLowStock" class="form-label fw-semibold text-danger">Low Stock Alert:</label>
-                                            <div class="input-group">
-                                                <span class="input-group-text bg-danger-subtle text-danger"><i class="bi bi-bell"></i></span>
-                                                <input type="number" class="form-control" id="editLowStock" wire:model="editLowStock" placeholder="Alert Qty">
-                                            </div>
-                                            @error('editLowStock')
-                                            <span class="text-danger small">* {{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
                                 </div>
 
-                                <!-- Warehouse Information -->
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="mb-1">
-                                            <label for="editFastMoving" class="form-label fw-semibold">
-                                                <i class="bi bi-lightning-charge text-warning"></i> Fast Moving:
-                                            </label>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="editFastMoving" 
-                                                    wire:model="editFastMoving">
-                                                <label class="form-check-label" for="editFastMoving">Mark as fast moving product</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-1">
-                                            <label for="editStoreLocation" class="form-label fw-semibold">
-                                                <i class="bi bi-geo-alt text-info"></i> Store Location:
-                                            </label>
-                                            <input type="text" class="form-control" id="editStoreLocation" 
-                                                wire:model="editStoreLocation" placeholder="e.g., Shelf A1">
-                                            @error('editStoreLocation')
-                                            <span class="text-danger small">* {{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-1">
-                                            <label for="editRackNumber" class="form-label fw-semibold">
-                                                <i class="bi bi-stack text-success"></i> Rack Number:
-                                            </label>
-                                            <input type="text" class="form-control" id="editRackNumber" 
-                                                wire:model="editRackNumber" placeholder="e.g., R-05">
-                                            @error('editRackNumber')
-                                            <span class="text-danger small">* {{ $message }}</span>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
                                 @else
 
-                                <div class="alert alert-info border-info">
-                                    <i class="bi bi-info-circle me-2"></i>
-                                    <strong>Note:</strong> Select an existing variant type to edit prices and stock for each value.
-                                </div>
-
-                                {{-- Variant selector (show when there are available variants) --}}
-                                @if(!empty($availableVariants))
-                                <div class="row mb-4">
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-semibold">
-                                            <i class="bi bi-folder2-open text-primary me-2"></i>Select Variant Type:
-                                        </label>
-                                        <select class="form-select form-select-lg"
-                                            wire:model.live="variant_id" wire:change="selectVariant($event.target.value)">
-                                            <option value="">-- Choose a variant --</option>
-                                            @foreach($availableVariants as $variant)
-                                            <option value="{{ $variant['id'] }}">
-                                                {{ $variant['variant_name'] }} ({{ count($variant['variant_values'] ?? []) }} values)
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                        @error('variant_id')
-                                        <span class="text-danger small">* {{ $message }}</span>
-                                        @enderror
-                                    </div>
-                                </div>
-                                @endif
 
                                 {{-- If the product has exactly one variant value, show inline editable inputs immediately --}}
                                 @if(count($variant_prices) === 1)
@@ -2257,15 +2160,6 @@
                                         if(($v['id'] ?? null) == $variant_id) { $variantName = $v['variant_name']; break; }
                                     }
                                 @endphp
-
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-semibold">
-                                            <i class="bi bi-folder2-open text-primary me-2"></i>Variant Type:
-                                            <strong class="ms-2">{{ $variantName ?: 'Variant' }}</strong>
-                                        </label>
-                                    </div>
-                                </div>
 
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-3">
@@ -2437,6 +2331,65 @@
                                 @endif
 
                                 @endif
+
+                                {{-- ── Warehouse & Stock Info (always visible regardless of pricing mode) ── --}}
+                                <hr class="my-3">
+                                <h6 class="fw-semibold mb-3" style="font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:#64748b;">
+                                    <i class="bi bi-building me-1"></i> Warehouse &amp; Stock Info
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editLowStock" class="form-label fw-semibold text-danger">
+                                                <i class="bi bi-bell me-1"></i> Low Stock Alert:
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-danger-subtle text-danger"><i class="bi bi-bell"></i></span>
+                                                <input type="number" class="form-control" id="editLowStock" wire:model="editLowStock" placeholder="Alert Qty" min="0">
+                                            </div>
+                                            @error('editLowStock')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editFastMoving" class="form-label fw-semibold">
+                                                <i class="bi bi-lightning-charge text-warning"></i> Fast Moving:
+                                            </label>
+                                            <div class="form-check form-switch mt-2">
+                                                <input class="form-check-input" type="checkbox" id="editFastMoving"
+                                                    wire:model="editFastMoving">
+                                                <label class="form-check-label" for="editFastMoving">Mark as fast moving</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editStoreLocation" class="form-label fw-semibold">
+                                                <i class="bi bi-geo-alt text-info"></i> Store Location:
+                                            </label>
+                                            <input type="text" class="form-control" id="editStoreLocation"
+                                                wire:model="editStoreLocation" placeholder="e.g., Shelf A1">
+                                            @error('editStoreLocation')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-1">
+                                            <label for="editRackNumber" class="form-label fw-semibold">
+                                                <i class="bi bi-stack text-success"></i> Rack Number:
+                                            </label>
+                                            <input type="text" class="form-control" id="editRackNumber"
+                                                wire:model="editRackNumber" placeholder="e.g., R-05">
+                                            @error('editRackNumber')
+                                            <span class="text-danger small">* {{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -3227,7 +3180,15 @@
 @endpush
 
     @if(isset($lowStockCount) && $lowStockCount > 0)
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;"
+         x-data="{
+             show: localStorage.getItem('lowStockAlertDismissedDate') !== new Date().toISOString().slice(0,10),
+             dismiss() {
+                 localStorage.setItem('lowStockAlertDismissedDate', new Date().toISOString().slice(0,10));
+                 this.show = false;
+             }
+         }"
+         x-show="show">
         <div class="toast show text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
             <div class="d-flex align-items-center justify-content-between p-2">
                 <div class="toast-body d-flex align-items-center gap-2">
@@ -3238,7 +3199,7 @@
                         <a href="#" wire:click.prevent="$set('stockFilter', 'low')" class="text-white text-decoration-underline ms-1 fw-bold">View</a>
                     </div>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" @click="dismiss()" aria-label="Close"></button>
             </div>
         </div>
     </div>
