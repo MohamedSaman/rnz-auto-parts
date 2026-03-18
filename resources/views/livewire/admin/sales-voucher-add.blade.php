@@ -93,11 +93,24 @@
                     <select class="form-select form-select-sm" wire:model.live="billingType">
                         <option value="cash">Cash</option>
                         <option value="credit">Credit</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                </div>
+
+                {{-- Price Type --}}
+                <div class="col-md-2">
+                    <label class="form-label small fw-semibold text-muted mb-0">
+                        <i class="bi bi-tags me-1"></i>Price Type
+                    </label>
+                    <select class="form-select form-select-sm" wire:model.live="priceType">
+                        <option value="retail">Retail Price</option>
+                        <option value="wholesale">Wholesale Price</option>
+                        <option value="distributor">Distributor Price</option>
                     </select>
                 </div>
 
                 {{-- Salesman --}}
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <label class="form-label small fw-semibold text-muted mb-0">
                         <i class="bi bi-person-badge me-1"></i>Salesman
                     </label>
@@ -110,7 +123,7 @@
                 </div>
 
                 {{-- Notes --}}
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label small fw-semibold text-muted mb-0">
                         <i class="bi bi-chat-dots me-1"></i>Narration / Notes
                     </label>
@@ -195,7 +208,14 @@
                                         <div class="d-flex justify-content-between text-muted" style="font-size:10px;">
                                             <span>Code: {{ $product['code'] }}</span>
                                             <span>Stock: {{ $product['available_stock'] }}</span>
-                                            <span>Rs.{{ number_format($product['selling_price'], 2) }}</span>
+                                            @php
+                                            $rowPrice = $priceType === 'retail'
+                                            ? ($product['retail_price'] ?? $product['distributor_price'] ?? $product['wholesale_price'])
+                                            : ($priceType === 'wholesale'
+                                            ? ($product['wholesale_price'] ?? $product['distributor_price'] ?? $product['retail_price'])
+                                            : ($product['distributor_price'] ?? $product['wholesale_price'] ?? $product['retail_price']));
+                                            @endphp
+                                            <span>Rs.{{ number_format($rowPrice, 2) }}</span>
                                         </div>
                                     </div>
                                     @endforeach
@@ -430,6 +450,101 @@
     </div>
     @endif
 
+    {{-- Cheque Entry Modal --}}
+    @if($showChequeModal)
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white py-2">
+                    <h6 class="modal-title"><i class="bi bi-receipt me-2"></i>Add Cheques</h6>
+                    <button class="btn-close btn-close-white" wire:click="closeChequeModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2 align-items-end mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Cheque Number</label>
+                            <input type="text" class="form-control form-control-sm" wire:model="tempChequeNumber" placeholder="Cheque #">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Bank Name</label>
+                            <input type="text" class="form-control form-control-sm" wire:model="tempChequeBankName" placeholder="Bank name">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold mb-1">Cheque Date</label>
+                            <input type="date" class="form-control form-control-sm" wire:model="tempChequeDate">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold mb-1">Amount</label>
+                            <input type="number" step="0.01" class="form-control form-control-sm" wire:model="tempChequeAmount">
+                        </div>
+                        <div class="col-md-1 d-grid">
+                            <button class="btn btn-sm btn-primary" wire:click="addCheque" title="Add cheque">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive border rounded">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cheque #</th>
+                                    <th>Bank</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-center" style="width:60px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($cheques as $index => $chq)
+                                <tr>
+                                    <td>{{ $chq['number'] }}</td>
+                                    <td>{{ $chq['bank_name'] }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($chq['date'])->format('d-M-Y') }}</td>
+                                    <td class="text-end">Rs.{{ number_format($chq['amount'], 2) }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm text-danger border-0 p-0" wire:click="removeCheque({{ $index }})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">No cheques added yet.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="small text-muted">Grand Total: <strong>Rs.{{ number_format($this->grandTotal, 2) }}</strong></div>
+                            <div class="small text-muted">Cheque Total: <strong>Rs.{{ number_format($this->totalChequeAmount, 2) }}</strong></div>
+                            <div class="small {{ abs($this->remainingChequeAmount) < 0.01 ? 'text-success' : 'text-danger' }}">
+                                Remaining: <strong>Rs.{{ number_format($this->remainingChequeAmount, 2) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            @if(abs($this->remainingChequeAmount) < 0.01)
+                            <span class="badge bg-success">Cheque total matched</span>
+                            @else
+                            <span class="badge bg-warning text-dark">Add cheques to match total</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button class="btn btn-sm btn-outline-secondary" wire:click="closeChequeModal">Cancel</button>
+                    <button class="btn btn-sm btn-success" wire:click="completeChequeVoucherSave">
+                        <i class="bi bi-check2-circle me-1"></i>Complete Sale
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Keyboard Shortcut Help --}}
     <div class="mt-2 text-center">
         <small class="text-muted">
@@ -477,7 +592,7 @@
                 // Escape = Reset
                 if (e.key === 'Escape') {
                     // Only reset if no modal is open
-                    if (!@this.showSavedModal && !@this.showCustomerModal) {
+                    if (!@this.showSavedModal && !@this.showCustomerModal && !@this.showChequeModal) {
                         e.preventDefault();
                         @this.resetVoucherForm();
                     }

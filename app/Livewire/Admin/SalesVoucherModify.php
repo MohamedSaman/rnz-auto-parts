@@ -5,7 +5,9 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use App\Livewire\Concerns\WithDynamicLayout;
+use App\Models\Cheque;
 use App\Models\Customer;
+use App\Models\Payment;
 use App\Models\ProductDetail;
 use App\Models\Sale;
 use App\Models\User;
@@ -31,6 +33,7 @@ class SalesVoucherModify extends Component
     public $customerId = '';
     public $customerSearch = '';
     public $billingType = 'cash';
+    public $priceType = 'retail'; // retail, wholesale, distributor
     public $salesmanId = '';
     public $notes = '';
     public $items = [];
@@ -47,15 +50,37 @@ class SalesVoucherModify extends Component
     public $isLoaded = false;
     public $showSavedModal = false;
     public $savedSale = null;
+    public $showChequeModal = false;
+
+    // Cheque entry state
+    public $cheques = [];
+    public $tempChequeNumber = '';
+    public $tempChequeBankName = '';
+    public $tempChequeDate = '';
+    public $tempChequeAmount = 0;
 
     public function mount($saleId = null)
     {
         $this->loadCustomers();
         $this->loadSalesmen();
+        $this->tempChequeDate = now()->format('Y-m-d');
 
         if ($saleId) {
             $this->loadVoucher($saleId);
         }
+    }
+
+    private function getProductPriceByType(array $product): float
+    {
+        if ($this->priceType === 'retail') {
+            return (float) ($product['retail_price'] ?? $product['distributor_price'] ?? $product['wholesale_price'] ?? 0);
+        }
+
+        if ($this->priceType === 'wholesale') {
+            return (float) ($product['wholesale_price'] ?? $product['distributor_price'] ?? $product['retail_price'] ?? 0);
+        }
+
+        return (float) ($product['distributor_price'] ?? $product['wholesale_price'] ?? $product['retail_price'] ?? 0);
     }
 
     public function loadCustomers()
@@ -84,7 +109,6 @@ class SalesVoucherModify extends Component
         }
 
         $query = Sale::with(['customer', 'items'])
-            ->where('sale_type', 'admin')
             ->where('status', '!=', 'cancelled');
 
         switch ($this->searchType) {
@@ -139,6 +163,14 @@ class SalesVoucherModify extends Component
         $this->voucherNumber = $sale->invoice_number;
         $this->customerId = $sale->customer_id;
         $this->billingType = $sale->billing_type ?? ($sale->payment_status === 'paid' ? 'cash' : 'credit');
+
+        // Backward compatibility: old records may be cheque paid but billing_type stored as cash/credit.
+        $hasChequePayment = Payment::where('sale_id', $sale->id)
+            ->where('payment_method', 'cheque')
+            ->exists();
+        if ($hasChequePayment) {
+            $this->billingType = 'cheque';
+        }
         $this->salesmanId = $sale->salesman_id ?? '';
         $this->notes = $sale->notes ?? '';
 
@@ -183,9 +215,40 @@ class SalesVoucherModify extends Component
         // Add empty row
         $this->addEmptyRow();
 
+        if ($this->billingType === 'cheque') {
+            $this->loadChequeEntries($sale->id);
+        } else {
+            $this->resetChequeEntries();
+        }
+
         $this->isLoaded = true;
         $this->showSearchResults = false;
         $this->searchQuery = '';
+    }
+
+    private function loadChequeEntries(int $saleId): void
+    {
+        $payment = Payment::with('cheques')
+            ->where('sale_id', $saleId)
+            ->where('payment_method', 'cheque')
+            ->latest('id')
+            ->first();
+
+        $this->cheques = [];
+
+        if ($payment) {
+            $this->cheques = $payment->cheques->map(function ($cheque) {
+                return [
+                    'number' => $cheque->cheque_number,
+                    'bank_name' => $cheque->bank_name,
+                    'date' => optional($cheque->cheque_date)->format('Y-m-d') ?? (string) $cheque->cheque_date,
+                    'amount' => (float) $cheque->cheque_amount,
+                ];
+            })->toArray();
+        }
+
+        $this->tempChequeDate = now()->format('Y-m-d');
+        $this->tempChequeAmount = max(0, $this->remainingChequeAmount);
     }
 
     // --- Customer methods (same as Add) ---
@@ -247,6 +310,9 @@ class SalesVoucherModify extends Component
                 'code' => $product->code ?? '',
                 'barcode' => $product->barcode ?? '',
                 'selling_price' => $product->price->selling_price ?? 0,
+                'retail_price' => $product->price->retail_price ?? 0,
+                'wholesale_price' => $product->price->wholesale_price ?? 0,
+                'distributor_price' => $product->price->distributor_price ?? 0,
                 'available_stock' => $product->stock->available_stock ?? 0,
                 'variant_id' => null,
                 'variant_value' => null,
@@ -267,7 +333,7 @@ class SalesVoucherModify extends Component
             'product_name' => $product['name'],
             'product_code' => $product['code'],
             'sku' => $product['barcode'] ?? $product['code'],
-            'rate' => $product['selling_price'],
+            'rate' => $this->getProductPriceByType($product),
             'available_stock' => $product['available_stock'],
             'variant_id' => $product['variant_id'],
             'variant_value' => $product['variant_value'],
@@ -283,6 +349,30 @@ class SalesVoucherModify extends Component
 
         if ($index === count($this->items) - 1) {
             $this->addEmptyRow();
+        }
+    }
+
+    public function updatedPriceType()
+    {
+        foreach ($this->items as $index => $item) {
+            if (empty($item['product_id'])) {
+                continue;
+            }
+
+            $product = ProductDetail::with('price')->find($item['product_id']);
+            if (!$product) {
+                continue;
+            }
+
+            $prices = [
+                'selling_price' => $product->price->selling_price ?? 0,
+                'retail_price' => $product->price->retail_price ?? 0,
+                'wholesale_price' => $product->price->wholesale_price ?? 0,
+                'distributor_price' => $product->price->distributor_price ?? 0,
+            ];
+
+            $this->items[$index]['rate'] = $this->getProductPriceByType($prices);
+            $this->calculateRowTotal($index);
         }
     }
 
@@ -378,57 +468,242 @@ class SalesVoucherModify extends Component
         return collect($this->items)->where('product_id', '!=', null)->count();
     }
 
-    // --- Update Voucher ---
-    public function updateVoucher()
+    public function getTotalChequeAmountProperty()
+    {
+        return (float) collect($this->cheques)->sum('amount');
+    }
+
+    public function getRemainingChequeAmountProperty()
+    {
+        return round((float) $this->grandTotal - (float) $this->totalChequeAmount, 2);
+    }
+
+    public function updatedBillingType($value)
+    {
+        if ($value !== 'cheque') {
+            $this->showChequeModal = false;
+            $this->resetChequeEntries();
+        } elseif ($this->loadedSaleId) {
+            $this->loadChequeEntries($this->loadedSaleId);
+        }
+    }
+
+    public function addCheque()
+    {
+        if (!$this->tempChequeNumber || !$this->tempChequeBankName || !$this->tempChequeDate) {
+            session()->flash('error', 'Please fill cheque number, bank, and cheque date.');
+            return;
+        }
+
+        $amount = (float) $this->tempChequeAmount;
+        if ($amount <= 0) {
+            session()->flash('error', 'Cheque amount must be greater than zero.');
+            return;
+        }
+
+        $existsInLocal = collect($this->cheques)->contains(function ($chq) {
+            return strcasecmp($chq['number'], $this->tempChequeNumber) === 0;
+        });
+
+        if ($existsInLocal) {
+            session()->flash('error', 'Cheque number already added in this voucher.');
+            return;
+        }
+
+        $duplicateQuery = Cheque::where('cheque_number', $this->tempChequeNumber);
+        if ($this->loadedSaleId) {
+            $duplicateQuery->whereHas('payment', function ($q) {
+                $q->where('sale_id', '!=', $this->loadedSaleId);
+            });
+        }
+
+        if ($duplicateQuery->exists()) {
+            session()->flash('error', 'Cheque number already exists.');
+            return;
+        }
+
+        if ($amount > ($this->remainingChequeAmount + 0.01)) {
+            session()->flash('error', 'Cheque amount cannot exceed remaining amount.');
+            return;
+        }
+
+        $this->cheques[] = [
+            'number' => $this->tempChequeNumber,
+            'bank_name' => $this->tempChequeBankName,
+            'date' => $this->tempChequeDate,
+            'amount' => round($amount, 2),
+        ];
+
+        $this->tempChequeNumber = '';
+        $this->tempChequeBankName = '';
+        $this->tempChequeDate = now()->format('Y-m-d');
+        $this->tempChequeAmount = max(0, $this->remainingChequeAmount);
+    }
+
+    public function removeCheque($index)
+    {
+        unset($this->cheques[$index]);
+        $this->cheques = array_values($this->cheques);
+        $this->tempChequeAmount = max(0, $this->remainingChequeAmount);
+    }
+
+    public function closeChequeModal()
+    {
+        $this->showChequeModal = false;
+    }
+
+    private function resetChequeEntries()
+    {
+        $this->cheques = [];
+        $this->tempChequeNumber = '';
+        $this->tempChequeBankName = '';
+        $this->tempChequeDate = now()->format('Y-m-d');
+        $this->tempChequeAmount = 0;
+    }
+
+    private function validateVoucherItemsAndCustomer(): ?array
     {
         if (!$this->loadedSaleId) {
             session()->flash('error', 'No voucher loaded.');
-            return;
+            return null;
         }
 
         $validItems = collect($this->items)->where('product_id', '!=', null)->values()->toArray();
 
         if (empty($validItems)) {
             session()->flash('error', 'Please add at least one item.');
-            return;
+            return null;
         }
 
         if (!$this->customerId) {
             session()->flash('error', 'Please select a customer.');
+            return null;
+        }
+
+        return $validItems;
+    }
+
+    private function syncChequePaymentRecords(Sale $sale): void
+    {
+        $existingPayments = Payment::where('sale_id', $sale->id)
+            ->where('payment_method', 'cheque')
+            ->get();
+
+        foreach ($existingPayments as $payment) {
+            Cheque::where('payment_id', $payment->id)->delete();
+            $payment->delete();
+        }
+
+        if ($this->billingType !== 'cheque') {
+            return;
+        }
+
+        $reference = 'SV-CHQ-' . $sale->invoice_number;
+        $bankNames = collect($this->cheques)->pluck('bank_name')->unique()->implode(', ');
+
+        $payment = Payment::create([
+            'sale_id' => $sale->id,
+            'customer_id' => $sale->customer_id,
+            'amount' => (float) $sale->total_amount,
+            'payment_method' => 'cheque',
+            'payment_reference' => $reference,
+            'bank_name' => $bankNames ?: null,
+            'is_completed' => false,
+            'payment_date' => now(),
+            'status' => 'pending',
+            'created_by' => Auth::id(),
+            'notes' => 'Cheque payment updated during sales voucher modification.',
+        ]);
+
+        foreach ($this->cheques as $cheque) {
+            Cheque::create([
+                'cheque_number' => $cheque['number'],
+                'cheque_date' => $cheque['date'],
+                'bank_name' => $cheque['bank_name'],
+                'cheque_amount' => $cheque['amount'],
+                'status' => 'pending',
+                'customer_id' => $sale->customer_id,
+                'payment_id' => $payment->id,
+            ]);
+        }
+    }
+
+    private function persistVoucherUpdate(array $validItems)
+    {
+        $voucherData = [
+            'date' => $this->voucherDate,
+            'customer_id' => $this->customerId,
+            'billing_type' => $this->billingType,
+            'salesman_id' => $this->salesmanId ?: null,
+            'notes' => $this->notes,
+        ];
+
+        $itemsData = collect($validItems)->map(function ($item) {
+            return [
+                'product_id' => $item['product_id'],
+                'variant_id' => $item['variant_id'] ?? null,
+                'variant_value' => $item['variant_value'] ?? null,
+                'quantity' => (int) $item['quantity'],
+                'rate' => (float) $item['rate'],
+                'discount' => (float) ($item['discount'] ?? 0),
+                'tax_percentage' => (float) ($item['tax_percentage'] ?? 0),
+                'tax_amount' => (float) ($item['tax_amount'] ?? 0),
+            ];
+        })->toArray();
+
+        $sale = VoucherService::modifySalesVoucher($this->loadedSaleId, $voucherData, $itemsData);
+
+        $this->syncChequePaymentRecords($sale);
+
+        $this->savedSale = $sale;
+        $this->showSavedModal = true;
+
+        session()->flash('success', 'Voucher ' . $sale->invoice_number . ' updated successfully!');
+    }
+
+    // --- Update Voucher ---
+    public function updateVoucher()
+    {
+        $validItems = $this->validateVoucherItemsAndCustomer();
+        if ($validItems === null) return;
+
+        if ($this->billingType === 'cheque') {
+            $this->showChequeModal = true;
+            $this->tempChequeDate = now()->format('Y-m-d');
+            $this->tempChequeAmount = max(0, $this->remainingChequeAmount);
             return;
         }
 
         try {
-            $voucherData = [
-                'date' => $this->voucherDate,
-                'customer_id' => $this->customerId,
-                'billing_type' => $this->billingType,
-                'salesman_id' => $this->salesmanId ?: null,
-                'notes' => $this->notes,
-            ];
-
-            $itemsData = collect($validItems)->map(function ($item) {
-                return [
-                    'product_id' => $item['product_id'],
-                    'variant_id' => $item['variant_id'] ?? null,
-                    'variant_value' => $item['variant_value'] ?? null,
-                    'quantity' => (int) $item['quantity'],
-                    'rate' => (float) $item['rate'],
-                    'discount' => (float) ($item['discount'] ?? 0),
-                    'tax_percentage' => (float) ($item['tax_percentage'] ?? 0),
-                    'tax_amount' => (float) ($item['tax_amount'] ?? 0),
-                ];
-            })->toArray();
-
-            $sale = VoucherService::modifySalesVoucher($this->loadedSaleId, $voucherData, $itemsData);
-
-            $this->savedSale = $sale;
-            $this->showSavedModal = true;
-
-            session()->flash('success', 'Voucher ' . $sale->invoice_number . ' updated successfully!');
+            $this->persistVoucherUpdate($validItems);
         } catch (\Exception $e) {
             Log::error('Update voucher failed: ' . $e->getMessage());
             session()->flash('error', 'Failed to update voucher: ' . $e->getMessage());
+        }
+    }
+
+    public function completeChequeVoucherUpdate()
+    {
+        $validItems = $this->validateVoucherItemsAndCustomer();
+        if ($validItems === null) return;
+
+        if (empty($this->cheques)) {
+            session()->flash('error', 'Please add at least one cheque.');
+            return;
+        }
+
+        $remaining = round($this->remainingChequeAmount, 2);
+        if (abs($remaining) > 0.01) {
+            session()->flash('error', 'Total cheque amount must exactly match grand total.');
+            return;
+        }
+
+        try {
+            $this->persistVoucherUpdate($validItems);
+            $this->showChequeModal = false;
+        } catch (\Exception $e) {
+            Log::error('Cheque voucher update failed: ' . $e->getMessage());
+            session()->flash('error', 'Failed to update cheque voucher: ' . $e->getMessage());
         }
     }
 
@@ -436,6 +711,9 @@ class SalesVoucherModify extends Component
     {
         $this->showSavedModal = false;
         $this->savedSale = null;
+
+        // Reload the page to refresh and show updated data
+        return $this->redirect(request()->url(), navigate: true);
     }
 
     public function clearVoucher()
@@ -452,6 +730,9 @@ class SalesVoucherModify extends Component
         $this->notes = '';
         $this->searchQuery = '';
         $this->searchResults = [];
+        $this->priceType = 'retail';
+        $this->showChequeModal = false;
+        $this->resetChequeEntries();
     }
 
     public function render()

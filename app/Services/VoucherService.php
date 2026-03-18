@@ -73,7 +73,8 @@ class VoucherService
             // Determine payment status based on billing type
             $billingType = $voucherData['billing_type'] ?? 'cash';
             $paymentStatus = $billingType === 'cash' ? 'paid' : 'pending';
-            $paymentType = $billingType === 'cash' ? 'full' : 'partial';
+            $paymentType = $billingType === 'credit' ? 'partial' : 'full';
+            $dueAmount = $billingType === 'credit' ? $grandTotal : 0;
 
             // 2. Create the Sale record
             $sale = Sale::create([
@@ -89,7 +90,7 @@ class VoucherService
                 'payment_type' => $paymentType,
                 'payment_status' => $paymentStatus,
                 'status' => 'confirm',
-                'due_amount' => $billingType === 'credit' ? $grandTotal : 0,
+                'due_amount' => $dueAmount,
                 'notes' => $voucherData['notes'] ?? null,
                 'tax_amount' => $totalTax,
                 'voucher_date' => $voucherData['date'] ?? now()->toDateString(),
@@ -227,6 +228,9 @@ class VoucherService
 
             $grandTotal = $subtotal - $totalDiscount + $totalTax;
             $billingType = $voucherData['billing_type'] ?? 'cash';
+            $paymentType = $billingType === 'credit' ? 'partial' : 'full';
+            $paymentStatus = $billingType === 'cash' ? 'paid' : 'pending';
+            $dueAmount = $billingType === 'credit' ? $grandTotal : 0;
 
             // Update sale record
             $sale->update([
@@ -234,9 +238,9 @@ class VoucherService
                 'subtotal' => $subtotal,
                 'discount_amount' => $totalDiscount,
                 'total_amount' => $grandTotal,
-                'payment_type' => $billingType === 'cash' ? 'full' : 'partial',
-                'payment_status' => $billingType === 'cash' ? 'paid' : 'pending',
-                'due_amount' => $billingType === 'credit' ? $grandTotal : 0,
+                'payment_type' => $paymentType,
+                'payment_status' => $paymentStatus,
+                'due_amount' => $dueAmount,
                 'notes' => $voucherData['notes'] ?? null,
                 'tax_amount' => $totalTax,
                 'voucher_date' => $voucherData['date'] ?? $sale->voucher_date,
