@@ -33,6 +33,7 @@ use App\Models\ProductBatch;
 use Illuminate\Support\Facades\DB;
 use App\Livewire\Concerns\WithDynamicLayout;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 #[Title("Product List")]
 class Products extends Component
@@ -447,6 +448,8 @@ class Products extends Component
                     'product_details.name as product_name',
                     'product_details.model_id',
                     'product_models.model_name as model',
+                    'product_details.store_location',
+                    'product_details.rack_number',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -477,6 +480,8 @@ class Products extends Component
                     'product_details.name',
                     'product_details.model_id',
                     'product_models.model_name',
+                    'product_details.store_location',
+                    'product_details.rack_number',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -518,6 +523,8 @@ class Products extends Component
                     'product_details.name as product_name',
                     'product_details.model_id',
                     'product_models.model_name as model',
+                    'product_details.store_location',
+                    'product_details.rack_number',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -548,6 +555,8 @@ class Products extends Component
                     'product_details.name',
                     'product_details.model_id',
                     'product_models.model_name',
+                    'product_details.store_location',
+                    'product_details.rack_number',
                     'product_details.image',
                     'product_details.description',
                     'product_details.barcode',
@@ -957,6 +966,202 @@ class Products extends Component
     public function downloadTemplate()
     {
         return Excel::download(new ProductsImportTemplateExport(), 'products_import_template.xlsx');
+    }
+
+    /**
+     * Base query used by export actions.
+     */
+    private function getProductExportQuery()
+    {
+        return ProductDetail::query()
+            ->leftJoin('brand_lists', 'product_details.brand_id', '=', 'brand_lists.id')
+            ->leftJoin('category_lists', 'product_details.category_id', '=', 'category_lists.id')
+            ->leftJoin('product_models', 'product_details.model_id', '=', 'product_models.id')
+            ->leftJoin('product_suppliers', 'product_details.supplier_id', '=', 'product_suppliers.id')
+            ->leftJoin('product_stocks', 'product_details.id', '=', 'product_stocks.product_id')
+            ->leftJoin('product_prices', function ($join) {
+                $join->on('product_details.id', '=', 'product_prices.product_id')
+                    ->where('product_prices.pricing_mode', '=', 'single')
+                    ->whereNull('product_prices.variant_id');
+            })
+            ->select(
+                'product_details.id',
+                'product_details.code',
+                'product_details.name as product_name',
+                'product_details.model_id',
+                'product_models.model_name as model_name',
+                'product_details.brand_id',
+                'brand_lists.brand_name as brand_name',
+                'product_details.category_id',
+                'category_lists.category_name as category_name',
+                'product_details.supplier_id',
+                'product_suppliers.name as supplier_name',
+                'product_details.variant_id',
+                'product_details.image',
+                'product_details.description',
+                'product_details.barcode',
+                'product_details.status',
+                'product_details.fast_moving',
+                'product_details.store_location',
+                'product_details.rack_number',
+                'product_details.sale_bonus',
+                DB::raw('COALESCE(product_prices.supplier_price, 0) as supplier_price'),
+                DB::raw('COALESCE(product_prices.wholesale_price, 0) as wholesale_price'),
+                DB::raw('COALESCE(product_prices.distributor_price, 0) as distributor_price'),
+                DB::raw('COALESCE(product_prices.retail_price, 0) as retail_price'),
+                DB::raw('COALESCE(product_prices.discount_price, 0) as discount_price'),
+                DB::raw('COALESCE(SUM(product_stocks.available_stock), 0) as available_stock'),
+                DB::raw('COALESCE(SUM(product_stocks.damage_stock), 0) as damage_stock'),
+                DB::raw('COALESCE(SUM(product_stocks.total_stock), 0) as total_stock'),
+                DB::raw('COALESCE(MAX(product_stocks.low_stock), 0) as low_stock')
+            )
+            ->where(function ($query) {
+                $query->where('product_details.name', 'like', '%' . $this->search . '%')
+                    ->orWhere('product_details.code', 'like', '%' . $this->search . '%')
+                    ->orWhere('product_models.model_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('brand_lists.brand_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('category_lists.category_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('product_details.status', 'like', '%' . $this->search . '%')
+                    ->orWhere('product_details.barcode', 'like', '%' . $this->search . '%')
+                    ->orWhere('product_details.store_location', 'like', '%' . $this->search . '%')
+                    ->orWhere('product_details.rack_number', 'like', '%' . $this->search . '%');
+            })
+            ->groupBy(
+                'product_details.id',
+                'product_details.code',
+                'product_details.name',
+                'product_details.model_id',
+                'product_models.model_name',
+                'product_details.brand_id',
+                'brand_lists.brand_name',
+                'product_details.category_id',
+                'category_lists.category_name',
+                'product_details.supplier_id',
+                'product_suppliers.name',
+                'product_details.variant_id',
+                'product_details.image',
+                'product_details.description',
+                'product_details.barcode',
+                'product_details.status',
+                'product_details.fast_moving',
+                'product_details.store_location',
+                'product_details.rack_number',
+                'product_details.sale_bonus',
+                'product_prices.supplier_price',
+                'product_prices.wholesale_price',
+                'product_prices.distributor_price',
+                'product_prices.retail_price',
+                'product_prices.discount_price'
+            )
+            ->when($this->stockFilter === 'low', function ($q) {
+                $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) <= 5');
+            })
+            ->when($this->stockFilter === 'out', function ($q) {
+                $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) <= 0');
+            })
+            ->when($this->stockFilter === 'available', function ($q) {
+                $q->havingRaw('COALESCE(SUM(product_stocks.available_stock), 0) > 0');
+            })
+            ->orderByRaw("CASE WHEN product_details.code LIKE 'G-%' THEN 1 ELSE 0 END ASC")
+            ->orderBy('product_details.code', 'asc');
+    }
+
+    public function exportProductsPdf()
+    {
+        $products = $this->getProductExportQuery()->get();
+
+        $pdf = Pdf::loadView('exports.products-list-pdf', [
+            'products' => $products,
+            'generatedAt' => now(),
+        ])->setPaper('a4', 'landscape');
+
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'products-list-' . now()->format('Ymd_His') . '.pdf', [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    public function exportProductsCsv()
+    {
+        $products = $this->getProductExportQuery()->get();
+
+        return response()->streamDownload(function () use ($products) {
+            $handle = fopen('php://output', 'w');
+
+            // UTF-8 BOM for Excel compatibility.
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'Code',
+                'Item Name',
+                'Model ID',
+                'Model Name',
+                'Brand ID',
+                'Brand Name',
+                'Category ID',
+                'Category Name',
+                'Supplier ID',
+                'Supplier Name',
+                'Variant ID',
+                'Barcode',
+                'Status',
+                'Fast Moving',
+                'Store Location',
+                'Rack Number',
+                'Sale Bonus',
+                'Image',
+                'Description',
+                'Supplier Price',
+                'Wholesale Price',
+                'Distributor Price',
+                'Retail Price',
+                'Discount Price',
+                'Available Stock',
+                'Damage Stock',
+                'Total Stock',
+                'Low Stock',
+            ]);
+
+            foreach ($products as $product) {
+                fputcsv($handle, [
+                    $product->id,
+                    $product->code,
+                    $product->product_name,
+                    $product->model_id,
+                    $product->model_name,
+                    $product->brand_id,
+                    $product->brand_name,
+                    $product->category_id,
+                    $product->category_name,
+                    $product->supplier_id,
+                    $product->supplier_name,
+                    $product->variant_id,
+                    $product->barcode,
+                    $product->status,
+                    $product->fast_moving ? 'Yes' : 'No',
+                    $product->store_location,
+                    $product->rack_number,
+                    $product->sale_bonus,
+                    $product->image,
+                    $product->description,
+                    $product->supplier_price,
+                    $product->wholesale_price,
+                    $product->distributor_price,
+                    $product->retail_price,
+                    $product->discount_price,
+                    $product->available_stock,
+                    $product->damage_stock,
+                    $product->total_stock,
+                    $product->low_stock,
+                ]);
+            }
+
+            fclose($handle);
+        }, 'products-list-' . now()->format('Ymd_His') . '.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     // 🔹 Reset form fields

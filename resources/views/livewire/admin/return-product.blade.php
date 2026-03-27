@@ -1,11 +1,37 @@
 <div>
+    <div class="busy-header-card mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="mb-1 fw-bold text-white">
+                    <i class="bi bi-arrow-return-left me-2"></i>Sales Return Voucher
+                </h5>
+                <small class="text-white-50">Mode: Add Entry</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <kbd class="erp-kbd">Alt+A</kbd>
+            </div>
+        </div>
+    </div>
+
+    <div class="busy-tabs mb-4">
+        <a href="{{ route('admin.sales-return-add') }}" class="busy-tab active">
+            <i class="bi bi-plus-circle-fill"></i> Add
+        </a>
+        <a href="{{ route('admin.sales-return-modify') }}" class="busy-tab">
+            <i class="bi bi-pencil-square"></i> Modify
+        </a>
+        <a href="{{ route('admin.sales-return-list') }}" class="busy-tab">
+            <i class="bi bi-list-ul"></i> List
+        </a>
+    </div>
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-arrow-return-left text-success me-2"></i> Product Returns
+                <i class="bi bi-arrow-return-left text-success me-2"></i> Sales Return Add
             </h3>
-            <p class="text-muted mb-0">Manage product returns and refunds efficiently</p>
+            <p class="text-muted mb-0">Create sales return entries with invoice-based item control</p>
         </div>
         <div>
             <button class="btn btn-primary">
@@ -418,9 +444,41 @@
 
 @push('styles')
 <style>
+    .busy-header-card {
+        background: linear-gradient(90deg, #1f2937 0%, #374151 100%);
+        border-radius: 8px;
+        padding: 12px 16px;
+    }
+
+    .busy-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .busy-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #111827;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .busy-tab.active {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: #fff;
+    }
+
     .card {
         border: none;
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         transition: all 0.3s ease;
     }
@@ -471,6 +529,16 @@
     .border-warning {
         border-width: 2px !important;
     }
+
+    .erp-kbd {
+        background: #111827;
+        color: #fff;
+        border: 1px solid #374151;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.72rem;
+    }
+
     .table{
         color:black !important;
     }

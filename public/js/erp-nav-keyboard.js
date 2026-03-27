@@ -94,15 +94,17 @@
 
         function openItem(item) {
             if (!isOpen(item)) {
-                var btn = getItemBtn(item);
-                if (btn) btn.click();
+                item.dispatchEvent(
+                    new CustomEvent("erp-nav-open", { bubbles: true }),
+                );
             }
         }
 
         function closeItem(item) {
             if (isOpen(item)) {
-                var btn = getItemBtn(item);
-                if (btn) btn.click();
+                item.dispatchEvent(
+                    new CustomEvent("erp-nav-close", { bubbles: true }),
+                );
             }
         }
 

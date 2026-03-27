@@ -530,7 +530,8 @@ class AccountingService
         Sale   $originalSale,
         float  $returnAmount,
         float  $returnCOGS,
-        ?int   $branchId = null
+        ?int   $branchId = null,
+        string $refundType = 'credit_note'
     ): Voucher {
         $entries = [];
 
@@ -542,11 +543,11 @@ class AccountingService
             'narration'  => 'Return against ' . $originalSale->invoice_number,
         ];
 
-        // Cr Customer / Cash
+        // Cr Customer / Cash based on refund mode
         $customer = Customer::find($originalSale->customer_id);
-        $creditAccountId = $customer
-            ? Account::getOrCreateForCustomer($customer)->id
-            : self::getSystemAccountId('CASH');
+        $creditAccountId = $refundType === 'cash'
+            ? self::getSystemAccountId('CASH')
+            : ($customer ? Account::getOrCreateForCustomer($customer)->id : self::getSystemAccountId('CASH'));
 
         $entries[] = [
             'account_id' => $creditAccountId,
@@ -603,25 +604,34 @@ class AccountingService
     public static function postPurchaseReturn(
         PurchaseOrder $po,
         float         $returnValue,
-        ?int          $branchId = null
-    ): Voucher {
+        ?int          $branchId = null,
+        string        $settlementType = 'debit_note'
+    ): ?Voucher {
+        if ($settlementType === 'replacement' || $returnValue <= 0) {
+            return null;
+        }
+
         $supplier = ProductSupplier::find($po->supplier_id);
         $supplierAccount = $supplier
             ? Account::getOrCreateForSupplier($supplier)
             : self::getSystemAccount('AP');
 
+        $debitAccountId = $settlementType === 'cash_refund'
+            ? self::getSystemAccountId('CASH')
+            : $supplierAccount->id;
+
         $entries = [
             [
-                'account_id' => $supplierAccount->id,
+                'account_id' => $debitAccountId,
                 'debit'      => $returnValue,
                 'credit'     => 0,
                 'narration'  => 'Purchase return: ' . $po->order_code,
             ],
             [
-                'account_id' => self::getSystemAccountId('INVENTORY'),
+                'account_id' => self::getSystemAccountId('PURCH-RET'),
                 'debit'      => 0,
                 'credit'     => $returnValue,
-                'narration'  => 'Returned stock: ' . $po->order_code,
+                'narration'  => 'Purchase return account: ' . $po->order_code,
             ],
         ];
 

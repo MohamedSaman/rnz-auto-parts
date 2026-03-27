@@ -447,6 +447,7 @@ class VoucherService
             unset($item);
 
             $grandTotal = $subtotal - $totalDiscount + $totalTax;
+            $dueAmount = $billingType === 'credit' ? $grandTotal : 0;
 
             // 3. Create PurchaseOrder record
             $po = PurchaseOrder::create([
@@ -456,6 +457,7 @@ class VoucherService
                 'order_date' => $purchaseDate,
                 'status' => 'complete',
                 'total_amount' => $grandTotal,
+                'due_amount' => $dueAmount,
                 'transport_cost' => floatval($voucherData['transport_cost'] ?? 0),
                 'payment_type' => $billingType,
                 'discount_amount' => $totalDiscount,
@@ -516,13 +518,7 @@ class VoucherService
                 Log::warning('Accounting posting failed for purchase ' . $po->order_code . ': ' . $e->getMessage());
             }
 
-            // 6. Update supplier balance for credit purchases
-            if ($billingType === 'credit' && $po->supplier_id) {
-                $supplier = ProductSupplier::find($po->supplier_id);
-                if ($supplier) {
-                    $supplier->increment('due_amount', $grandTotal);
-                }
-            }
+            // Supplier dues are tracked on purchase orders/accounting, not product_suppliers.due_amount.
 
             Log::info("Purchase Voucher created: {$po->order_code} / {$invoiceNumber} - Total: {$grandTotal}");
 
@@ -545,14 +541,7 @@ class VoucherService
             // 2. Reverse stock for old items
             self::reversePurchaseStock($po);
 
-            // 3. Reverse supplier balance
-            $oldBillingType = $po->payment_type ?? 'cash';
-            if ($oldBillingType === 'credit' && $po->supplier_id) {
-                $supplier = ProductSupplier::find($po->supplier_id);
-                if ($supplier && $supplier->due_amount > 0) {
-                    $supplier->decrement('due_amount', min($supplier->due_amount, floatval($po->total_amount)));
-                }
-            }
+            // Supplier dues are handled via purchase order due amounts and ledger entries.
 
             // 4. Delete old items
             $po->items()->delete();
@@ -583,12 +572,14 @@ class VoucherService
             unset($item);
 
             $grandTotal = $subtotal - $totalDiscount + $totalTax;
+            $dueAmount = $billingType === 'credit' ? $grandTotal : 0;
 
             // 6. Update PO record
             $po->update([
                 'supplier_id' => $voucherData['supplier_id'],
                 'order_date' => $purchaseDate,
                 'total_amount' => $grandTotal,
+                'due_amount' => $dueAmount,
                 'transport_cost' => floatval($voucherData['transport_cost'] ?? 0),
                 'payment_type' => $billingType,
                 'discount_amount' => $totalDiscount,
@@ -642,13 +633,7 @@ class VoucherService
                 Log::warning('Accounting posting failed: ' . $e->getMessage());
             }
 
-            // 9. Update supplier balance for credit
-            if ($billingType === 'credit' && $po->supplier_id) {
-                $supplier = ProductSupplier::find($po->supplier_id);
-                if ($supplier) {
-                    $supplier->increment('due_amount', $grandTotal);
-                }
-            }
+            // Supplier dues are tracked on purchase orders/accounting, not product_suppliers.due_amount.
 
             Log::info("Purchase Voucher modified: {$po->order_code}");
 
@@ -670,13 +655,7 @@ class VoucherService
             // 2. Reverse stock
             self::reversePurchaseStock($po);
 
-            // 3. Reverse supplier balance
-            if (($po->payment_type ?? 'cash') === 'credit' && $po->supplier_id) {
-                $supplier = ProductSupplier::find($po->supplier_id);
-                if ($supplier && $supplier->due_amount > 0) {
-                    $supplier->decrement('due_amount', min($supplier->due_amount, floatval($po->total_amount)));
-                }
-            }
+            // Supplier dues are handled via purchase order due amounts and ledger entries.
 
             // 4. Cancel
             $po->update(['status' => 'cancelled']);

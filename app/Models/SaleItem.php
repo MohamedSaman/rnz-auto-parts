@@ -16,6 +16,7 @@ class SaleItem extends Model
         'product_name',
         'product_model',
         'quantity',
+        'returned_qty',
         'unit_price',
         'discount_per_unit',
         'total_discount',
@@ -27,6 +28,7 @@ class SaleItem extends Model
     ];
 
     protected $casts = [
+        'returned_qty' => 'decimal:3',
         'unit_price' => 'decimal:2',
         'discount_per_unit' => 'decimal:2',
         'total_discount' => 'decimal:2',

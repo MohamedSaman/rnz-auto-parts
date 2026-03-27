@@ -49,4 +49,9 @@ class PurchaseOrder extends Model
     {
         return $this->hasMany(ReturnSupplier::class, 'purchase_order_id');
     }
+
+    public function purchaseReturns()
+    {
+        return $this->hasMany(PurchaseReturn::class, 'purchase_id');
+    }
 }

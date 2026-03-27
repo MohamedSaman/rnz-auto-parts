@@ -1601,8 +1601,12 @@
       data-erp-route-profit-loss="{{ route('admin.profit-loss') }}"
       data-erp-route-income="{{ route('admin.income') }}"
       data-erp-route-settings="{{ route('admin.settings') }}"
-      data-erp-route-return-product="{{ route('admin.return-product') }}"
-      data-erp-route-return-list="{{ route('admin.return-list') }}"
+            data-erp-route-return-product="{{ route('admin.sales-return-add') }}"
+        data-erp-route-return-product-modify="{{ route('admin.sales-return-modify') }}"
+            data-erp-route-return-list="{{ route('admin.sales-return-list') }}"
+    data-erp-route-return-supplier="{{ route('admin.return-supplier') }}"
+    data-erp-route-return-supplier-modify="{{ route('admin.return-supplier-modify') }}"
+    data-erp-route-list-supplier-return="{{ route('admin.list-supplier-return') }}"
       data-erp-route-quotation-list="{{ route('admin.quotation-list') }}"
       data-erp-route-sales-voucher-add="{{ route('admin.sales-voucher-add') }}"
       data-erp-route-sales-voucher-modify="{{ route('admin.sales-voucher-modify') }}"
@@ -1660,22 +1664,22 @@
                     {{-- ╔══════════════════════════════════════╗ --}}
                     {{-- ║  2. TRANSACTIONS                     ║ --}}
                     {{-- ╚══════════════════════════════════════╝ --}}
-                    <x-erp-nav-dropdown label="Transactions" icon="arrow-left-right" :active="request()->routeIs('admin.pos-sales', 'admin.sale-approval', 'admin.sales-system', 'admin.sales-list', 'admin.store-billing', 'admin.quotation-list', 'admin.quotation-system', 'admin.purchase-order-list', 'admin.purchase-create', 'admin.purchase-voucher-modify', 'admin.purchase-voucher-list', 'admin.grn', 'admin.add-customer-receipt', 'admin.list-customer-receipt', 'admin.add-supplier-receipt', 'admin.list-supplier-receipt', 'admin.return-product', 'admin.return-list', 'admin.return-supplier', 'admin.list-supplier-return', 'admin.expenses', 'admin.sales-voucher-add', 'admin.sales-voucher-modify', 'admin.sales-voucher-list', 'admin.journal-voucher', 'admin.contra-voucher')">
+                    <x-erp-nav-dropdown label="Transactions" icon="arrow-left-right" :active="request()->routeIs('admin.pos-sales', 'admin.sale-approval', 'admin.sales-system', 'admin.sales-list', 'admin.store-billing', 'admin.quotation-list', 'admin.quotation-system', 'admin.purchase-order-list', 'admin.purchase-create', 'admin.purchase-voucher-modify', 'admin.purchase-voucher-list', 'admin.grn', 'admin.add-customer-receipt', 'admin.list-customer-receipt', 'admin.add-supplier-receipt', 'admin.list-supplier-receipt', 'admin.sales-return-add', 'admin.sales-return-modify', 'admin.sales-return-list', 'admin.return-product', 'admin.return-product-modify', 'admin.return-list', 'admin.return-supplier', 'admin.return-supplier-modify', 'admin.list-supplier-return', 'admin.expenses', 'admin.sales-voucher-add', 'admin.sales-voucher-modify', 'admin.sales-voucher-list', 'admin.journal-voucher', 'admin.contra-voucher')">
 
                         {{-- ── Sales Voucher ── --}}
                         <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.sales-voucher-add','admin.sales-voucher-modify','admin.sales-voucher-list') ? 'erp-sub-open' : '' }}" data-sub="txn-sv">
-                            <i class="bi bi-receipt"></i> Sales Voucher
+                            <i class="bi bi-receipt"></i> Sales
                             <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
                         </button>
                         <div class="erp-sub-panel {{ request()->routeIs('admin.sales-voucher-add','admin.sales-voucher-modify','admin.sales-voucher-list') ? 'show' : '' }}" id="txn-sv">
                             <a href="{{ route('admin.sales-voucher-add') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-voucher-add') ? 'active' : '' }}">
-                                <i class="bi bi-plus-circle-fill"></i> Add Voucher <kbd class="erp-kbd">Alt+A</kbd>
+                                <i class="bi bi-plus-circle-fill"></i> Add <kbd class="erp-kbd">Alt+A</kbd>
                             </a>
                             <a href="{{ route('admin.sales-voucher-modify') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-voucher-modify') ? 'active' : '' }}">
-                                <i class="bi bi-pencil-square"></i> Modify Voucher <kbd class="erp-kbd">Alt+M</kbd>
+                                <i class="bi bi-pencil-square"></i> Modify <kbd class="erp-kbd">Alt+M</kbd>
                             </a>
                             <a href="{{ route('admin.sales-voucher-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-voucher-list') ? 'active' : '' }}">
-                                <i class="bi bi-list-ul"></i> List Voucher <kbd class="erp-kbd">Alt+L</kbd>
+                                <i class="bi bi-list-ul"></i> List <kbd class="erp-kbd">Alt+L</kbd>
                             </a>
                         </div>
 
@@ -1683,24 +1687,24 @@
 
                         {{-- ── Purchase Voucher ── --}}
                         <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.purchase-create','admin.purchase-voucher-modify','admin.purchase-voucher-list') ? 'erp-sub-open' : '' }}" data-sub="txn-pv">
-                            <i class="bi bi-cart4"></i> Purchase Voucher
+                            <i class="bi bi-cart4"></i> Purchase
                             <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
                         </button>
                         <div class="erp-sub-panel {{ request()->routeIs('admin.purchase-create','admin.purchase-voucher-modify','admin.purchase-voucher-list') ? 'show' : '' }}" id="txn-pv">
                             <a href="{{ route('admin.purchase-create') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-create') ? 'active' : '' }}">
-                                <i class="bi bi-plus-circle-fill"></i> Add Voucher <kbd class="erp-kbd">Alt+Ctrl+F9</kbd>
+                                <i class="bi bi-plus-circle-fill"></i> Add <kbd class="erp-kbd">Alt+Ctrl+F9</kbd>
                             </a>
                             <a href="{{ route('admin.purchase-voucher-modify') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-voucher-modify') ? 'active' : '' }}">
-                                <i class="bi bi-pencil-square"></i> Modify Voucher <kbd class="erp-kbd">Alt+Shift+M</kbd>
+                                <i class="bi bi-pencil-square"></i> Modify <kbd class="erp-kbd">Alt+Shift+M</kbd>
                             </a>
                             <a href="{{ route('admin.purchase-voucher-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.purchase-voucher-list') ? 'active' : '' }}">
-                                <i class="bi bi-list-ul"></i> List Voucher <kbd class="erp-kbd">Alt+Shift+L</kbd>
+                                <i class="bi bi-list-ul"></i> List <kbd class="erp-kbd">Alt+Shift+L</kbd>
                             </a>
                         </div>
 
                         <div class="erp-dropdown-divider"></div>
 
-                        {{-- ── Purchase Legacy ── --}}
+                        {{-- ── Purchase Legacy ── 
                         <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.purchase-order-list','admin.grn') ? 'erp-sub-open' : '' }}" data-sub="txn-pl">
                             <i class="bi bi-box-arrow-in-down"></i> Purchase (Legacy)
                             <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
@@ -1714,7 +1718,7 @@
                             </a>
                         </div>
 
-                        <div class="erp-dropdown-divider"></div>
+                        <div class="erp-dropdown-divider"></div> --}}
 
                         {{-- ── Receipt Voucher ── --}}
                         <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.add-customer-receipt','admin.list-customer-receipt') ? 'erp-sub-open' : '' }}" data-sub="txn-rv">
@@ -1787,23 +1791,39 @@
 
                         <div class="erp-dropdown-divider"></div>
 
-                        {{-- ── Returns ── --}}
-                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.return-product','admin.return-list','admin.return-supplier','admin.list-supplier-return') ? 'erp-sub-open' : '' }}" data-sub="txn-ret">
-                            <i class="bi bi-arrow-return-left"></i> Returns
+                        {{-- ── Sales Return ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.sales-return-add','admin.sales-return-modify','admin.sales-return-list','admin.return-product','admin.return-product-modify','admin.return-list') ? 'erp-sub-open' : '' }}" data-sub="txn-ret-sales">
+                            <i class="bi bi-arrow-return-left"></i> Sales Return
                             <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
                         </button>
-                        <div class="erp-sub-panel {{ request()->routeIs('admin.return-product','admin.return-list','admin.return-supplier','admin.list-supplier-return') ? 'show' : '' }}" id="txn-ret">
-                            <a href="{{ route('admin.return-product') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-product') ? 'active' : '' }}">
-                                <i class="bi bi-arrow-return-left"></i> Sales Return (Credit Note)
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.sales-return-add','admin.sales-return-modify','admin.sales-return-list','admin.return-product','admin.return-product-modify','admin.return-list') ? 'show' : '' }}" id="txn-ret-sales">
+                            <a href="{{ route('admin.sales-return-add') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-return-add','admin.return-product') ? 'active' : '' }}">
+                                <i class="bi bi-plus-circle-fill"></i> Add
                             </a>
-                            <a href="{{ route('admin.return-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-list') ? 'active' : '' }}">
-                                <i class="bi bi-list-check"></i> List Sales Returns
+                            <a href="{{ route('admin.sales-return-modify') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-return-modify','admin.return-product-modify') ? 'active' : '' }}">
+                                <i class="bi bi-pencil-square"></i> Modify
                             </a>
+                            <a href="{{ route('admin.sales-return-list') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.sales-return-list','admin.return-list') ? 'active' : '' }}">
+                                <i class="bi bi-list-ul"></i> List
+                            </a>
+                        </div>
+
+                        <div class="erp-dropdown-divider"></div>
+
+                        {{-- ── Purchase Return ── --}}
+                        <button type="button" class="erp-dropdown-item erp-sub-toggle {{ request()->routeIs('admin.return-supplier','admin.return-supplier-modify','admin.list-supplier-return') ? 'erp-sub-open' : '' }}" data-sub="txn-ret-purchase">
+                            <i class="bi bi-arrow-return-left"></i> Purchase Return
+                            <i class="bi bi-chevron-down erp-sub-chevron ms-auto"></i>
+                        </button>
+                        <div class="erp-sub-panel {{ request()->routeIs('admin.return-supplier','admin.return-supplier-modify','admin.list-supplier-return') ? 'show' : '' }}" id="txn-ret-purchase">
                             <a href="{{ route('admin.return-supplier') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-supplier') ? 'active' : '' }}">
-                                <i class="bi bi-arrow-return-left"></i> Purchase Return (Debit Note)
+                                <i class="bi bi-plus-circle-fill"></i> Add
+                            </a>
+                            <a href="{{ route('admin.return-supplier-modify') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.return-supplier-modify') ? 'active' : '' }}">
+                                <i class="bi bi-pencil-square"></i> Modify
                             </a>
                             <a href="{{ route('admin.list-supplier-return') }}" class="erp-dropdown-item erp-sub-item {{ request()->routeIs('admin.list-supplier-return') ? 'active' : '' }}">
-                                <i class="bi bi-list-check"></i> List Purchase Returns
+                                <i class="bi bi-list-ul"></i> List
                             </a>
                         </div>
 
@@ -1892,19 +1912,19 @@
                     {{-- Digital Clock --}}
                     <div id="digitalClock" class="erp-clock d-none d-md-block">00:00:00</div>
 
-                    {{-- POS Button --}}
+                    {{-- POS Button 
                     <button class="erp-pos-btn" onclick="handlePOSClick()" title="Open POS (F5)" type="button">
                         <i class="bi bi-cart-plus-fill"></i>
                         <span class="d-none d-sm-inline">POS</span>
                         <kbd class="erp-kbd">F5</kbd>
-                    </button>
+                    </button> --}}
 
-                    {{-- Reopen POS Button --}}
+                    {{-- Reopen POS Button 
                     <div id="reopenPosBtnContainer" style="display:none;">
                         <button type="button" class="erp-reopen-btn" onclick="showReopenPOSModal()" title="Reopen POS Session">
                             <i class="bi bi-unlock"></i>
                         </button>
-                    </div>
+                    </div> --}}
 
                     {{-- User Dropdown --}}
                     <div class="erp-user-dropdown" x-data="{ userOpen: false }" @click.away="userOpen = false">
@@ -3194,6 +3214,20 @@
                 if (event.altKey && event.key === 's') {
                     event.preventDefault();
                     this.enterKbMode();
+                    return;
+                }
+
+                // ── Esc → go back page (when not typing and no modal is open) ──
+                if (event.key === 'Escape' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
+                    if (isTyping) return;
+                    if (document.querySelector('.modal.show')) return;
+
+                    event.preventDefault();
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = "{{ route('admin.dashboard') }}";
+                    }
                     return;
                 }
 

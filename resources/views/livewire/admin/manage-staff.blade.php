@@ -177,83 +177,261 @@
     {{-- View Details Modal --}}
     @if($showViewModal)
     <div class="modal fade show d-block" tabindex="-1" aria-labelledby="viewDetailsModalLabel" aria-hidden="false" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 1100px;">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">
-                        <i class="bi bi-person-badge text-white me-2"></i> Staff Details
-                    </h5>
+                <div class="modal-header" style="background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%); border-radius: 12px 12px 0 0;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                            <i class="bi bi-person-badge text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-white mb-0">{{ $viewUserDetail['name'] ?? '-' }}</h5>
+                            <small class="text-white-50">{{ ucfirst(str_replace('_', ' ', $viewUserDetail['staff_type'] ?? 'staff')) }}</small>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" wire:click="closeModal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="row g-0">
-                        <div class="col-md-4 d-flex flex-column align-items-center justify-content-center p-3 border-end">
+
+                <div class="px-4 pt-3 pb-2" style="background-color: #f8f9fc;">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #e8f4fd; border: 1px solid #cce5ff;">
+                                <small class="text-muted d-block">Sales Count</small>
+                                <strong class="text-primary">{{ count($viewStaffSales) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #d4edda; border: 1px solid #28a745;">
+                                <small class="text-muted d-block">Total Sales Amount</small>
+                                <strong class="text-success">{{ number_format(collect($viewStaffSales)->sum('total_amount'), 2) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #fff3cd; border: 1px solid #ffc107;">
+                                <small class="text-muted d-block">Collected Payments</small>
+                                <strong class="text-warning">{{ number_format(collect($viewStaffPayments)->sum('amount'), 2) }}</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #f8d7da; border: 1px solid #dc3545;">
+                                <small class="text-muted d-block">Sales Due</small>
+                                <strong class="text-danger">{{ number_format(collect($viewStaffDues)->sum('due_amount'), 2) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-4 pt-3" style="background-color: #f8f9fc;">
+                    <ul class="nav nav-tabs border-0" style="gap: 4px;">
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'overview' ? 'active' : '' }}" wire:click="setActiveTab('overview')">
+                                <i class="bi bi-info-circle me-1"></i>Overview
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'sales' ? 'active' : '' }}" wire:click="setActiveTab('sales')">
+                                <i class="bi bi-receipt me-1"></i>Sales List
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'payments' ? 'active' : '' }}" wire:click="setActiveTab('payments')">
+                                <i class="bi bi-cash-stack me-1"></i>Payment List
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'dues' ? 'active' : '' }}" wire:click="setActiveTab('dues')">
+                                <i class="bi bi-exclamation-circle me-1"></i>Sales Due
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'ledger' ? 'active' : '' }}" wire:click="setActiveTab('ledger')">
+                                <i class="bi bi-journal-text me-1"></i>Ledger
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="modal-body" style="max-height: 55vh; overflow-y: auto;">
+                    @if($activeTab === 'overview')
+                    <div class="row g-3">
+                        <div class="col-md-4 d-flex flex-column align-items-center justify-content-start p-3 border-end">
                             <img src="{{ $viewUserDetail['user_image'] ?? 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o=' }}"
                                 alt="User Image" class="img-fluid rounded-circle shadow mb-3"
                                 style="width: 140px; height: 140px; object-fit: cover;">
                             <span class="fw-bold fs-5">{{ $viewUserDetail['name'] ?? '-' }}</span>
-                            <span class="text-muted">{{ $viewUserDetail['role'] ?? '-' }}</span>
+                            <span class="text-muted">{{ ucfirst(str_replace('_', ' ', $viewUserDetail['staff_type'] ?? 'staff')) }}</span>
                         </div>
                         <div class="col-md-8 p-3">
                             <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="fw-bold text-primary mb-2">
-                                    <i class="bi bi-person-lines-fill me-1"></i> Personal Info
-                                </h6>
+                                <h6 class="fw-bold text-primary mb-2"><i class="bi bi-person-lines-fill me-1"></i> Personal Info</h6>
                                 <div class="row mb-1">
-                                    <div class="col-5 text-muted">Contact:</div>
-                                    <div class="col-7">{{ $viewUserDetail['contact'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Email:</div>
-                                    <div class="col-7">{{ $viewUserDetail['email'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Date of Birth:</div>
-                                    <div class="col-7">{{ $viewUserDetail['dob'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Age:</div>
-                                    <div class="col-7">{{ $viewUserDetail['age'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">NIC Number:</div>
-                                    <div class="col-7">{{ $viewUserDetail['nic_num'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Gender:</div>
-                                    <div class="col-7">{{ $viewUserDetail['gender'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Contact:</div><div class="col-7">{{ $viewUserDetail['contact'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Email:</div><div class="col-7">{{ $viewUserDetail['email'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Date of Birth:</div><div class="col-7">{{ $viewUserDetail['dob'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Age:</div><div class="col-7">{{ $viewUserDetail['age'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">NIC Number:</div><div class="col-7">{{ $viewUserDetail['nic_num'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Gender:</div><div class="col-7">{{ $viewUserDetail['gender'] ?? '-' }}</div>
                                 </div>
                             </div>
                             <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="fw-bold text-primary mb-2">
-                                    <i class="bi bi-building me-1"></i> Work Info
-                                </h6>
+                                <h6 class="fw-bold text-primary mb-2"><i class="bi bi-building me-1"></i> Work Info</h6>
                                 <div class="row mb-1">
-                                    <div class="col-5 text-muted">Work Role:</div>
-                                    <div class="col-7">{{ $viewUserDetail['work_role'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Department:</div>
-                                    <div class="col-7">{{ $viewUserDetail['department'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Join Date:</div>
-                                    <div class="col-7">{{ $viewUserDetail['join_date'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Fingerprint ID:</div>
-                                    <div class="col-7">{{ $viewUserDetail['fingerprint_id'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Allowance:</div>
-                                    <div class="col-7">{{ is_array($viewUserDetail['allowance'] ?? null) ? implode(', ', $viewUserDetail['allowance']) : ($viewUserDetail['allowance'] ?? '-') }}</div>
-                                    <div class="col-5 text-muted">Basic Salary:</div>
-                                    <div class="col-7">{{ $viewUserDetail['basic_salary'] ?? '-' }}</div>
-                                </div>
-                            </div>
-                            <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="fw-bold text-primary mb-2">
-                                    <i class="bi bi-geo-alt me-1"></i> Address & Status
-                                </h6>
-                                <div class="row mb-1">
-                                    <div class="col-5 text-muted">Address:</div>
-                                    <div class="col-7">{{ $viewUserDetail['address'] ?? '-' }}</div>
-                                    <div class="col-5 text-muted">Status:</div>
-                                    <div class="col-7">{{ $viewUserDetail['status'] ?? '-' }}</div>
-                                </div>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold text-primary mb-2">
-                                    <i class="bi bi-chat-left-text me-1"></i> Description
-                                </h6>
-                                <div class="row mb-1">
-                                    <div class="col-12">{{ $viewUserDetail['description'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Work Role:</div><div class="col-7">{{ $viewUserDetail['work_role'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Department:</div><div class="col-7">{{ $viewUserDetail['department'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Join Date:</div><div class="col-7">{{ $viewUserDetail['join_date'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Fingerprint ID:</div><div class="col-7">{{ $viewUserDetail['fingerprint_id'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Allowance:</div><div class="col-7">{{ is_array($viewUserDetail['allowance'] ?? null) ? implode(', ', $viewUserDetail['allowance']) : ($viewUserDetail['allowance'] ?? '-') }}</div>
+                                    <div class="col-5 text-muted">Basic Salary:</div><div class="col-7">{{ $viewUserDetail['basic_salary'] ?? '-' }}</div>
+                                    <div class="col-5 text-muted">Status:</div><div class="col-7">{{ $viewUserDetail['status'] ?? '-' }}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    @elseif($activeTab === 'sales')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th class="text-center">Items</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Paid</th>
+                                    <th class="text-end">Due</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($viewStaffSales as $i => $sale)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $sale['invoice_number'] ?? '-' }}</td>
+                                    <td>{{ $sale['customer'] ?? '-' }}</td>
+                                    <td class="text-center">{{ $sale['items_count'] ?? 0 }}</td>
+                                    <td class="text-end">{{ number_format($sale['total_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-success">{{ number_format($sale['paid_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-danger">{{ number_format($sale['due_amount'] ?? 0, 2) }}</td>
+                                    <td><span class="badge bg-secondary">{{ ucfirst($sale['status'] ?? 'pending') }}</span></td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="8" class="text-center text-muted py-3">No sales found for this staff.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @elseif($activeTab === 'payments')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Invoice</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th class="text-end">Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($viewStaffPayments as $i => $payment)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $payment['payment_date'] ?? '-' }}</td>
+                                    <td>{{ $payment['invoice_number'] ?? '-' }}</td>
+                                    <td>{{ ucfirst($payment['payment_method'] ?? '-') }}</td>
+                                    <td>{{ $payment['payment_reference'] ?? '-' }}</td>
+                                    <td class="text-end">{{ number_format($payment['amount'] ?? 0, 2) }}</td>
+                                    <td><span class="badge bg-secondary">{{ ucfirst($payment['status'] ?? 'pending') }}</span></td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="7" class="text-center text-muted py-3">No payments found for this staff sales.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @elseif($activeTab === 'dues')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Invoice</th>
+                                    <th>Customer</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Paid</th>
+                                    <th class="text-end">Due</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($viewStaffDues as $i => $due)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $due['invoice_number'] ?? '-' }}</td>
+                                    <td>{{ $due['customer'] ?? '-' }}</td>
+                                    <td class="text-end">{{ number_format($due['total_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-success">{{ number_format($due['paid_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end fw-semibold text-danger">{{ number_format($due['due_amount'] ?? 0, 2) }}</td>
+                                    <td><span class="badge bg-warning text-dark">{{ ucfirst($due['status'] ?? 'pending') }}</span></td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="7" class="text-center text-muted py-3">No due sales found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @elseif($activeTab === 'ledger')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Reference</th>
+                                    <th class="text-end">Debit</th>
+                                    <th class="text-end">Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $running = 0; @endphp
+                                @forelse($viewStaffLedger as $i => $entry)
+                                @php $running += ($entry['debit'] ?? 0) - ($entry['credit'] ?? 0); @endphp
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $entry['date'] ?? '-' }}</td>
+                                    <td>{{ $entry['description'] ?? '-' }}</td>
+                                    <td>{{ $entry['reference'] ?? '-' }}</td>
+                                    <td class="text-end text-danger">{{ number_format($entry['debit'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-success">{{ number_format($entry['credit'] ?? 0, 2) }}</td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="6" class="text-center text-muted py-3">No ledger entries found.</td></tr>
+                                @endforelse
+                            </tbody>
+                            @if(count($viewStaffLedger) > 0)
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th colspan="4" class="text-end">Balance:</th>
+                                    <th colspan="2" class="text-end {{ $running >= 0 ? 'text-danger' : 'text-success' }}">{{ number_format(abs($running), 2) }}</th>
+                                </tr>
+                            </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" wire:click="closeModal">
+                        <i class="bi bi-x-lg me-1"></i> Close
+                    </button>
                 </div>
             </div>
         </div>
@@ -612,6 +790,33 @@
         font-size: 0.75rem;
         padding: 0.35rem 0.65rem;
         border-radius: 6px;
+    }
+
+    .customer-tab {
+        border: none !important;
+        background: transparent;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.6rem 1rem;
+        border-radius: 8px 8px 0 0 !important;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+
+    .customer-tab:hover {
+        color: #4361ee;
+        background: rgba(67, 97, 238, 0.08);
+    }
+
+    .customer-tab.active {
+        color: #4361ee !important;
+        background: white !important;
+        border-bottom: 3px solid #4361ee !important;
+        font-weight: 600;
+    }
+
+    .nav-tabs {
+        border-bottom: 2px solid #e9ecef;
     }
 </style>
 @endpush

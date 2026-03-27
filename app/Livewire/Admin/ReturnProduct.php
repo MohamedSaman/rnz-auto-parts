@@ -158,12 +158,12 @@ class ReturnProduct extends Component
             ->map(function ($returns) {
                 $firstReturn = $returns->first();
                 $productName = $firstReturn->product->name ?? 'Unknown';
-                
+
                 // Add variant value if exists
                 if ($firstReturn->variant_value) {
                     $productName .= ' (' . $firstReturn->variant_value . ')';
                 }
-                
+
                 return [
                     'product_name' => $productName,
                     'total_returned' => $returns->sum('return_quantity'),
@@ -315,7 +315,7 @@ class ReturnProduct extends Component
     private function calculateTotalReturnValue()
     {
         $this->totalReturnValue = collect($this->returnItems)->sum(
-            fn($item) => $item['return_qty'] * $item['selling_price']
+            fn($item) => (float) ($item['return_qty'] ?? 0) * (float) ($item['selling_price'] ?? 0)
         );
     }
 
@@ -373,7 +373,7 @@ class ReturnProduct extends Component
             $totalReturnAmount = 0;
 
             foreach ($itemsToReturn as $item) {
-                $returnAmount = $item['return_qty'] * $item['selling_price'];
+                $returnAmount = (float) ($item['return_qty'] ?? 0) * (float) ($item['selling_price'] ?? 0);
                 $totalReturnAmount += $returnAmount;
 
                 ReturnsProduct::create([

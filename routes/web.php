@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\CashController;
+use App\Http\Controllers\Admin\PurchaseReturnPrintController;
+use App\Http\Controllers\Admin\SalesReturnPrintController;
 use App\Http\Controllers\Admin\PrintController;
 use App\Http\Controllers\ProductApiController;
 use Illuminate\Http\Request;
@@ -82,6 +84,12 @@ use App\Livewire\Admin\ReturnCheque;
 
 use App\Livewire\Admin\ReturnSupplier;
 use App\Livewire\Admin\ListSupplierReturn;
+use App\Livewire\Admin\SalesReturnAdd;
+use App\Livewire\Admin\SalesReturnModify;
+use App\Livewire\Admin\SalesReturnList;
+use App\Livewire\Admin\PurchaseReturnAdd;
+use App\Livewire\Admin\PurchaseReturnList;
+use App\Livewire\Admin\PurchaseReturnModify;
 use App\Livewire\Admin\ProfitLoss;
 use App\Livewire\Admin\StaffSalesView;
 use App\Livewire\Admin\StaffPaymentApproval;
@@ -253,18 +261,34 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         Route::get('/contra-voucher', ContraVoucher::class)->name('contra-voucher');
 
         Route::get('/settings', Settings::class)->name('settings');
-        Route::get('/return-product', ReturnProduct::class)->name('return-product');
+
+        // BUSY-style Sales Return routes
+        Route::get('/sales-return-add', SalesReturnAdd::class)->name('sales-return-add');
+        Route::get('/sales-return-modify', SalesReturnModify::class)->name('sales-return-modify');
+        Route::get('/sales-return-list', SalesReturnList::class)->name('sales-return-list');
+        Route::get('/sales-return/{salesReturn}/print', [SalesReturnPrintController::class, 'show'])->name('sales-return-print');
+
+        // BUSY-style Purchase Return routes
+        Route::get('/purchase-return-add', PurchaseReturnAdd::class)->name('purchase-return-add');
+        Route::get('/purchase-return-modify', PurchaseReturnModify::class)->name('purchase-return-modify');
+        Route::get('/purchase-return-list', PurchaseReturnList::class)->name('purchase-return-list');
+        Route::get('/purchase-return/{purchaseReturn}/print', [PurchaseReturnPrintController::class, 'show'])->name('purchase-return-print');
+
+        // Legacy aliases kept for compatibility
+        Route::get('/return-product', SalesReturnAdd::class)->name('return-product');
+        Route::get('/return-product-modify', SalesReturnModify::class)->name('return-product-modify');
         Route::get('/purchase-order-list', PurchaseOrderList::class)->name('purchase-order-list');
         Route::get('/purchase-create', PurchaseCreate::class)->name('purchase-create');
-        Route::get('/return-list', ReturnList::class)->name('return-list');
+        Route::get('/return-list', SalesReturnList::class)->name('return-list');
         Route::get('/add-customer-receipt', AddCustomerReceipt::class)->name('add-customer-receipt');
         Route::get('/cheque-list', ChequeList::class)->name('cheque-list');
         Route::get('/return-cheque', ReturnCheque::class)->name('return-cheque');
         Route::get('/list-customer-receipt', ListCustomerReceipt::class)->name('list-customer-receipt');
         Route::get('/add-supplier-receipt', AddSupplierReceipt::class)->name('add-supplier-receipt');
         Route::get('/list-supplier-receipt', ListSupplierReceipt::class)->name('list-supplier-receipt');
-        Route::get('/return-supplier', ReturnSupplier::class)->name('return-supplier');
-        Route::get('/list-supplier-return', ListSupplierReturn::class)->name('list-supplier-return');
+        Route::get('/return-supplier', PurchaseReturnAdd::class)->name('return-supplier');
+        Route::get('/return-supplier-modify', PurchaseReturnModify::class)->name('return-supplier-modify');
+        Route::get('/list-supplier-return', PurchaseReturnList::class)->name('list-supplier-return');
         Route::get('/cash-deposit', DaySummary::class)->name('day-summary');
         Route::get('/deposits', Deposits::class)->name('deposits');
         Route::get('/register-report/{sessionId}', DaySummaryDetails::class)->name('day-summary-details');

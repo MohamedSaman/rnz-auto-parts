@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use Exception;
 use App\Models\User;
+use App\Models\Sale;
+use App\Models\Payment;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Layout;
@@ -57,6 +59,12 @@ class ManageStaff extends Component
     public $showDeleteModal = false;
     public $showViewModal = false;
     public $perPage = 10;
+    public $activeTab = 'overview';
+
+    public $viewStaffSales = [];
+    public $viewStaffPayments = [];
+    public $viewStaffDues = [];
+    public $viewStaffLedger = [];
 
     public function render()
     {
@@ -83,10 +91,12 @@ class ManageStaff extends Component
 
         $userDetail = \App\Models\UserDetail::where('user_id', $user->id)->first();
         $this->viewUserDetail = [
+            'id' => $user->id,
             'name' => $user->name,
             'contact' => $user->contact,
             'email' => $user->email,
             'role' => $user->role,
+            'staff_type' => $user->staff_type,
             'dob' => $userDetail ? $userDetail->dob : '-',
             'age' => $userDetail ? $userDetail->age : '-',
             'nic_num' => $userDetail ? $userDetail->nic_num : '-',
@@ -103,7 +113,105 @@ class ManageStaff extends Component
             'status' => $userDetail ? $userDetail->status : '-',
         ];
 
+        $this->activeTab = 'overview';
+
+        $sales = Sale::where('salesman_id', $user->id)
+            ->with(['items', 'customer'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $this->viewStaffSales = $sales->map(function ($sale) {
+            $paidAmount = (float) ($sale->total_amount ?? 0) - (float) ($sale->due_amount ?? 0);
+
+            return [
+                'id' => $sale->id,
+                'invoice_number' => $sale->invoice_number,
+                'sale_id' => $sale->sale_id,
+                'customer' => $sale->customer->business_name ?? $sale->customer->name ?? '-',
+                'total_amount' => (float) ($sale->total_amount ?? 0),
+                'due_amount' => (float) ($sale->due_amount ?? 0),
+                'paid_amount' => $paidAmount,
+                'payment_status' => $sale->payment_status,
+                'status' => $sale->status,
+                'created_at' => optional($sale->created_at)->format('M d, Y h:i A') ?? '-',
+                'items_count' => $sale->items->count(),
+            ];
+        })->toArray();
+
+        $payments = Payment::whereHas('sale', function ($q) use ($user) {
+            $q->where('salesman_id', $user->id);
+        })
+            ->with(['sale'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $this->viewStaffPayments = $payments->map(function ($payment) {
+            return [
+                'id' => $payment->id,
+                'amount' => (float) ($payment->amount ?? 0),
+                'payment_method' => $payment->payment_method,
+                'payment_reference' => $payment->payment_reference,
+                'payment_date' => $payment->payment_date ? $payment->payment_date->format('M d, Y') : '-',
+                'status' => $payment->status,
+                'invoice_number' => $payment->sale ? $payment->sale->invoice_number : '-',
+                'created_at' => $payment->created_at ? $payment->created_at->format('M d, Y h:i A') : '-',
+            ];
+        })->toArray();
+
+        $this->viewStaffDues = $sales->filter(function ($sale) {
+            return (float) ($sale->due_amount ?? 0) > 0;
+        })->map(function ($sale) {
+            $paidAmount = (float) ($sale->total_amount ?? 0) - (float) ($sale->due_amount ?? 0);
+
+            return [
+                'id' => $sale->id,
+                'invoice_number' => $sale->invoice_number,
+                'customer' => $sale->customer->business_name ?? $sale->customer->name ?? '-',
+                'total_amount' => (float) ($sale->total_amount ?? 0),
+                'due_amount' => (float) ($sale->due_amount ?? 0),
+                'paid_amount' => $paidAmount,
+                'status' => $sale->status,
+                'payment_status' => $sale->payment_status,
+                'created_at' => $sale->created_at ? $sale->created_at->format('M d, Y h:i A') : '-',
+            ];
+        })->values()->toArray();
+
+        $ledgerEntries = collect();
+
+        foreach ($sales as $sale) {
+            $ledgerEntries->push([
+                'date' => $sale->created_at ? $sale->created_at->format('M d, Y h:i A') : '-',
+                'description' => 'Staff Sale',
+                'reference' => $sale->invoice_number ?? $sale->sale_id,
+                'debit' => (float) ($sale->total_amount ?? 0),
+                'credit' => 0,
+                'type' => 'sale',
+            ]);
+        }
+
+        foreach ($payments as $payment) {
+            if ($payment->status === 'rejected' || $payment->status === 'pending') {
+                continue;
+            }
+
+            $ledgerEntries->push([
+                'date' => $payment->payment_date ? $payment->payment_date->format('M d, Y h:i A') : ($payment->created_at ? $payment->created_at->format('M d, Y h:i A') : '-'),
+                'description' => 'Payment Received (' . ucfirst($payment->payment_method ?? 'N/A') . ')',
+                'reference' => $payment->payment_reference ?? ($payment->sale ? $payment->sale->invoice_number : '-'),
+                'debit' => 0,
+                'credit' => (float) ($payment->amount ?? 0),
+                'type' => 'payment',
+            ]);
+        }
+
+        $this->viewStaffLedger = $ledgerEntries->sortBy('date')->values()->toArray();
+
         $this->showViewModal = true;
+    }
+
+    public function setActiveTab($tab)
+    {
+        $this->activeTab = $tab;
     }
 
     /** ----------------------------

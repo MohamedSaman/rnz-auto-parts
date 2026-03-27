@@ -52,34 +52,57 @@ class PurchaseVoucherModify extends Component
 
     protected $listeners = ['refreshComponent' => '$refresh'];
 
-    public function mount()
+    public function mount($load = null)
     {
         $this->suppliers = ProductSupplier::orderBy('name')->get();
         $this->voucherDate = now()->toDateString();
         $this->addEmptyRow();
+
+        $load = $load ?: request()->query('load') ?: request()->query('orderId');
+        if ($load) {
+            $this->loadVoucher((int) $load);
+        }
+    }
+
+    private function buildVoucherSearchQuery()
+    {
+        $query = PurchaseOrder::with(['supplier', 'items'])
+            ->whereNotIn('status', ['cancelled']);
+
+        if (!empty($this->searchQuery)) {
+            $search = $this->searchQuery;
+
+            if ($this->searchType === 'voucher_number') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('order_code', 'like', '%' . $search . '%')
+                        ->orWhere('invoice_number', 'like', '%' . $search . '%');
+                });
+            } elseif ($this->searchType === 'date') {
+                $query->whereDate('order_date', $search);
+            } elseif ($this->searchType === 'supplier') {
+                $query->whereHas('supplier', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%');
+                });
+            }
+        }
+
+        return $query;
+    }
+
+    public function getRecentVouchersProperty()
+    {
+        return $this->buildVoucherSearchQuery()
+            ->orderByDesc('order_date')
+            ->orderByDesc('id')
+            ->limit(25)
+            ->get();
     }
 
     // ═══ Search & Load ═══
 
     public function searchVouchers()
     {
-        $query = PurchaseOrder::with(['supplier', 'items'])
-            ->whereNotIn('status', ['cancelled']);
-
-        if ($this->searchType === 'voucher_number') {
-            $query->where(function ($q) {
-                $q->where('order_code', 'like', '%' . $this->searchQuery . '%')
-                    ->orWhere('invoice_number', 'like', '%' . $this->searchQuery . '%');
-            });
-        } elseif ($this->searchType === 'date') {
-            $query->whereDate('order_date', $this->searchQuery);
-        } elseif ($this->searchType === 'supplier') {
-            $query->whereHas('supplier', function ($q) {
-                $q->where('name', 'like', '%' . $this->searchQuery . '%');
-            });
-        }
-
-        $this->searchResults = $query->orderByDesc('order_date')->limit(20)->get();
+        $this->searchResults = $this->buildVoucherSearchQuery()->orderByDesc('order_date')->limit(20)->get();
         $this->showSearchResults = true;
     }
 
@@ -406,6 +429,7 @@ class PurchaseVoucherModify extends Component
     {
         return view('livewire.admin.purchase-voucher-modify', [
             'filteredSuppliers' => $this->filteredSuppliers,
+            'recentVouchers' => $this->recentVouchers,
         ])->layout($this->layout, ['erpContext' => 'voucher']);
     }
 }

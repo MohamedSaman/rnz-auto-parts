@@ -1,11 +1,35 @@
 <div class="container-fluid py-3">
+    <div class="busy-header-card mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="mb-1 fw-bold text-white">
+                    <i class="bi bi-arrow-return-left me-2"></i>Sales Return Voucher
+                </h5>
+                <small class="text-white-50">Mode: Ledger/List View</small>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="busy-tabs mb-4">
+        <a href="{{ route('admin.sales-return-add') }}" class="busy-tab">
+            <i class="bi bi-plus-circle-fill"></i> Add
+        </a>
+        <a href="{{ route('admin.sales-return-modify') }}" class="busy-tab">
+            <i class="bi bi-pencil-square"></i> Modify
+        </a>
+        <a href="{{ route('admin.sales-return-list') }}" class="busy-tab active">
+            <i class="bi bi-list-ul"></i> List
+        </a>
+    </div>
+
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h3 class="fw-bold text-dark mb-2">
-                <i class="bi bi-arrow-return-left text-success me-2"></i> Product Returns List
+                <i class="bi bi-arrow-return-left text-success me-2"></i> Sales Return List
             </h3>
-            <p class="text-muted mb-0">View and manage all product returns</p>
+            <p class="text-muted mb-0">View and maintain all sales return vouchers</p>
         </div>
     </div>
 
@@ -78,6 +102,24 @@
         </button>
 
         <ul class="dropdown-menu dropdown-menu-end">
+
+            <!-- Edit Return -->
+            <li>
+                <button class="dropdown-item"
+                        wire:click="editReturn({{ $return->id }})"
+                        wire:loading.attr="disabled"
+                        wire:target="editReturn({{ $return->id }})">
+
+                    <span wire:loading wire:target="editReturn({{ $return->id }})">
+                        <i class="spinner-border spinner-border-sm me-2"></i>
+                        Loading...
+                    </span>
+                    <span wire:loading.remove wire:target="editReturn({{ $return->id }})">
+                        <i class="bi bi-pencil-square text-primary me-2"></i>
+                        Modify
+                    </span>
+                </button>
+            </li>
 
             <!-- Delete Return -->
             <li>
@@ -238,6 +280,60 @@
                         </button>
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Return Modal -->
+    <div wire:ignore.self class="modal fade" id="editReturnModal" tabindex="-1"
+         aria-labelledby="editReturnModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="editReturnModalLabel">
+                        <i class="bi bi-pencil-square me-2"></i> Modify Sales Return
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" wire:click="closeModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if($selectedReturn)
+                    <div class="mb-2 small text-muted">
+                        Return #{{ $selectedReturn->id }} | Invoice: {{ $selectedReturn->sale?->invoice_number ?? '-' }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Product</label>
+                        <input type="text" class="form-control" value="{{ $selectedReturn->product?->name ?? '-' }}" readonly>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Return Qty</label>
+                            <input type="number" step="0.01" min="0.01" class="form-control" wire:model="editReturnQuantity">
+                            @error('editReturnQuantity') <small class="text-danger">{{ $message }}</small> @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Unit Price</label>
+                            <input type="number" step="0.01" min="0" class="form-control" wire:model="editReturnPrice">
+                            @error('editReturnPrice') <small class="text-danger">{{ $message }}</small> @enderror
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">New Total</label>
+                            <input type="text" class="form-control" readonly
+                                value="Rs.{{ number_format(((float)($editReturnQuantity ?? 0) * (float)($editReturnPrice ?? 0)), 2) }}">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label fw-semibold">Notes</label>
+                        <textarea class="form-control" rows="3" wire:model="editReturnNotes" placeholder="Optional notes"></textarea>
+                        @error('editReturnNotes') <small class="text-danger">{{ $message }}</small> @enderror
+                    </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" wire:click="closeModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" wire:click="updateReturn">
+                        <i class="bi bi-check2-circle me-1"></i> Update Return
+                    </button>
                 </div>
             </div>
         </div>
@@ -417,6 +513,47 @@
         .text-muted { 
             font-size: 0.8rem; 
         }
+    }
+
+    .busy-header-card {
+        background: linear-gradient(90deg, #1f2937 0%, #374151 100%);
+        border-radius: 8px;
+        padding: 12px 16px;
+    }
+
+    .busy-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .busy-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #111827;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .busy-tab.active {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: #fff;
+    }
+
+    .erp-kbd {
+        background: #111827;
+        color: #fff;
+        border: 1px solid #374151;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.72rem;
     }
 </style>
 @endpush

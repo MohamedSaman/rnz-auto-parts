@@ -126,6 +126,11 @@ class Sale extends Model
         return $this->hasMany(ReturnsProduct::class, 'sale_id');
     }
 
+    public function salesReturns()
+    {
+        return $this->hasMany(SalesReturn::class, 'sale_id');
+    }
+
     /**
      * Relationship: Approved by admin
      */

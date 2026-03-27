@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Livewire\Concerns\WithDynamicLayout;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 #[Title("Product Return")]
 class ReturnList extends Component
@@ -24,6 +25,12 @@ class ReturnList extends Component
     public $showReceiptModal = false;
     public $currentReturnId = null;
     public $perPage = 10;
+
+    // Edit return state
+    public $editingReturnId = null;
+    public $editReturnQuantity = 0;
+    public $editReturnPrice = 0;
+    public $editReturnNotes = '';
 
     public function mount()
     {
@@ -115,6 +122,145 @@ class ReturnList extends Component
         $this->dispatch('showModal', 'deleteReturnModal');
     }
 
+    public function editReturn($returnId)
+    {
+        $return = ReturnsProduct::with(['sale.customer', 'product'])->find($returnId);
+
+        if (!$return) {
+            $this->dispatch('showToast', ['type' => 'error', 'message' => 'Return record not found.']);
+            return;
+        }
+
+        $this->editingReturnId = $return->id;
+        $this->selectedReturn = $return;
+        $this->editReturnQuantity = (float) ($return->return_quantity ?? 0);
+        $this->editReturnPrice = (float) ($return->selling_price ?? 0);
+        $this->editReturnNotes = (string) ($return->notes ?? '');
+
+        $this->dispatch('showModal', 'editReturnModal');
+    }
+
+    public function updateReturn()
+    {
+        if (!$this->editingReturnId) {
+            $this->dispatch('showToast', ['type' => 'error', 'message' => 'No return selected for update.']);
+            return;
+        }
+
+        $this->validate([
+            'editReturnQuantity' => 'required|numeric|min:0.01',
+            'editReturnPrice' => 'required|numeric|min:0',
+            'editReturnNotes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            DB::transaction(function () {
+                $return = ReturnsProduct::with(['sale.customer'])->lockForUpdate()->findOrFail($this->editingReturnId);
+
+                $oldQty = (float) ($return->return_quantity ?? 0);
+                $oldPrice = (float) ($return->selling_price ?? 0);
+                $oldTotal = (float) ($return->total_amount ?? ($oldQty * $oldPrice));
+
+                $newQty = (float) $this->editReturnQuantity;
+                $newPrice = (float) $this->editReturnPrice;
+                $newTotal = round($newQty * $newPrice, 2);
+
+                $qtyDelta = $newQty - $oldQty;
+
+                // When reducing return qty, stock must have enough available quantity to reverse the return.
+                if ($qtyDelta < 0) {
+                    $required = abs($qtyDelta);
+                    $stockCheck = \App\Models\ProductStock::where('product_id', $return->product_id)->first();
+                    if ($stockCheck && (float) $stockCheck->available_stock < $required) {
+                        throw new \RuntimeException('Not enough available stock to reduce this return quantity.');
+                    }
+                }
+
+                $return->update([
+                    'return_quantity' => $newQty,
+                    'selling_price' => $newPrice,
+                    'total_amount' => $newTotal,
+                    'notes' => $this->editReturnNotes ?: null,
+                ]);
+
+                $this->applyReturnStockAdjustment($return, $qtyDelta);
+                $this->applySaleAndCustomerAdjustment($return, $oldTotal, $newTotal);
+            });
+
+            $this->selectedReturn = ReturnsProduct::with(['sale.customer', 'product'])->find($this->editingReturnId);
+            $this->loadReturns();
+            $this->dispatch('hideModal', 'editReturnModal');
+            $this->dispatch('showToast', ['type' => 'success', 'message' => 'Return updated successfully.']);
+        } catch (\Throwable $e) {
+            $this->dispatch('showToast', ['type' => 'error', 'message' => 'Failed to update return: ' . $e->getMessage()]);
+        }
+    }
+
+    private function applyReturnStockAdjustment(ReturnsProduct $return, float $qtyDelta): void
+    {
+        if (abs($qtyDelta) < 0.0001) {
+            return;
+        }
+
+        $stockQuery = \App\Models\ProductStock::where('product_id', $return->product_id);
+        if (!empty($return->variant_id)) {
+            $stockQuery->where('variant_id', $return->variant_id);
+        }
+        if (!empty($return->variant_value)) {
+            $stockQuery->where('variant_value', $return->variant_value);
+        }
+
+        $stock = $stockQuery->first();
+        if (!$stock) {
+            $stock = \App\Models\ProductStock::where('product_id', $return->product_id)->first();
+        }
+
+        if (!$stock) {
+            $stock = \App\Models\ProductStock::create([
+                'product_id' => $return->product_id,
+                'variant_id' => $return->variant_id,
+                'variant_value' => $return->variant_value,
+                'available_stock' => 0,
+                'damage_stock' => 0,
+                'total_stock' => 0,
+                'sold_count' => 0,
+                'restocked_quantity' => 0,
+            ]);
+        }
+
+        $stock->available_stock = (float) $stock->available_stock + $qtyDelta;
+        if ($qtyDelta > 0) {
+            $stock->sold_count = max(0, (float) $stock->sold_count - $qtyDelta);
+        } else {
+            $stock->sold_count = (float) $stock->sold_count + abs($qtyDelta);
+        }
+
+        $stock->updateTotals();
+    }
+
+    private function applySaleAndCustomerAdjustment(ReturnsProduct $return, float $oldTotal, float $newTotal): void
+    {
+        $sale = $return->sale;
+        if (!$sale) {
+            return;
+        }
+
+        // Positive value means sale should increase, negative means sale should decrease.
+        $saleAdjustment = $oldTotal - $newTotal;
+
+        $sale->total_amount = max(0, (float) $sale->total_amount + $saleAdjustment);
+        $sale->subtotal = max(0, (float) ($sale->subtotal ?? 0) + $saleAdjustment);
+        $sale->due_amount = max(0, (float) ($sale->due_amount ?? 0) + $saleAdjustment);
+        $sale->save();
+
+        if ($sale->customer) {
+            $customer = $sale->customer;
+            $customer->due_amount = max(0, (float) ($customer->due_amount ?? 0) + $saleAdjustment);
+            $customer->total_due = (float) ($customer->opening_balance ?? 0) + (float) $customer->due_amount;
+            $customer->save();
+        }
+    }
+
     public function confirmDeleteReturn()
     {
         try {
@@ -154,9 +300,14 @@ class ReturnList extends Component
         $this->selectedReturn = null;
         $this->currentReturnId = null;
         $this->showReceiptModal = false;
+        $this->editingReturnId = null;
+        $this->editReturnQuantity = 0;
+        $this->editReturnPrice = 0;
+        $this->editReturnNotes = '';
         $this->dispatch('hideModal', 'returnDetailsModal');
         $this->dispatch('hideModal', 'deleteReturnModal');
         $this->dispatch('hideModal', 'receiptModal');
+        $this->dispatch('hideModal', 'editReturnModal');
     }
 
     public function render()

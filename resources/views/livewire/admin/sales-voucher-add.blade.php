@@ -1,4 +1,6 @@
-<div x-data="voucherKeyboard()" x-init="initKeyboard()" @keydown.window="handleGlobalKey($event)">
+<div x-data="voucherKeyboard()" x-init="initKeyboard()" @keydown.window="handleGlobalKey($event)"
+    @customer-selected.window="focusBillingType()"
+    @product-selected.window="focusRowQty($event.detail.index)">
     {{-- Flash Messages --}}
     @if (session()->has('success'))
     <div class="alert alert-success alert-dismissible fade show mb-2 py-2">
@@ -57,6 +59,10 @@
                             placeholder="Search customer..."
                             id="customerSearchInput"
                             @focus="$wire.showCustomerDropdown = true"
+                            @input="resetCustomerSelection()"
+                            @keydown.arrow-down.prevent="handleCustomerArrow(1)"
+                            @keydown.arrow-up.prevent="handleCustomerArrow(-1)"
+                            @keydown.enter.prevent="handleCustomerEnter()"
                             @blur="setTimeout(() => $wire.showCustomerDropdown = false, 200)"
                             autocomplete="off">
                         <button class="btn btn-outline-primary" type="button" wire:click="openCustomerModal" title="Add New Customer">
@@ -70,6 +76,7 @@
                         @forelse($this->filteredCustomers as $customer)
                         <div class="px-3 py-2 border-bottom cursor-pointer hover-bg-light"
                             wire:click="selectCustomer({{ $customer['id'] }})"
+                            data-customer-option="true"
                             style="cursor:pointer;"
                             @mouseenter="this.style.background='#f1f5f9'"
                             @mouseleave="this.style.background='white'">
@@ -90,7 +97,8 @@
                     <label class="form-label small fw-semibold text-muted mb-0">
                         <i class="bi bi-credit-card me-1"></i>Billing Type
                     </label>
-                    <select class="form-select form-select-sm" wire:model.live="billingType">
+                    <select class="form-select form-select-sm" wire:model.live="billingType" id="billingTypeSelect"
+                        @keydown.enter.prevent="focusPriceType()">
                         <option value="cash">Cash</option>
                         <option value="credit">Credit</option>
                         <option value="cheque">Cheque</option>
@@ -102,7 +110,8 @@
                     <label class="form-label small fw-semibold text-muted mb-0">
                         <i class="bi bi-tags me-1"></i>Price Type
                     </label>
-                    <select class="form-select form-select-sm" wire:model.live="priceType">
+                    <select class="form-select form-select-sm" wire:model.live="priceType" id="priceTypeSelect"
+                        @keydown.enter.prevent="focusFirstItemSearch()">
                         <option value="retail">Retail Price</option>
                         <option value="wholesale">Wholesale Price</option>
                         <option value="distributor">Distributor Price</option>
@@ -174,8 +183,6 @@
                             <th style="width:70px" class="text-center">Qty</th>
                             <th style="width:90px" class="text-end">Rate</th>
                             <th style="width:70px" class="text-end">Disc/Unit</th>
-                            <th style="width:60px" class="text-center">Tax%</th>
-                            <th style="width:80px" class="text-end">Tax Amt</th>
                             <th style="width:100px" class="text-end">Amount</th>
                             <th style="width:35px" class="text-center"></th>
                         </tr>
@@ -193,7 +200,9 @@
                                     id="item-search-{{ $index }}"
                                     autocomplete="off"
                                     @focus="$wire.activeItemIndex = {{ $index }}"
-                                    @keydown.enter.prevent="$event.target.closest('tr').querySelector('[data-field=qty]')?.focus()">
+                                    @keydown.arrow-down.prevent="handleItemArrow({{ $index }}, 1)"
+                                    @keydown.arrow-up.prevent="handleItemArrow({{ $index }}, -1)"
+                                    @keydown.enter.prevent="handleItemEnter({{ $index }})">
 
                                 {{-- Product search results dropdown --}}
                                 @if($activeItemIndex === $index && $showProductDropdown && count($productSearchResults) > 0)
@@ -201,6 +210,8 @@
                                     @foreach($productSearchResults as $product)
                                     <div class="px-2 py-1 border-bottom small"
                                         wire:click="selectProduct({{ $index }}, {{ $product['id'] }})"
+                                        data-product-option="true"
+                                        data-row-index="{{ $index }}"
                                         style="cursor:pointer;"
                                         @mouseenter="this.style.background='#eff6ff'"
                                         @mouseleave="this.style.background='white'">
@@ -241,6 +252,7 @@
                             <td class="p-0">
                                 <input type="number" class="form-control form-control-sm border-0 rounded-0 text-center"
                                     wire:model.live.debounce.500ms="items.{{ $index }}.quantity"
+                                    id="qty-{{ $index }}"
                                     data-field="qty"
                                     min="1" max="{{ $item['available_stock'] ?? 99999 }}"
                                     @keydown.enter.prevent="$event.target.closest('tr').querySelector('[data-field=rate]')?.focus()"
@@ -251,6 +263,7 @@
                             <td class="p-0">
                                 <input type="number" step="0.01" class="form-control form-control-sm border-0 rounded-0 text-end"
                                     wire:model.live.debounce.500ms="items.{{ $index }}.rate"
+                                    id="rate-{{ $index }}"
                                     data-field="rate"
                                     @keydown.enter.prevent="$event.target.closest('tr').querySelector('[data-field=disc]')?.focus()"
                                     {{ !$item['product_id'] ? 'disabled' : '' }}>
@@ -260,26 +273,11 @@
                             <td class="p-0">
                                 <input type="number" step="0.01" class="form-control form-control-sm border-0 rounded-0 text-end"
                                     wire:model.live.debounce.500ms="items.{{ $index }}.discount"
+                                    id="disc-{{ $index }}"
                                     data-field="disc"
-                                    @keydown.enter.prevent="$event.target.closest('tr').querySelector('[data-field=tax]')?.focus()"
+                                    placeholder="0"
+                                    @keydown.enter.prevent="focusNextItemSearch({{ $index }})"
                                     {{ !$item['product_id'] ? 'disabled' : '' }}>
-                            </td>
-
-                            {{-- Tax % --}}
-                            <td class="p-0">
-                                <input type="number" step="0.01" class="form-control form-control-sm border-0 rounded-0 text-center"
-                                    wire:model.live.debounce.500ms="items.{{ $index }}.tax_percentage"
-                                    data-field="tax"
-                                    @keydown.enter.prevent="
-                                        let nextRow = $event.target.closest('tr').nextElementSibling;
-                                        if(nextRow) nextRow.querySelector('[id^=item-search]')?.focus();
-                                    "
-                                    {{ !$item['product_id'] ? 'disabled' : '' }}>
-                            </td>
-
-                            {{-- Tax Amount (computed) --}}
-                            <td class="text-end small p-1">
-                                {{ number_format($item['tax_amount'] ?? 0, 2) }}
                             </td>
 
                             {{-- Amount (computed) --}}
@@ -561,10 +559,112 @@
     <script>
     function voucherKeyboard() {
         return {
+            customerOptionIndex: -1,
+            productOptionIndexes: {},
             initKeyboard() {
                 // Focus on customer search on load
                 this.$nextTick(() => {
                     document.getElementById('customerSearchInput')?.focus();
+                });
+            },
+            resetCustomerSelection() {
+                this.customerOptionIndex = -1;
+                this.clearOptionHighlight('[data-customer-option]');
+            },
+            getOptions(selector) {
+                return Array.from(document.querySelectorAll(selector));
+            },
+            clearOptionHighlight(selector) {
+                this.getOptions(selector).forEach((el) => el.classList.remove('keyboard-highlight'));
+            },
+            highlightOption(selector, index) {
+                const options = this.getOptions(selector);
+                options.forEach((el, i) => {
+                    el.classList.toggle('keyboard-highlight', i === index);
+                });
+            },
+            moveIndex(current, max, direction) {
+                if (max <= 0) return -1;
+                if (current < 0) {
+                    return direction > 0 ? 0 : max - 1;
+                }
+                const next = current + direction;
+                if (next < 0) return 0;
+                if (next >= max) return max - 1;
+                return next;
+            },
+            handleCustomerArrow(direction) {
+                const selector = '[data-customer-option]';
+                const options = this.getOptions(selector);
+                if (!options.length) return;
+
+                this.customerOptionIndex = this.moveIndex(this.customerOptionIndex, options.length, direction);
+                this.highlightOption(selector, this.customerOptionIndex);
+            },
+            handleCustomerEnter() {
+                const options = this.getOptions('[data-customer-option]');
+                if (!options.length) {
+                    this.focusBillingType();
+                    return;
+                }
+
+                const index = this.customerOptionIndex < 0 ? 0 : this.customerOptionIndex;
+                options[index]?.click();
+                this.customerOptionIndex = -1;
+                this.clearOptionHighlight('[data-customer-option]');
+            },
+            focusBillingType() {
+                this.$nextTick(() => {
+                    document.getElementById('billingTypeSelect')?.focus();
+                });
+            },
+            focusPriceType() {
+                this.$nextTick(() => {
+                    document.getElementById('priceTypeSelect')?.focus();
+                });
+            },
+            focusFirstItemSearch() {
+                this.$nextTick(() => {
+                    document.getElementById('item-search-0')?.focus();
+                });
+            },
+            getProductSelector(rowIndex) {
+                return `[data-product-option][data-row-index="${rowIndex}"]`;
+            },
+            handleItemArrow(rowIndex, direction) {
+                const selector = this.getProductSelector(rowIndex);
+                const options = this.getOptions(selector);
+                if (!options.length) return;
+
+                const current = this.productOptionIndexes[rowIndex] ?? -1;
+                this.productOptionIndexes[rowIndex] = this.moveIndex(current, options.length, direction);
+                this.highlightOption(selector, this.productOptionIndexes[rowIndex]);
+            },
+            handleItemEnter(rowIndex) {
+                const selector = this.getProductSelector(rowIndex);
+                const options = this.getOptions(selector);
+
+                if (options.length) {
+                    const index = (this.productOptionIndexes[rowIndex] ?? -1) < 0 ? 0 : this.productOptionIndexes[rowIndex];
+                    options[index]?.click();
+                    this.productOptionIndexes[rowIndex] = -1;
+                    this.clearOptionHighlight(selector);
+                    return;
+                }
+
+                this.focusRowQty(rowIndex);
+            },
+            focusRowQty(rowIndex) {
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        document.getElementById(`qty-${rowIndex}`)?.focus();
+                    }, 40);
+                });
+            },
+            focusNextItemSearch(rowIndex) {
+                this.$nextTick(() => {
+                    const nextIndex = Number(rowIndex) + 1;
+                    document.getElementById(`item-search-${nextIndex}`)?.focus();
                 });
             },
             handleGlobalKey(e) {
@@ -609,5 +709,6 @@
         .voucher-grid td { vertical-align: middle; }
         .voucher-grid thead th { font-size: 11px; white-space: nowrap; }
         kbd { background: #374151; color: #fff; padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+        .keyboard-highlight { background: #e0f2fe !important; }
     </style>
 </div>

@@ -53,27 +53,18 @@
                             @forelse($suppliers as $supplier)
                             <tr>
                                 <td class="ps-4">{{ $loop->iteration }}</td>
-                                <td>
-                                    <span class="fw-medium text-dark">{{ $supplier->name }}</span>
-                                </td>
+                                <td><span class="fw-medium text-dark">{{ $supplier->name }}</span></td>
                                 <td>{{ $supplier->businessname }}</td>
                                 <td>{{ $supplier->contact }}</td>
                                 <td>{{ $supplier->email }}</td>
-                                <td class="text-end pe-2">
+                                <td class="text-end pe-4">
                                     <div class="dropdown">
-                                        <button class="btn btn-outline-secondary dropdown-toggle"
-                                                type="button"
-                                                data-bs-toggle="dropdown"
-                                                aria-expanded="false">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="bi bi-gear-fill"></i> Actions
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                            <!-- View Supplier -->
                                             <li>
-                                                <button class="dropdown-item"
-                                                        wire:click="view({{ $supplier->id }})"
-                                                        wire:loading.attr="disabled"
-                                                        title="View Supplier Details">
+                                                <button class="dropdown-item" wire:click="view({{ $supplier->id }})" wire:loading.attr="disabled" title="View Supplier">
                                                     <span wire:loading wire:target="view({{ $supplier->id }})">
                                                         <i class="spinner-border spinner-border-sm me-2"></i> Loading...
                                                     </span>
@@ -82,13 +73,8 @@
                                                     </span>
                                                 </button>
                                             </li>
-
-                                            <!-- Edit Supplier -->
                                             <li>
-                                                <button class="dropdown-item"
-                                                        wire:click="edit({{ $supplier->id }})"
-                                                        wire:loading.attr="disabled"
-                                                        title="Edit Supplier">
+                                                <button class="dropdown-item" wire:click="edit({{ $supplier->id }})" wire:loading.attr="disabled" title="Edit Supplier">
                                                     <span wire:loading wire:target="edit({{ $supplier->id }})">
                                                         <i class="spinner-border spinner-border-sm me-2"></i> Loading...
                                                     </span>
@@ -97,13 +83,8 @@
                                                     </span>
                                                 </button>
                                             </li>
-
-                                            <!-- Delete Supplier -->
                                             <li>
-                                                <button class="dropdown-item"
-                                                        wire:click="confirmDelete({{ $supplier->id }})"
-                                                        wire:loading.attr="disabled"
-                                                        title="Delete Supplier">
+                                                <button class="dropdown-item" wire:click="confirmDelete({{ $supplier->id }})" wire:loading.attr="disabled" title="Delete Supplier">
                                                     <span wire:loading wire:target="confirmDelete({{ $supplier->id }})">
                                                         <i class="spinner-border spinner-border-sm me-2"></i> Loading...
                                                     </span>
@@ -118,7 +99,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No suppliers found.</td>
+                                <td colspan="6" class="text-center text-muted py-4">No suppliers found.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -150,15 +131,15 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Supplier Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" wire:model.blur="name" placeholder="Enter supplier name">
-                                @error('name') 
-                                    <div class="invalid-feedback d-block">{{ $message }}</div> 
+                                @error('name')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Business Name</label>
                                 <input type="text" class="form-control @error('businessname') is-invalid @enderror" wire:model.blur="businessname" placeholder="Enter business name">
-                                @error('businessname') 
-                                    <div class="invalid-feedback d-block">{{ $message }}</div> 
+                                @error('businessname')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -166,15 +147,15 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Contact Number</label>
                                 <input type="text" class="form-control @error('contact') is-invalid @enderror" wire:model.blur="contact" placeholder="Enter contact number">
-                                @error('contact') 
-                                    <div class="invalid-feedback d-block">{{ $message }}</div> 
+                                @error('contact')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Email</label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" wire:model.blur="email" placeholder="Enter email">
-                                @error('email') 
-                                    <div class="invalid-feedback d-block">{{ $message }}</div> 
+                                @error('email')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -182,8 +163,8 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Phone</label>
                                 <input type="text" class="form-control @error('phone') is-invalid @enderror" wire:model.blur="phone" placeholder="Enter phone number">
-                                @error('phone') 
-                                    <div class="invalid-feedback d-block">{{ $message }}</div> 
+                                @error('phone')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-12 col-md-6">
@@ -192,23 +173,23 @@
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
                                 </select>
-                                @error('status') 
-                                    <div class="invalid-feedback d-block">{{ $message }}</div> 
+                                @error('status')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Address</label>
                             <textarea class="form-control @error('address') is-invalid @enderror" wire:model.blur="address" rows="2" placeholder="Enter address"></textarea>
-                            @error('address') 
-                                <div class="invalid-feedback d-block">{{ $message }}</div> 
+                            @error('address')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Notes</label>
                             <textarea class="form-control @error('notes') is-invalid @enderror" wire:model.blur="notes" rows="2" placeholder="Additional notes (optional)"></textarea>
-                            @error('notes') 
-                                <div class="invalid-feedback d-block">{{ $message }}</div> 
+                            @error('notes')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="d-grid">
@@ -225,63 +206,269 @@
 
     <!-- View Supplier Modal -->
     @if($showViewModal)
-    <div class="modal fade show d-block" tabindex="-1" aria-hidden="true" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal fade show d-block" tabindex="-1" aria-hidden="false" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 1100px;">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">
-                        <i class="bi bi-eye text-white me-2"></i> Supplier Details
-                    </h5>
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%); border-radius: 12px 12px 0 0;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                            <i class="bi bi-truck text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-white mb-0">{{ $viewSupplierDetail['name'] ?? '-' }}</h5>
+                            <small class="text-white-50">{{ $viewSupplierDetail['business_name'] ?? 'No business name' }}</small>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" wire:click="closeModal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-muted">Supplier Name</label>
-                            <p class="form-control-plaintext fw-medium">{{ $name }}</p>
+
+                <div class="px-4 pt-3 pb-2" style="background-color: #f8f9fc;">
+                    <div class="row g-2">
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #e8f4fd; border: 1px solid #cce5ff;">
+                                <small class="text-muted d-block">Total Purchases</small>
+                                <strong class="text-primary">{{ count($viewSupplierPurchases) }}</strong>
+                            </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-muted">Business Name</label>
-                            <p class="form-control-plaintext">{{ $businessname ?: 'N/A' }}</p>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #fff3cd; border: 1px solid #ffc107;">
+                                <small class="text-muted d-block">Total Purchase Amount</small>
+                                <strong class="text-warning">{{ number_format(collect($viewSupplierPurchases)->sum('total_amount'), 2) }}</strong>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-muted">Contact Number</label>
-                            <p class="form-control-plaintext">{{ $contact ?: 'N/A' }}</p>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #d4edda; border: 1px solid #28a745;">
+                                <small class="text-muted d-block">Total Paid</small>
+                                <strong class="text-success">{{ number_format(collect($viewSupplierPayments)->sum('total_payment'), 2) }}</strong>
+                            </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-muted">Email</label>
-                            <p class="form-control-plaintext">{{ $email ?: 'N/A' }}</p>
-                        </div>
-                    </div>
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-muted">Phone</label>
-                            <p class="form-control-plaintext">{{ $phone ?: 'N/A' }}</p>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold text-muted">Status</label>
-                            <p class="form-control-plaintext">
-                                <span class="badge bg-{{ $status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ ucfirst($status) }}
-                                </span>
-                            </p>
+                        <div class="col-6 col-md-3">
+                            <div class="p-2 rounded text-center" style="background-color: #f8d7da; border: 1px solid #dc3545;">
+                                <small class="text-muted d-block">Total Due</small>
+                                <strong class="text-danger">{{ number_format(collect($viewSupplierDues)->sum('due_amount'), 2) }}</strong>
+                            </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold text-muted">Address</label>
-                        <p class="form-control-plaintext">{{ $address ?: 'N/A' }}</p>
+                </div>
+
+                <div class="px-4 pt-3" style="background-color: #f8f9fc;">
+                    <ul class="nav nav-tabs border-0" style="gap: 4px;">
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'overview' ? 'active' : '' }}" wire:click="setActiveTab('overview')">
+                                <i class="bi bi-info-circle me-1"></i>Overview
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'purchases' ? 'active' : '' }}" wire:click="setActiveTab('purchases')">
+                                <i class="bi bi-cart4 me-1"></i>Purchase List
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'payments' ? 'active' : '' }}" wire:click="setActiveTab('payments')">
+                                <i class="bi bi-cash-coin me-1"></i>Payment List
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'dues' ? 'active' : '' }}" wire:click="setActiveTab('dues')">
+                                <i class="bi bi-exclamation-circle me-1"></i>Due List
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link customer-tab {{ $activeTab === 'ledger' ? 'active' : '' }}" wire:click="setActiveTab('ledger')">
+                                <i class="bi bi-journal-text me-1"></i>Ledger
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="modal-body" style="max-height: 55vh; overflow-y: auto;">
+                    @if($activeTab === 'overview')
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light"><h6 class="mb-0 fw-bold">Supplier Information</h6></div>
+                                <div class="card-body small">
+                                    <div><span class="text-muted">Name:</span> <strong>{{ $viewSupplierDetail['name'] ?? '-' }}</strong></div>
+                                    <div><span class="text-muted">Business:</span> {{ $viewSupplierDetail['business_name'] ?? '-' }}</div>
+                                    <div><span class="text-muted">Contact:</span> {{ $viewSupplierDetail['contact'] ?? '-' }}</div>
+                                    <div><span class="text-muted">Phone:</span> {{ $viewSupplierDetail['phone'] ?? '-' }}</div>
+                                    <div><span class="text-muted">Email:</span> {{ $viewSupplierDetail['email'] ?? '-' }}</div>
+                                    <div><span class="text-muted">Address:</span> {{ $viewSupplierDetail['address'] ?? '-' }}</div>
+                                    <div><span class="text-muted">Status:</span>
+                                        <span class="badge bg-{{ ($viewSupplierDetail['status'] ?? 'inactive') === 'active' ? 'success' : 'secondary' }}">
+                                            {{ ucfirst($viewSupplierDetail['status'] ?? 'inactive') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-light"><h6 class="mb-0 fw-bold">Financial Summary</h6></div>
+                                <div class="card-body small">
+                                    <div><span class="text-muted">Purchase Vouchers:</span> <strong>{{ count($viewSupplierPurchases) }}</strong></div>
+                                    <div><span class="text-muted">Total Purchase:</span> {{ number_format(collect($viewSupplierPurchases)->sum('total_amount'), 2) }}</div>
+                                    <div><span class="text-muted">Total Paid:</span> {{ number_format(collect($viewSupplierPayments)->sum('total_payment'), 2) }}</div>
+                                    <div><span class="text-muted">Current Due:</span> <strong class="text-danger">{{ number_format(collect($viewSupplierDues)->sum('due_amount'), 2) }}</strong></div>
+                                    <div><span class="text-muted">Overpayment Credit:</span> <strong class="text-success">{{ number_format(($viewSupplierDetail['overpayment'] ?? 0), 2) }}</strong></div>
+                                    <div><span class="text-muted">Notes:</span> {{ $viewSupplierDetail['notes'] ?? 'No notes' }}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">Notes</label>
-                        <p class="form-control-plaintext">{{ $notes ?: 'No notes available' }}</p>
+
+                    @elseif($activeTab === 'purchases')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Order Code</th>
+                                    <th>Invoice</th>
+                                    <th>Date</th>
+                                    <th class="text-center">Items</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Paid</th>
+                                    <th class="text-end">Due</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($viewSupplierPurchases as $i => $purchase)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $purchase['order_code'] ?? '-' }}</td>
+                                    <td>{{ $purchase['invoice_number'] ?? '-' }}</td>
+                                    <td>{{ $purchase['order_date'] ?? '-' }}</td>
+                                    <td class="text-center">{{ $purchase['items_count'] ?? 0 }}</td>
+                                    <td class="text-end">{{ number_format($purchase['total_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-success">{{ number_format($purchase['paid_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-danger">{{ number_format($purchase['due_amount'] ?? 0, 2) }}</td>
+                                    <td><span class="badge bg-secondary">{{ ucfirst($purchase['status'] ?? 'pending') }}</span></td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="9" class="text-center text-muted py-3">No purchase vouchers found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="d-grid">
-                        <button type="button" class="btn btn-secondary" wire:click="closeModal">
-                            <i class="bi bi-x-circle me-1"></i> Close
-                        </button>
+
+                    @elseif($activeTab === 'payments')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th>Order</th>
+                                    <th class="text-end">Cash Amount</th>
+                                    <th class="text-end">Overpayment Used</th>
+                                    <th class="text-end">Total Payment</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($viewSupplierPayments as $i => $payment)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $payment['payment_date'] ?? '-' }}</td>
+                                    <td>{{ ucfirst(str_replace('_', ' ', $payment['payment_method'] ?? '-')) }}</td>
+                                    <td>{{ $payment['payment_reference'] ?? '-' }}</td>
+                                    <td>{{ $payment['order_code'] ?? '-' }}</td>
+                                    <td class="text-end">{{ number_format($payment['amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-info">{{ number_format($payment['overpayment_used'] ?? 0, 2) }}</td>
+                                    <td class="text-end fw-semibold text-success">{{ number_format($payment['total_payment'] ?? 0, 2) }}</td>
+                                    <td><span class="badge bg-secondary">{{ ucfirst($payment['status'] ?? 'pending') }}</span></td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="9" class="text-center text-muted py-3">No payments found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
+
+                    @elseif($activeTab === 'dues')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Order Code</th>
+                                    <th>Invoice</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Paid</th>
+                                    <th class="text-end">Due</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($viewSupplierDues as $i => $due)
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $due['order_code'] ?? '-' }}</td>
+                                    <td>{{ $due['invoice_number'] ?? '-' }}</td>
+                                    <td>{{ $due['created_at'] ?? '-' }}</td>
+                                    <td class="text-end">{{ number_format($due['total_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-success">{{ number_format($due['paid_amount'] ?? 0, 2) }}</td>
+                                    <td class="text-end fw-semibold text-danger">{{ number_format($due['due_amount'] ?? 0, 2) }}</td>
+                                    <td><span class="badge bg-warning text-dark">{{ ucfirst($due['status'] ?? 'pending') }}</span></td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="8" class="text-center text-muted py-3">No outstanding dues found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @elseif($activeTab === 'ledger')
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Reference</th>
+                                    <th class="text-end">Debit</th>
+                                    <th class="text-end">Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php $running = 0; @endphp
+                                @forelse($viewSupplierLedger as $i => $entry)
+                                @php $running += ($entry['debit'] ?? 0) - ($entry['credit'] ?? 0); @endphp
+                                <tr>
+                                    <td>{{ $i + 1 }}</td>
+                                    <td>{{ $entry['date'] ?? '-' }}</td>
+                                    <td>{{ $entry['description'] ?? '-' }}</td>
+                                    <td>{{ $entry['reference'] ?? '-' }}</td>
+                                    <td class="text-end text-danger">{{ number_format($entry['debit'] ?? 0, 2) }}</td>
+                                    <td class="text-end text-success">{{ number_format($entry['credit'] ?? 0, 2) }}</td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="6" class="text-center text-muted py-3">No ledger entries found.</td></tr>
+                                @endforelse
+                            </tbody>
+                            @if(count($viewSupplierLedger) > 0)
+                            <tfoot class="table-light">
+                                <tr>
+                                    <th colspan="4" class="text-end">Balance:</th>
+                                    <th colspan="2" class="text-end {{ $running >= 0 ? 'text-danger' : 'text-success' }}">{{ number_format(abs($running), 2) }}</th>
+                                </tr>
+                            </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" wire:click="closeModal">
+                        <i class="bi bi-x-lg me-1"></i> Close
+                    </button>
                 </div>
             </div>
         </div>
@@ -475,6 +662,33 @@
     }
     .text-crimson {
         color: var(--primary) !important;
+    }
+
+    .customer-tab {
+        border: none !important;
+        background: transparent;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.6rem 1rem;
+        border-radius: 8px 8px 0 0 !important;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+    }
+
+    .customer-tab:hover {
+        color: var(--primary);
+        background: rgba(225, 29, 72, 0.08);
+    }
+
+    .customer-tab.active {
+        color: var(--primary) !important;
+        background: white !important;
+        border-bottom: 3px solid var(--primary) !important;
+        font-weight: 600;
+    }
+
+    .nav-tabs {
+        border-bottom: 2px solid #e9ecef;
     }
 </style>
 @endpush

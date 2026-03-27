@@ -17,10 +17,19 @@ class PurchaseOrderItem extends Model
         'quantity',
         'free_qty',
         'received_quantity',
+        'returned_qty',
         'unit_price',
         'discount',
         'discount_type',
         'status',
+    ];
+
+    protected $casts = [
+        'quantity' => 'decimal:3',
+        'received_quantity' => 'decimal:3',
+        'returned_qty' => 'decimal:3',
+        'unit_price' => 'decimal:2',
+        'discount' => 'decimal:2',
     ];
 
     public function order()

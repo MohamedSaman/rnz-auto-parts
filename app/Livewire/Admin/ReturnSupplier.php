@@ -356,7 +356,7 @@ class ReturnSupplier extends Component
     private function calculateTotalReturnValue()
     {
         $this->totalReturnValue = collect($this->returnItems)->sum(
-            fn($item) => $item['return_qty'] * $item['net_unit_price']
+            fn($item) => (float) ($item['return_qty'] ?? 0) * (float) ($item['net_unit_price'] ?? 0)
         );
     }
 
@@ -414,7 +414,7 @@ class ReturnSupplier extends Component
             $totalReturnAmount = 0;
 
             foreach ($itemsToReturn as $item) {
-                $returnAmount = $item['return_qty'] * $item['net_unit_price'];
+                $returnAmount = (float) ($item['return_qty'] ?? 0) * (float) ($item['net_unit_price'] ?? 0);
                 $totalReturnAmount += $returnAmount;
 
                 ReturnSupplierModel::create([

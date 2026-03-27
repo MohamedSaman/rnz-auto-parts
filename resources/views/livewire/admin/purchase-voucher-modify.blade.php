@@ -93,6 +93,58 @@
                 @endif
             </div>
         </div>
+
+        <div class="card mb-3" style="border-left:3px solid #6366f1;">
+            <div class="card-header py-2 px-3 d-flex justify-content-between align-items-center" style="background:#eef2ff; border-bottom:1px solid #c7d2fe;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-table" style="color:#4f46e5;"></i>
+                    <span class="fw-600" style="font-size:12px;">Purchase Voucher List</span>
+                </div>
+                <small class="text-muted">Latest 25 records</small>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-bordered mb-0" style="font-size:12px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Voucher #</th>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Supplier</th>
+                                <th class="text-end">Total</th>
+                                <th>Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($recentVouchers as $voucher)
+                            <tr>
+                                <td class="fw-semibold">{{ $voucher->order_code }}</td>
+                                <td>{{ $voucher->invoice_number ?: '-' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($voucher->order_date)->format('d-M-Y') }}</td>
+                                <td>{{ $voucher->supplier->name ?? 'N/A' }}</td>
+                                <td class="text-end">Rs {{ number_format((float) $voucher->total_amount, 2) }}</td>
+                                <td>
+                                    <span class="badge {{ $voucher->status === 'complete' ? 'bg-success' : ($voucher->status === 'pending' ? 'bg-warning' : 'bg-secondary') }}" style="font-size:10px;">
+                                        {{ ucfirst($voucher->status) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary" wire:click="loadVoucher({{ $voucher->id }})">
+                                        <i class="bi bi-pencil me-1"></i>Load
+                                    </button>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-3">No purchase vouchers found.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         @endif
 
         {{-- ═══ VOUCHER EDITOR ═══ --}}

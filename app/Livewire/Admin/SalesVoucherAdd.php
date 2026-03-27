@@ -151,6 +151,7 @@ class SalesVoucherAdd extends Component
         $customer = collect($this->customers)->firstWhere('id', $id);
         $this->customerSearch = $customer ? ($customer['business_name'] ?? $customer['name']) . ' - ' . ($customer['phone'] ?? '') : '';
         $this->showCustomerDropdown = false;
+        $this->dispatch('customer-selected');
     }
 
     public function getSelectedCustomerProperty()
@@ -243,7 +244,7 @@ class SalesVoucherAdd extends Component
             'variant_id' => $product['variant_id'],
             'variant_value' => $product['variant_value'],
             'quantity' => 1,
-            'discount' => 0,
+            'discount' => '',
             'tax_percentage' => 0,
             'tax_amount' => 0,
         ]);
@@ -256,6 +257,8 @@ class SalesVoucherAdd extends Component
         if ($index === count($this->items) - 1) {
             $this->addEmptyRow();
         }
+
+        $this->dispatch('product-selected', index: (int) $index);
     }
 
     // --- Item Grid Management ---
@@ -269,7 +272,7 @@ class SalesVoucherAdd extends Component
             'sku' => '',
             'quantity' => 1,
             'rate' => 0,
-            'discount' => 0,
+            'discount' => '',
             'tax_percentage' => 0,
             'tax_amount' => 0,
             'amount' => 0,
@@ -294,7 +297,7 @@ class SalesVoucherAdd extends Component
             $index = (int) $parts[0];
             $field = $parts[1];
 
-            if (in_array($field, ['quantity', 'rate', 'discount', 'tax_percentage'])) {
+            if (in_array($field, ['quantity', 'rate', 'discount'])) {
                 $this->calculateRowTotal($index);
             }
 
@@ -311,7 +314,7 @@ class SalesVoucherAdd extends Component
         $qty = max(0, (float) ($this->items[$index]['quantity'] ?? 0));
         $rate = max(0, (float) ($this->items[$index]['rate'] ?? 0));
         $discount = max(0, (float) ($this->items[$index]['discount'] ?? 0));
-        $taxPct = max(0, (float) ($this->items[$index]['tax_percentage'] ?? 0));
+        $taxPct = 0;
 
         $lineTotal = $qty * $rate;
         $lineDiscount = $discount * $qty;
@@ -319,7 +322,8 @@ class SalesVoucherAdd extends Component
         $taxAmount = $taxableAmount * ($taxPct / 100);
         $amount = $taxableAmount + $taxAmount;
 
-        $this->items[$index]['tax_amount'] = round($taxAmount, 2);
+        $this->items[$index]['tax_percentage'] = 0;
+        $this->items[$index]['tax_amount'] = 0;
         $this->items[$index]['amount'] = round($amount, 2);
     }
 
@@ -329,7 +333,7 @@ class SalesVoucherAdd extends Component
         return collect($this->items)
             ->where('product_id', '!=', null)
             ->sum(function ($item) {
-                return ($item['quantity'] ?? 0) * ($item['rate'] ?? 0);
+                return (float) ($item['quantity'] ?? 0) * (float) ($item['rate'] ?? 0);
             });
     }
 
@@ -338,7 +342,7 @@ class SalesVoucherAdd extends Component
         return collect($this->items)
             ->where('product_id', '!=', null)
             ->sum(function ($item) {
-                return ($item['discount'] ?? 0) * ($item['quantity'] ?? 0);
+                return (float) ($item['discount'] ?? 0) * (float) ($item['quantity'] ?? 0);
             });
     }
 
@@ -347,7 +351,7 @@ class SalesVoucherAdd extends Component
         return collect($this->items)
             ->where('product_id', '!=', null)
             ->sum(function ($item) {
-                return $item['tax_amount'] ?? 0;
+                return (float) ($item['tax_amount'] ?? 0);
             });
     }
 
@@ -524,8 +528,8 @@ class SalesVoucherAdd extends Component
                 'quantity' => (int) $item['quantity'],
                 'rate' => (float) $item['rate'],
                 'discount' => (float) ($item['discount'] ?? 0),
-                'tax_percentage' => (float) ($item['tax_percentage'] ?? 0),
-                'tax_amount' => (float) ($item['tax_amount'] ?? 0),
+                'tax_percentage' => 0,
+                'tax_amount' => 0,
             ];
         })->toArray();
 
@@ -611,8 +615,7 @@ class SalesVoucherAdd extends Component
         $this->showSavedModal = false;
         $this->savedSale = null;
 
-        // Reload the page to refresh and clear form for new entry
-        return $this->redirect(request()->url(), navigate: true);
+        return $this->redirectRoute('admin.sales-voucher-add', navigate: true);
     }
 
     // --- Customer Modal ---

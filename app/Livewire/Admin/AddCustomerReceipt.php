@@ -42,7 +42,16 @@ class AddCustomerReceipt extends Component
         'cheque_number' => '',
         'bank_name' => '',
         'cheque_date' => '',
-        'amount' => 0
+        'amount' => ''
+    ];
+
+    public $cheques = [];
+
+    public $tempCheque = [
+        'cheque_number' => '',
+        'bank_name' => '',
+        'cheque_date' => '',
+        'amount' => ''
     ];
 
     public $bankTransfer = [
@@ -53,8 +62,11 @@ class AddCustomerReceipt extends Component
 
     public $allocations = [];
     public $totalDueAmount = 0;
-    public $totalPaymentAmount = 0;
+    public $totalPaymentAmount = null;
     public $remainingAmount = 0;
+    public $customerOverpaidAmount = 0;
+    public $useCustomerOverpayment = false;
+    public $customerOverpaymentToApply = 0;
     public $showPaymentModal = false;
     public $showViewModal = false;
     public $showReceiptModal = false;
@@ -67,10 +79,7 @@ class AddCustomerReceipt extends Component
         'paymentData.payment_method' => 'required|in:cash,cheque,bank_transfer',
         'paymentData.reference_number' => 'nullable|string|max:100',
         'paymentData.notes' => 'nullable|string|max:500',
-        'totalPaymentAmount' => 'required|numeric|min:0.01',
-        'cheque.cheque_number' => 'required_if:paymentData.payment_method,cheque|string|max:50',
-        'cheque.bank_name' => 'required_if:paymentData.payment_method,cheque|string|max:100',
-        'cheque.cheque_date' => 'required_if:paymentData.payment_method,cheque|date',
+        'totalPaymentAmount' => 'nullable|numeric|min:0',
         'bankTransfer.bank_name' => 'required_if:paymentData.payment_method,bank_transfer|string|max:100',
         'bankTransfer.transfer_date' => 'required_if:paymentData.payment_method,bank_transfer|date',
         'bankTransfer.reference_number' => 'required_if:paymentData.payment_method,bank_transfer|string|max:100',
@@ -79,11 +88,7 @@ class AddCustomerReceipt extends Component
     protected $messages = [
         'paymentData.payment_date.required' => 'Payment date is required.',
         'paymentData.payment_method.required' => 'Payment method is required.',
-        'totalPaymentAmount.required' => 'Payment amount is required.',
-        'totalPaymentAmount.min' => 'Payment amount must be at least Rs. 0.01',
-        'cheque.cheque_number.required_if' => 'Cheque number is required for cheque payments.',
-        'cheque.bank_name.required_if' => 'Bank name is required for cheque payments.',
-        'cheque.cheque_date.required_if' => 'Cheque date is required for cheque payments.',
+        'totalPaymentAmount.min' => 'Payment amount cannot be negative.',
         'bankTransfer.bank_name.required_if' => 'Bank name is required for bank transfer.',
         'bankTransfer.transfer_date.required_if' => 'Transfer date is required for bank transfer.',
         'bankTransfer.reference_number.required_if' => 'Reference number is required for bank transfer.',
@@ -93,8 +98,9 @@ class AddCustomerReceipt extends Component
     {
         $this->paymentData['payment_date'] = now()->format('Y-m-d');
         $this->cheque['cheque_date'] = now()->format('Y-m-d');
+        $this->tempCheque['cheque_date'] = now()->format('Y-m-d');
         $this->bankTransfer['transfer_date'] = now()->format('Y-m-d');
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
     }
 
     public function updatedSearch()
@@ -115,8 +121,11 @@ class AddCustomerReceipt extends Component
 
     public function updatedTotalPaymentAmount()
     {
-        if ($this->totalPaymentAmount > $this->totalDueAmount) {
-            $this->totalPaymentAmount = $this->totalDueAmount;
+        if ($this->totalPaymentAmount === '' || $this->totalPaymentAmount === null) {
+            $this->totalPaymentAmount = null;
+            $this->calculateRemainingAmount();
+            $this->autoAllocatePayment();
+            return;
         }
 
         if ($this->totalPaymentAmount < 0) {
@@ -125,11 +134,6 @@ class AddCustomerReceipt extends Component
 
         $this->calculateRemainingAmount();
         $this->autoAllocatePayment();
-
-        // Update cheque amount if payment method is cheque
-        if ($this->paymentData['payment_method'] === 'cheque') {
-            $this->cheque['amount'] = $this->totalPaymentAmount;
-        }
     }
 
     public function updatedPaymentDataPaymentMethod($value)
@@ -139,7 +143,15 @@ class AddCustomerReceipt extends Component
             'cheque_number' => '',
             'bank_name' => '',
             'cheque_date' => now()->format('Y-m-d'),
-            'amount' => $this->totalPaymentAmount
+            'amount' => ''
+        ];
+
+        $this->cheques = [];
+        $this->tempCheque = [
+            'cheque_number' => '',
+            'bank_name' => '',
+            'cheque_date' => now()->format('Y-m-d'),
+            'amount' => ''
         ];
 
         $this->bankTransfer = [
@@ -154,8 +166,11 @@ class AddCustomerReceipt extends Component
         $this->selectedCustomer = Customer::find($customerId);
         $this->loadCustomerSales();
         $this->selectedInvoices = [];
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
         $this->totalDueAmount = 0;
+        $this->customerOverpaidAmount = (float) ($this->selectedCustomer->overpaid_amount ?? 0);
+        $this->useCustomerOverpayment = false;
+        $this->customerOverpaymentToApply = 0;
         $this->initializeAllocations();
     }
 
@@ -166,8 +181,11 @@ class AddCustomerReceipt extends Component
         $this->selectedInvoices = [];
         $this->allocations = [];
         $this->totalDueAmount = 0;
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
         $this->remainingAmount = 0;
+        $this->customerOverpaidAmount = 0;
+        $this->useCustomerOverpayment = false;
+        $this->customerOverpaymentToApply = 0;
         $this->resetPaymentData();
     }
 
@@ -183,7 +201,7 @@ class AddCustomerReceipt extends Component
         }
 
         $this->calculateTotalDue();
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
         $this->remainingAmount = $this->totalDueAmount;
         $this->initializeAllocations();
     }
@@ -195,7 +213,7 @@ class AddCustomerReceipt extends Component
     {
         $this->selectedInvoices = array_column($this->customerSales, 'id');
         $this->calculateTotalDue();
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
         $this->remainingAmount = $this->totalDueAmount;
         $this->initializeAllocations();
     }
@@ -207,7 +225,7 @@ class AddCustomerReceipt extends Component
     {
         $this->selectedInvoices = [];
         $this->totalDueAmount = 0;
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
         $this->remainingAmount = 0;
         $this->allocations = [];
     }
@@ -289,11 +307,47 @@ class AddCustomerReceipt extends Component
             ->whereIn('id', $this->selectedInvoices)
             ->sum('due_amount');
         $this->remainingAmount = $this->totalDueAmount;
+
+        // Reset overpayment usage when invoice selection changes
+        $this->useCustomerOverpayment = false;
+        $this->customerOverpaymentToApply = 0;
     }
 
     private function calculateRemainingAmount()
     {
-        $this->remainingAmount = $this->totalDueAmount - $this->totalPaymentAmount;
+        $paymentAmount = (float) ($this->totalPaymentAmount ?: 0);
+        $creditAmount = (float) ($this->customerOverpaymentToApply ?: 0);
+        $this->remainingAmount = $this->totalDueAmount - $paymentAmount - $creditAmount;
+    }
+
+    public function toggleCustomerOverpayment()
+    {
+        $this->useCustomerOverpayment = !$this->useCustomerOverpayment;
+
+        if ($this->useCustomerOverpayment && $this->customerOverpaidAmount > 0) {
+            $this->customerOverpaymentToApply = min($this->customerOverpaidAmount, $this->totalDueAmount);
+        } else {
+            $this->customerOverpaymentToApply = 0;
+        }
+
+        $this->calculateRemainingAmount();
+        $this->autoAllocatePayment();
+    }
+
+    public function updatedCustomerOverpaymentToApply()
+    {
+        if ($this->customerOverpaymentToApply > $this->customerOverpaidAmount) {
+            $this->customerOverpaymentToApply = $this->customerOverpaidAmount;
+        }
+        if ($this->customerOverpaymentToApply > $this->totalDueAmount) {
+            $this->customerOverpaymentToApply = $this->totalDueAmount;
+        }
+        if ($this->customerOverpaymentToApply < 0) {
+            $this->customerOverpaymentToApply = 0;
+        }
+
+        $this->calculateRemainingAmount();
+        $this->autoAllocatePayment();
     }
 
     private function initializeAllocations()
@@ -315,7 +369,7 @@ class AddCustomerReceipt extends Component
 
     private function autoAllocatePayment()
     {
-        $remainingPayment = $this->totalPaymentAmount;
+        $remainingPayment = (float) ($this->totalPaymentAmount ?: 0) + (float) ($this->customerOverpaymentToApply ?: 0);
 
         foreach ($this->customerSales as $sale) {
             $saleId = $sale['id'];
@@ -342,6 +396,20 @@ class AddCustomerReceipt extends Component
         }
     }
 
+    private function syncChequePaymentAmount(): void
+    {
+        if ($this->paymentData['payment_method'] !== 'cheque') {
+            return;
+        }
+
+        $this->totalPaymentAmount = round((float) collect($this->cheques)->sum(function ($cheque) {
+            return (float) ($cheque['amount'] ?? 0);
+        }), 2);
+
+        $this->calculateRemainingAmount();
+        $this->autoAllocatePayment();
+    }
+
     public function openPaymentModal()
     {
         if (empty($this->selectedInvoices)) {
@@ -352,32 +420,26 @@ class AddCustomerReceipt extends Component
             return;
         }
 
-        // Validate payment amount
-        if (!$this->totalPaymentAmount || $this->totalPaymentAmount <= 0) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'message' => 'Please enter a payment amount greater than zero.'
-            ]);
-            return;
-        }
-
-        if ($this->totalPaymentAmount > $this->totalDueAmount) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'message' => 'Payment amount cannot exceed total due amount.'
-            ]);
-            return;
-        }
-
-        // Validate cheque amounts if payment method is cheque
+        // Validate cheque entries for cheque payments
         if ($this->paymentData['payment_method'] === 'cheque') {
-            if ($this->cheque['amount'] != $this->totalPaymentAmount) {
+            if (count($this->cheques) === 0 && (float) ($this->totalPaymentAmount ?: 0) > 0) {
                 $this->dispatch('show-toast', [
                     'type' => 'error',
-                    'message' => 'Cheque amount must equal the payment amount.'
+                    'message' => 'Please add at least one cheque for cheque payments.'
                 ]);
                 return;
             }
+
+            $this->syncChequePaymentAmount();
+        }
+
+        // Validate payment amount
+        if (((float) ($this->totalPaymentAmount ?: 0) <= 0) && ((float) ($this->customerOverpaymentToApply ?: 0) <= 0)) {
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => 'Please enter a payment amount or apply customer overpayment credit.'
+            ]);
+            return;
         }
 
         // Allocate payment
@@ -415,13 +477,23 @@ class AddCustomerReceipt extends Component
         $this->selectedInvoices = [];
         $this->allocations = [];
         $this->totalDueAmount = 0;
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
         $this->remainingAmount = 0;
+        $this->customerOverpaidAmount = 0;
+        $this->useCustomerOverpayment = false;
+        $this->customerOverpaymentToApply = 0;
         $this->cheque = [
             'cheque_number' => '',
             'bank_name' => '',
             'cheque_date' => now()->format('Y-m-d'),
-            'amount' => 0
+            'amount' => ''
+        ];
+        $this->cheques = [];
+        $this->tempCheque = [
+            'cheque_number' => '',
+            'bank_name' => '',
+            'cheque_date' => now()->format('Y-m-d'),
+            'amount' => ''
         ];
         $this->search = '';
         $this->resetPaymentData();
@@ -441,18 +513,87 @@ class AddCustomerReceipt extends Component
             'reference_number' => '',
             'notes' => ''
         ];
-        $this->totalPaymentAmount = 0;
+        $this->totalPaymentAmount = null;
+        $this->useCustomerOverpayment = false;
+        $this->customerOverpaymentToApply = 0;
         $this->cheque = [
             'cheque_number' => '',
             'bank_name' => '',
             'cheque_date' => now()->format('Y-m-d'),
-            'amount' => 0
+            'amount' => ''
+        ];
+        $this->cheques = [];
+        $this->tempCheque = [
+            'cheque_number' => '',
+            'bank_name' => '',
+            'cheque_date' => now()->format('Y-m-d'),
+            'amount' => ''
         ];
         $this->bankTransfer = [
             'bank_name' => '',
             'transfer_date' => now()->format('Y-m-d'),
             'reference_number' => ''
         ];
+    }
+
+    public function addCheque()
+    {
+        $this->validate([
+            'tempCheque.cheque_number' => 'required|string|max:50',
+            'tempCheque.bank_name' => 'required|string|max:100',
+            'tempCheque.cheque_date' => 'required|date',
+            'tempCheque.amount' => 'required|numeric|min:0.01',
+        ], [
+            'tempCheque.cheque_number.required' => 'Cheque number is required.',
+            'tempCheque.bank_name.required' => 'Bank name is required.',
+            'tempCheque.cheque_date.required' => 'Cheque date is required.',
+            'tempCheque.amount.required' => 'Cheque amount is required.',
+        ]);
+
+        $chequeNumber = trim((string) $this->tempCheque['cheque_number']);
+
+        $existsInCurrentList = collect($this->cheques)->contains(function ($cheque) use ($chequeNumber) {
+            return $cheque['cheque_number'] === $chequeNumber;
+        });
+
+        if ($existsInCurrentList) {
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => "Cheque number '{$chequeNumber}' is already added in this payment."
+            ]);
+            return;
+        }
+
+        if (Cheque::where('cheque_number', $chequeNumber)->exists()) {
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => "Cheque number '{$chequeNumber}' already exists in the system."
+            ]);
+            return;
+        }
+
+        $this->cheques[] = [
+            'cheque_number' => $chequeNumber,
+            'bank_name' => trim((string) $this->tempCheque['bank_name']),
+            'cheque_date' => $this->tempCheque['cheque_date'],
+            'amount' => (float) $this->tempCheque['amount'],
+        ];
+
+        $this->syncChequePaymentAmount();
+
+        $this->tempCheque = [
+            'cheque_number' => '',
+            'bank_name' => '',
+            'cheque_date' => now()->format('Y-m-d'),
+            'amount' => ''
+        ];
+    }
+
+    public function removeCheque($index)
+    {
+        unset($this->cheques[$index]);
+        $this->cheques = array_values($this->cheques);
+        $this->syncChequePaymentAmount();
     }
 
     public function viewSale($saleId)
@@ -468,6 +609,18 @@ class AddCustomerReceipt extends Component
             'amount' => $this->totalPaymentAmount,
             'method' => $this->paymentData['payment_method']
         ]);
+
+        if ($this->paymentData['payment_method'] === 'cheque') {
+            $this->syncChequePaymentAmount();
+        }
+
+        if (((float) ($this->totalPaymentAmount ?: 0) <= 0) && ((float) ($this->customerOverpaymentToApply ?: 0) <= 0)) {
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => 'Please enter a payment amount or apply customer overpayment credit.'
+            ]);
+            return;
+        }
 
         // Validate inputs
         try {
@@ -485,29 +638,56 @@ class AddCustomerReceipt extends Component
             return;
         }
 
-        // Check payment amount
-        if ($this->totalPaymentAmount > $this->totalDueAmount) {
-            $this->dispatch('show-toast', [
-                'type' => 'error',
-                'message' => 'Payment amount cannot exceed total due amount.'
-            ]);
-            return;
-        }
-
-        // Additional validation: Check for duplicate cheque numbers in database
+        // Additional validation: Check cheque list for cheque payments
         if ($this->paymentData['payment_method'] === 'cheque') {
-            $existingCheque = Cheque::where('cheque_number', $this->cheque['cheque_number'])->first();
-            if ($existingCheque) {
+            if (count($this->cheques) === 0 && (float) ($this->totalPaymentAmount ?: 0) > 0) {
                 $this->dispatch('show-toast', [
                     'type' => 'error',
-                    'message' => "Cheque number '{$this->cheque['cheque_number']}' already exists in the system. Please use a different cheque number."
+                    'message' => 'Please add at least one cheque for cheque payment.'
                 ]);
                 return;
             }
+
+            $chequeNumbers = collect($this->cheques)->pluck('cheque_number');
+            if ($chequeNumbers->count() !== $chequeNumbers->unique()->count()) {
+                $this->dispatch('show-toast', [
+                    'type' => 'error',
+                    'message' => 'Duplicate cheque numbers found in the current payment list.'
+                ]);
+                return;
+            }
+
+            $existingCheques = Cheque::whereIn('cheque_number', $chequeNumbers->all())->pluck('cheque_number')->toArray();
+            if (!empty($existingCheques)) {
+                $this->dispatch('show-toast', [
+                    'type' => 'error',
+                    'message' => 'These cheque numbers already exist: ' . implode(', ', $existingCheques)
+                ]);
+                return;
+            }
+
+            $this->syncChequePaymentAmount();
         }
 
         try {
             DB::beginTransaction();
+
+            // Apply customer overpayment credit first (if selected)
+            $availableOverpaid = (float) ($this->selectedCustomer->overpaid_amount ?? 0);
+            $overpaymentUsed = min(
+                (float) ($this->customerOverpaymentToApply ?: 0),
+                $availableOverpaid,
+                (float) ($this->totalDueAmount ?: 0)
+            );
+
+            $this->customerOverpaymentToApply = $overpaymentUsed;
+            $this->calculateRemainingAmount();
+            $this->autoAllocatePayment();
+
+            if ($overpaymentUsed > 0) {
+                $this->selectedCustomer->overpaid_amount = max(0, $availableOverpaid - $overpaymentUsed);
+                $this->selectedCustomer->save();
+            }
 
             $totalProcessed = 0;
             $processedInvoices = [];
@@ -515,7 +695,7 @@ class AddCustomerReceipt extends Component
             // Create a single payment record for customer (not tied to specific sale)
             $paymentData = [
                 'customer_id' => $this->selectedCustomer->id,
-                'amount' => $this->totalPaymentAmount,
+                'amount' => (float) ($this->totalPaymentAmount ?: 0),
                 'payment_method' => $this->paymentData['payment_method'],
                 'payment_reference' => $this->paymentData['reference_number'] ?? null,
                 'payment_date' => $this->paymentData['payment_date'],
@@ -538,16 +718,18 @@ class AddCustomerReceipt extends Component
 
             // Process cheques if payment method is cheque
             if ($this->paymentData['payment_method'] === 'cheque') {
-                Cheque::create([
-                    'payment_id' => $payment->id,
-                    'cheque_number' => $this->cheque['cheque_number'],
-                    'bank_name' => $this->cheque['bank_name'],
-                    'cheque_date' => $this->cheque['cheque_date'],
-                    'cheque_amount' => $this->cheque['amount'],
-                    'status' => 'pending',
-                    'customer_id' => $this->selectedCustomer->id,
-                ]);
-                Log::info('Cheque created');
+                foreach ($this->cheques as $chequeItem) {
+                    Cheque::create([
+                        'payment_id' => $payment->id,
+                        'cheque_number' => $chequeItem['cheque_number'],
+                        'bank_name' => $chequeItem['bank_name'],
+                        'cheque_date' => $chequeItem['cheque_date'],
+                        'cheque_amount' => (float) $chequeItem['amount'],
+                        'status' => 'pending',
+                        'customer_id' => $this->selectedCustomer->id,
+                    ]);
+                }
+                Log::info('Cheques created', ['count' => count($this->cheques)]);
             }
 
             // Process each sale allocation
@@ -622,6 +804,19 @@ class AddCustomerReceipt extends Component
                 $processedInvoices[] = $sale['invoice_number'];
             }
 
+            $cashAppliedToInvoices = max(0, (float) $totalProcessed - (float) $overpaymentUsed);
+            $overpaidAmount = max(0, ((float) $this->totalPaymentAmount - (float) $cashAppliedToInvoices));
+            if ($overpaidAmount > 0) {
+                $this->selectedCustomer->overpaid_amount = (float) ($this->selectedCustomer->overpaid_amount ?? 0) + $overpaidAmount;
+                $this->selectedCustomer->save();
+
+                Log::info('Customer overpayment credited', [
+                    'customer_id' => $this->selectedCustomer->id,
+                    'overpaid_amount' => $overpaidAmount,
+                    'new_balance' => $this->selectedCustomer->overpaid_amount,
+                ]);
+            }
+
             DB::commit();
 
             Log::info('Payment processed successfully', [
@@ -636,7 +831,7 @@ class AddCustomerReceipt extends Component
 
             $this->dispatch('show-toast', [
                 'type' => 'success',
-                'message' => "Payment of Rs." . number_format($totalProcessed, 2) . " processed successfully!"
+                'message' => "Payment of Rs." . number_format((float) $this->totalPaymentAmount, 2) . " processed successfully!"
             ]);
 
             // Open receipt modal

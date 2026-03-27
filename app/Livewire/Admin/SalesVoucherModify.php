@@ -65,9 +65,50 @@ class SalesVoucherModify extends Component
         $this->loadSalesmen();
         $this->tempChequeDate = now()->format('Y-m-d');
 
+        $saleId = $saleId ?: request()->query('saleId') ?: request()->query('load');
+
         if ($saleId) {
             $this->loadVoucher($saleId);
         }
+    }
+
+    private function buildVoucherSearchQuery()
+    {
+        $query = Sale::with(['customer', 'items'])
+            ->where('status', '!=', 'cancelled');
+
+        if (!empty($this->searchQuery)) {
+            $search = $this->searchQuery;
+
+            switch ($this->searchType) {
+                case 'voucher_number':
+                    $query->where(function ($q) use ($search) {
+                        $q->where('invoice_number', 'like', "%{$search}%")
+                            ->orWhere('sale_id', 'like', "%{$search}%");
+                    });
+                    break;
+                case 'date':
+                    $query->whereDate('created_at', $search);
+                    break;
+                case 'customer':
+                    $query->whereHas('customer', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('business_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
+                    break;
+            }
+        }
+
+        return $query;
+    }
+
+    public function getRecentVouchersProperty()
+    {
+        return $this->buildVoucherSearchQuery()
+            ->orderBy('created_at', 'desc')
+            ->limit(25)
+            ->get();
     }
 
     private function getProductPriceByType(array $product): float
@@ -108,29 +149,7 @@ class SalesVoucherModify extends Component
             return;
         }
 
-        $query = Sale::with(['customer', 'items'])
-            ->where('status', '!=', 'cancelled');
-
-        switch ($this->searchType) {
-            case 'voucher_number':
-                $query->where(function ($q) {
-                    $q->where('invoice_number', 'like', "%{$this->searchQuery}%")
-                        ->orWhere('sale_id', 'like', "%{$this->searchQuery}%");
-                });
-                break;
-            case 'date':
-                $query->whereDate('created_at', $this->searchQuery);
-                break;
-            case 'customer':
-                $query->whereHas('customer', function ($q) {
-                    $q->where('name', 'like', "%{$this->searchQuery}%")
-                        ->orWhere('business_name', 'like', "%{$this->searchQuery}%")
-                        ->orWhere('phone', 'like', "%{$this->searchQuery}%");
-                });
-                break;
-        }
-
-        $this->searchResults = $query->orderBy('created_at', 'desc')
+        $this->searchResults = $this->buildVoucherSearchQuery()->orderBy('created_at', 'desc')
             ->limit(20)
             ->get()
             ->toArray();
@@ -187,7 +206,7 @@ class SalesVoucherModify extends Component
             $qty = (int) $item->quantity;
             $rate = (float) $item->unit_price;
             $disc = (float) $item->discount_per_unit;
-            $taxPct = (float) ($item->tax_percentage ?? 0);
+            $taxPct = 0;
             $lineTotal = $qty * $rate;
             $lineDiscount = $disc * $qty;
             $taxableAmount = $lineTotal - $lineDiscount;
@@ -203,8 +222,8 @@ class SalesVoucherModify extends Component
                 'quantity' => $qty,
                 'rate' => $rate,
                 'discount' => $disc,
-                'tax_percentage' => $taxPct,
-                'tax_amount' => round($taxAmount, 2),
+                'tax_percentage' => 0,
+                'tax_amount' => 0,
                 'amount' => round($amount, 2),
                 'available_stock' => $availableStock + $qty, // Add back the qty that will be restored
                 'variant_id' => $item->variant_id,
@@ -411,7 +430,7 @@ class SalesVoucherModify extends Component
             $index = (int) $parts[0];
             $field = $parts[1];
 
-            if (in_array($field, ['quantity', 'rate', 'discount', 'tax_percentage'])) {
+            if (in_array($field, ['quantity', 'rate', 'discount'])) {
                 $this->calculateRowTotal($index);
             }
             if ($field === 'product_search') {
@@ -427,7 +446,7 @@ class SalesVoucherModify extends Component
         $qty = max(0, (float) ($this->items[$index]['quantity'] ?? 0));
         $rate = max(0, (float) ($this->items[$index]['rate'] ?? 0));
         $discount = max(0, (float) ($this->items[$index]['discount'] ?? 0));
-        $taxPct = max(0, (float) ($this->items[$index]['tax_percentage'] ?? 0));
+        $taxPct = 0;
 
         $lineTotal = $qty * $rate;
         $lineDiscount = $discount * $qty;
@@ -435,7 +454,8 @@ class SalesVoucherModify extends Component
         $taxAmount = $taxableAmount * ($taxPct / 100);
         $amount = $taxableAmount + $taxAmount;
 
-        $this->items[$index]['tax_amount'] = round($taxAmount, 2);
+        $this->items[$index]['tax_percentage'] = 0;
+        $this->items[$index]['tax_amount'] = 0;
         $this->items[$index]['amount'] = round($amount, 2);
     }
 
@@ -443,19 +463,19 @@ class SalesVoucherModify extends Component
     public function getSubtotalProperty()
     {
         return collect($this->items)->where('product_id', '!=', null)
-            ->sum(fn($i) => ($i['quantity'] ?? 0) * ($i['rate'] ?? 0));
+            ->sum(fn($i) => (float) ($i['quantity'] ?? 0) * (float) ($i['rate'] ?? 0));
     }
 
     public function getTotalDiscountProperty()
     {
         return collect($this->items)->where('product_id', '!=', null)
-            ->sum(fn($i) => ($i['discount'] ?? 0) * ($i['quantity'] ?? 0));
+            ->sum(fn($i) => (float) ($i['discount'] ?? 0) * (float) ($i['quantity'] ?? 0));
     }
 
     public function getTotalTaxProperty()
     {
         return collect($this->items)->where('product_id', '!=', null)
-            ->sum(fn($i) => $i['tax_amount'] ?? 0);
+            ->sum(fn($i) => (float) ($i['tax_amount'] ?? 0));
     }
 
     public function getGrandTotalProperty()
@@ -646,8 +666,8 @@ class SalesVoucherModify extends Component
                 'quantity' => (int) $item['quantity'],
                 'rate' => (float) $item['rate'],
                 'discount' => (float) ($item['discount'] ?? 0),
-                'tax_percentage' => (float) ($item['tax_percentage'] ?? 0),
-                'tax_amount' => (float) ($item['tax_amount'] ?? 0),
+                'tax_percentage' => 0,
+                'tax_amount' => 0,
             ];
         })->toArray();
 
@@ -712,8 +732,7 @@ class SalesVoucherModify extends Component
         $this->showSavedModal = false;
         $this->savedSale = null;
 
-        // Reload the page to refresh and show updated data
-        return $this->redirect(request()->url(), navigate: true);
+        return $this->redirectRoute('admin.sales-voucher-modify', navigate: true);
     }
 
     public function clearVoucher()
@@ -739,6 +758,7 @@ class SalesVoucherModify extends Component
     {
         return view('livewire.admin.sales-voucher-modify', [
             'filteredCustomers' => $this->filteredCustomers,
+            'recentVouchers' => $this->recentVouchers,
         ])->layout($this->layout, ['erpContext' => 'voucher']);
     }
 }

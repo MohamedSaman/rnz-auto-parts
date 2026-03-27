@@ -310,6 +310,41 @@
                             </small>
                         </div>
 
+                        {{-- Customer Overpayment Credit --}}
+                        @if($customerOverpaidAmount > 0)
+                        <div class="card border-info mb-3">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold text-info">
+                                        <i class="bi bi-wallet2 me-1"></i> Customer Overpaid Credit Available
+                                    </span>
+                                    <span class="fw-bold text-success">Rs.{{ number_format($customerOverpaidAmount, 2) }}</span>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="useCustomerOverpayment"
+                                        wire:click="toggleCustomerOverpayment" {{ $useCustomerOverpayment ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="useCustomerOverpayment">
+                                        Apply customer overpaid credit to this payment
+                                    </label>
+                                </div>
+
+                                @if($useCustomerOverpayment)
+                                <div class="mt-2">
+                                    <label class="form-label small fw-semibold">Credit Amount to Apply</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Rs.</span>
+                                        <input type="number" min="0" step="0.01"
+                                            class="form-control"
+                                            wire:model.live="customerOverpaymentToApply"
+                                            placeholder="0.00">
+                                    </div>
+                                    <small class="text-muted">Max: Rs.{{ number_format(min($customerOverpaidAmount, $totalDueAmount), 2) }}</small>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
                         {{-- Payment Amount Field --}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Enter Payment Amount <span class="text-danger">*</span></label>
@@ -317,26 +352,37 @@
                                 <span class="input-group-text">Rs.</span>
                                 <input
                                     type="number"
-                                    min="0.01"
-                                    max="{{ $totalDueAmount }}"
+                                    min="0"
                                     step="0.01"
                                     class="form-control"
                                     wire:model.live="totalPaymentAmount"
-                                    placeholder="0.00">
+                                    placeholder="0">
                             </div>
-                            <small class="text-muted">Maximum: Rs.{{ number_format($totalDueAmount, 2) }}</small>
+                            <small class="text-muted">Selected due: Rs.{{ number_format($totalDueAmount, 2) }}. Overpayment is allowed and will be saved as customer overpaid amount.</small>
                             @error('totalPaymentAmount')
                             <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
                         {{-- Remaining Amount Display --}}
-                        @if($totalPaymentAmount > 0)
-                        <div class="alert alert-{{ $remainingAmount > 0 ? 'warning' : 'success' }} mb-3">
+                        @if((($totalPaymentAmount ?? 0) > 0) || (($customerOverpaymentToApply ?? 0) > 0))
+                        <div class="alert alert-{{ $remainingAmount > 0 ? 'warning' : ($remainingAmount < 0 ? 'info' : 'success') }} mb-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="fw-semibold">Remaining Due:</span>
-                                <span class="fw-bold">Rs.{{ number_format($remainingAmount, 2) }}</span>
+                                <span class="fw-bold">Rs.{{ number_format(max($remainingAmount, 0), 2) }}</span>
                             </div>
+                            @if(($customerOverpaymentToApply ?? 0) > 0)
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="fw-semibold text-info">Overpaid Credit Used:</span>
+                                <span class="fw-bold text-info">Rs.{{ number_format((float)$customerOverpaymentToApply, 2) }}</span>
+                            </div>
+                            @endif
+                            @if($remainingAmount < 0)
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="fw-semibold text-info">New Overpayment:</span>
+                                <span class="fw-bold text-info">Rs.{{ number_format(abs($remainingAmount), 2) }}</span>
+                            </div>
+                            @endif
                         </div>
                         @endif
 
@@ -347,12 +393,12 @@
                                 wire:click="openPaymentModal"
                                 wire:loading.attr="disabled"
                                 wire:loading.class="disabled"
-                                @if($totalPaymentAmount <= 0 || $totalPaymentAmount > $totalDueAmount) disabled @endif>
+                                @if((($totalPaymentAmount ?? 0) <= 0) && (($customerOverpaymentToApply ?? 0) <= 0)) disabled @endif>
                                 <span wire:loading.remove wire:target="openPaymentModal">
                                     <i class="bi bi-cash-coin me-2"></i>
                                     Process Payment
-                                    @if($totalPaymentAmount > 0)
-                                    <span class="ms-1">(Rs.{{ number_format($totalPaymentAmount, 2) }})</span>
+                                    @if((($totalPaymentAmount ?? 0) > 0) || (($customerOverpaymentToApply ?? 0) > 0))
+                                    <span class="ms-1">(Total Rs.{{ number_format((float)$totalPaymentAmount + (float)$customerOverpaymentToApply, 2) }})</span>
                                     @endif
                                 </span>
                                 <span wire:loading wire:target="openPaymentModal">
@@ -368,8 +414,8 @@
                             <div class="d-grid gap-2">
                                 <button
                                     class="btn btn-outline-primary btn-sm"
-                                    wire:click="$set('totalPaymentAmount', {{ $totalDueAmount }})">
-                                    Pay Full Amount (Rs.{{ number_format($totalDueAmount, 2) }})
+                                    wire:click="$set('totalPaymentAmount', {{ max($totalDueAmount - $customerOverpaymentToApply, 0) }})">
+                                    Pay Remaining Due (Rs.{{ number_format(max($totalDueAmount - $customerOverpaymentToApply, 0), 2) }})
                                 </button>
                             </div>
                         </div>
@@ -589,12 +635,24 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Amount Paid:</strong></td>
-                                    <td class="text-end text-success fw-bold">Rs.{{ number_format($totalPaymentAmount, 2) }}</td>
+                                    <td class="text-end text-success fw-bold">Rs.{{ number_format((float)($totalPaymentAmount ?? 0), 2) }}</td>
                                 </tr>
+                                @if(($customerOverpaymentToApply ?? 0) > 0)
+                                <tr>
+                                    <td><strong>Overpaid Credit Used:</strong></td>
+                                    <td class="text-end text-info fw-bold">Rs.{{ number_format((float)$customerOverpaymentToApply, 2) }}</td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <td><strong>Remaining Due:</strong></td>
-                                    <td class="text-end text-danger">Rs.{{ number_format($remainingAmount, 2) }}</td>
+                                    <td class="text-end text-danger">Rs.{{ number_format(max($remainingAmount, 0), 2) }}</td>
                                 </tr>
+                                @if($remainingAmount < 0)
+                                <tr>
+                                    <td><strong>New Overpayment:</strong></td>
+                                    <td class="text-end text-info fw-bold">Rs.{{ number_format(abs($remainingAmount), 2) }}</td>
+                                </tr>
+                                @endif
                             </table>
                         </div>
                     </div>
@@ -626,23 +684,74 @@
                                 <div class="row g-3">
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold">Cheque Number <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control @error('cheque.cheque_number') is-invalid @enderror"
-                                            wire:model="cheque.cheque_number"
+                                        <input type="text" class="form-control @error('tempCheque.cheque_number') is-invalid @enderror"
+                                            wire:model="tempCheque.cheque_number"
                                             placeholder="Enter cheque number">
-                                        @error('cheque.cheque_number') <span class="text-danger small">{{ $message }}</span> @enderror
+                                        @error('tempCheque.cheque_number') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold">Bank Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control @error('cheque.bank_name') is-invalid @enderror"
-                                            wire:model="cheque.bank_name"
+                                        <input type="text" class="form-control @error('tempCheque.bank_name') is-invalid @enderror"
+                                            wire:model="tempCheque.bank_name"
                                             placeholder="Enter bank name">
-                                        @error('cheque.bank_name') <span class="text-danger small">{{ $message }}</span> @enderror
+                                        @error('tempCheque.bank_name') <span class="text-danger small">{{ $message }}</span> @enderror
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold">Cheque Date <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control @error('cheque.cheque_date') is-invalid @enderror"
-                                            wire:model="cheque.cheque_date">
-                                        @error('cheque.cheque_date') <span class="text-danger small">{{ $message }}</span> @enderror
+                                        <input type="date" class="form-control @error('tempCheque.cheque_date') is-invalid @enderror"
+                                            wire:model="tempCheque.cheque_date">
+                                        @error('tempCheque.cheque_date') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Cheque Amount <span class="text-danger">*</span></label>
+                                        <input type="number" min="0.01" step="0.01" class="form-control @error('tempCheque.amount') is-invalid @enderror"
+                                            wire:model="tempCheque.amount"
+                                            placeholder="Enter cheque amount">
+                                        @error('tempCheque.amount') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-end">
+                                        <button type="button" class="btn btn-success w-100" wire:click="addCheque">
+                                            <i class="bi bi-plus-circle me-1"></i> Add Cheque
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    @if(count($cheques) > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered mb-2">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Cheque No</th>
+                                                    <th>Bank</th>
+                                                    <th>Date</th>
+                                                    <th class="text-end">Amount</th>
+                                                    <th class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($cheques as $index => $item)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $item['cheque_number'] }}</td>
+                                                    <td>{{ $item['bank_name'] }}</td>
+                                                    <td>{{ $item['cheque_date'] }}</td>
+                                                    <td class="text-end">Rs.{{ number_format((float)$item['amount'], 2) }}</td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" wire:click="removeCheque({{ $index }})">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @endif
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">Cheques added: {{ count($cheques) }}</small>
+                                        <small class="fw-semibold">Total Cheques: Rs.{{ number_format((float) collect($cheques)->sum('amount'), 2) }}</small>
                                     </div>
                                 </div>
                             </div>

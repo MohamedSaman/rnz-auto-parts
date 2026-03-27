@@ -1,4 +1,4 @@
-<div x-data="listVoucherKeyboard()" @keydown.window="handleGlobalKey($event)">
+<div x-data="listVoucherKeyboard()" x-init="initKeyboard()" @keydown.window="handleGlobalKey($event)">
     {{-- Flash Messages --}}
     @if (session()->has('success'))
     <div class="alert alert-success alert-dismissible fade show mb-2 py-2">
@@ -340,6 +340,17 @@
     <script>
     function listVoucherKeyboard() {
         return {
+            initKeyboard() {
+                this.$nextTick(() => {
+                    document.getElementById('listSearchInput')?.focus();
+                });
+            },
+            focusTopNav() {
+                const topNavTarget = document.querySelector('.erp-topnav .erp-menu-link');
+                if (topNavTarget) {
+                    topNavTarget.focus();
+                }
+            },
             handleGlobalKey(e) {
                 if (e.altKey && e.key.toLowerCase() === 'a') {
                     e.preventDefault();
@@ -348,6 +359,10 @@
                 if (e.altKey && e.key.toLowerCase() === 'm') {
                     e.preventDefault();
                     window.location.href = "{{ route('admin.sales-voucher-modify') }}";
+                }
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    this.focusTopNav();
                 }
             }
         }

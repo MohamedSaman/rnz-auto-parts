@@ -115,6 +115,55 @@
             @endif
         </div>
     </div>
+
+    <div class="card shadow-sm mb-3 border">
+        <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background:#f8fafc;">
+            <h6 class="mb-0 fw-semibold"><i class="bi bi-table me-2"></i>Sales Voucher List</h6>
+            <small class="text-muted">Latest 25 records</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered mb-0" style="font-size:12px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th class="text-center">Items</th>
+                            <th class="text-end">Total</th>
+                            <th>Status</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($recentVouchers as $voucher)
+                        <tr>
+                            <td class="fw-semibold">{{ $voucher->invoice_number }}</td>
+                            <td>{{ optional($voucher->created_at)->format('d-M-Y') }}</td>
+                            <td>{{ $voucher->customer->name ?? ($voucher->customer->business_name ?? 'N/A') }}</td>
+                            <td class="text-center">{{ $voucher->items->count() }}</td>
+                            <td class="text-end">Rs.{{ number_format((float) $voucher->total_amount, 2) }}</td>
+                            <td>
+                                <span class="badge bg-{{ $voucher->status === 'confirm' ? 'success' : ($voucher->status === 'pending' ? 'warning' : 'secondary') }}">
+                                    {{ ucfirst($voucher->status) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" wire:click="loadVoucher({{ $voucher->id }})">
+                                    <i class="bi bi-pencil me-1"></i>Load
+                                </button>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-3">No sales vouchers found.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     @else
     {{-- Voucher Edit Form (same layout as Add) --}}
     <div class="card shadow-sm mb-2 border">
@@ -211,8 +260,6 @@
                             <th style="width:70px" class="text-center">Qty</th>
                             <th style="width:90px" class="text-end">Rate</th>
                             <th style="width:70px" class="text-end">Disc/Unit</th>
-                            <th style="width:60px" class="text-center">Tax%</th>
-                            <th style="width:80px" class="text-end">Tax Amt</th>
                             <th style="width:100px" class="text-end">Amount</th>
                             <th style="width:35px" class="text-center"></th>
                         </tr>
@@ -278,12 +325,6 @@
                                     wire:model.live.debounce.500ms="items.{{ $index }}.discount"
                                     {{ !$item['product_id'] ? 'disabled' : '' }}>
                             </td>
-                            <td class="p-0">
-                                <input type="number" step="0.01" class="form-control form-control-sm border-0 rounded-0 text-center"
-                                    wire:model.live.debounce.500ms="items.{{ $index }}.tax_percentage"
-                                    {{ !$item['product_id'] ? 'disabled' : '' }}>
-                            </td>
-                            <td class="text-end small p-1">{{ number_format($item['tax_amount'] ?? 0, 2) }}</td>
                             <td class="text-end fw-semibold small p-1">{{ number_format($item['amount'] ?? 0, 2) }}</td>
                             <td class="text-center p-0">
                                 @if($item['product_id'])

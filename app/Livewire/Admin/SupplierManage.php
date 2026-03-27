@@ -7,6 +7,8 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use App\Models\ProductSupplier;
+use App\Models\PurchaseOrder;
+use App\Models\PurchasePayment;
 use Livewire\WithPagination;
 use App\Livewire\Concerns\WithDynamicLayout;
 
@@ -26,11 +28,18 @@ class SupplierManage extends Component
     public $phone;
     public $status = 'active';
     public $notes;
-    
+
     public $showCreateModal = false;
     public $showEditModal = false;
     public $showViewModal = false;
-    public $perPage= 10;
+    public $perPage = 10;
+    public $activeTab = 'overview';
+
+    public $viewSupplierDetail = [];
+    public $viewSupplierPurchases = [];
+    public $viewSupplierPayments = [];
+    public $viewSupplierDues = [];
+    public $viewSupplierLedger = [];
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -108,7 +117,129 @@ class SupplierManage extends Component
         $this->status = $supplier->status;
         $this->notes = $supplier->notes;
 
+        $this->activeTab = 'overview';
+
+        $this->viewSupplierDetail = [
+            'id' => $supplier->id,
+            'name' => $supplier->name,
+            'business_name' => $supplier->businessname,
+            'contact' => $supplier->contact,
+            'email' => $supplier->email,
+            'phone' => $supplier->phone,
+            'status' => $supplier->status,
+            'address' => $supplier->address,
+            'notes' => $supplier->notes,
+            'overpayment' => (float) ($supplier->overpayment ?? 0),
+            'created_at' => $supplier->created_at,
+            'updated_at' => $supplier->updated_at,
+        ];
+
+        $purchases = PurchaseOrder::where('supplier_id', $supplier->id)
+            ->with(['items'])
+            ->orderBy('order_date', 'desc')
+            ->get();
+
+        $this->viewSupplierPurchases = $purchases->map(function ($purchase) {
+            $paidAmount = (float) ($purchase->total_amount ?? 0) - (float) ($purchase->due_amount ?? 0);
+
+            return [
+                'id' => $purchase->id,
+                'order_code' => $purchase->order_code,
+                'invoice_number' => $purchase->invoice_number,
+                'order_date' => $purchase->order_date,
+                'status' => $purchase->status,
+                'payment_type' => $purchase->payment_type,
+                'items_count' => $purchase->items->count(),
+                'total_amount' => (float) ($purchase->total_amount ?? 0),
+                'due_amount' => (float) ($purchase->due_amount ?? 0),
+                'paid_amount' => $paidAmount,
+                'created_at' => optional($purchase->created_at)->format('M d, Y h:i A') ?? '-',
+            ];
+        })->toArray();
+
+        $payments = PurchasePayment::where('supplier_id', $supplier->id)
+            ->with(['purchaseOrder'])
+            ->orderBy('payment_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $this->viewSupplierPayments = $payments->map(function ($payment) {
+            return [
+                'id' => $payment->id,
+                'amount' => (float) ($payment->amount ?? 0),
+                'overpayment_used' => (float) ($payment->overpayment_used ?? 0),
+                'total_payment' => (float) ($payment->total_payment ?? (($payment->amount ?? 0) + ($payment->overpayment_used ?? 0))),
+                'payment_method' => $payment->payment_method,
+                'payment_reference' => $payment->payment_reference ?? $payment->reference,
+                'payment_date' => optional($payment->payment_date)->format('M d, Y') ?? '-',
+                'status' => $payment->status,
+                'order_code' => $payment->purchaseOrder->order_code ?? '-',
+                'notes' => null,
+                'created_at' => optional($payment->created_at)->format('M d, Y h:i A') ?? '-',
+            ];
+        })->toArray();
+
+        $this->viewSupplierDues = $purchases->filter(function ($purchase) {
+            return (float) ($purchase->due_amount ?? 0) > 0;
+        })->map(function ($purchase) {
+            $paidAmount = (float) ($purchase->total_amount ?? 0) - (float) ($purchase->due_amount ?? 0);
+
+            return [
+                'id' => $purchase->id,
+                'order_code' => $purchase->order_code,
+                'invoice_number' => $purchase->invoice_number,
+                'total_amount' => (float) ($purchase->total_amount ?? 0),
+                'due_amount' => (float) ($purchase->due_amount ?? 0),
+                'paid_amount' => $paidAmount,
+                'status' => $purchase->status,
+                'payment_type' => $purchase->payment_type,
+                'created_at' => optional($purchase->created_at)->format('M d, Y h:i A') ?? '-',
+            ];
+        })->values()->toArray();
+
+        $ledgerEntries = collect();
+
+        foreach ($purchases as $purchase) {
+            $ledgerEntries->push([
+                'date' => optional($purchase->order_date)->format('M d, Y') ?? (optional($purchase->created_at)->format('M d, Y h:i A') ?? '-'),
+                'description' => 'Purchase Voucher',
+                'reference' => $purchase->order_code ?? $purchase->invoice_number ?? '-',
+                'debit' => (float) ($purchase->total_amount ?? 0),
+                'credit' => 0,
+                'type' => 'purchase',
+            ]);
+        }
+
+        foreach ($payments as $payment) {
+            $ledgerEntries->push([
+                'date' => optional($payment->payment_date)->format('M d, Y') ?? (optional($payment->created_at)->format('M d, Y h:i A') ?? '-'),
+                'description' => 'Payment Made (' . ucfirst($payment->payment_method ?? 'N/A') . ')',
+                'reference' => $payment->payment_reference ?? $payment->reference ?? ($payment->purchaseOrder->order_code ?? '-'),
+                'debit' => 0,
+                'credit' => (float) ($payment->total_payment ?? (($payment->amount ?? 0) + ($payment->overpayment_used ?? 0))),
+                'type' => 'payment',
+            ]);
+        }
+
+        if ((float) ($supplier->overpayment ?? 0) > 0) {
+            $ledgerEntries->push([
+                'date' => optional($supplier->updated_at)->format('M d, Y h:i A') ?? '-',
+                'description' => 'Overpayment Credit Balance',
+                'reference' => 'SUP-' . $supplier->id,
+                'debit' => 0,
+                'credit' => (float) ($supplier->overpayment ?? 0),
+                'type' => 'credit_balance',
+            ]);
+        }
+
+        $this->viewSupplierLedger = $ledgerEntries->sortBy('date')->values()->toArray();
+
         $this->showViewModal = true;
+    }
+
+    public function setActiveTab($tab)
+    {
+        $this->activeTab = $tab;
     }
 
     // -------------------- EDIT --------------------
@@ -163,7 +294,7 @@ class SupplierManage extends Component
     public function confirmDelete($id)
     {
         $this->supplierId = $id;
-        
+
         $this->dispatch('swal:confirm', [
             'title' => 'Are you sure?',
             'text' => 'You won\'t be able to revert this!',

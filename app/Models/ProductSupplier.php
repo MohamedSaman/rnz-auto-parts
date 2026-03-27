@@ -29,6 +29,11 @@ class ProductSupplier extends Model
         return $this->hasMany(\App\Models\PurchaseOrder::class, 'supplier_id');
     }
 
+    public function purchaseReturns()
+    {
+        return $this->hasMany(PurchaseReturn::class, 'supplier_id');
+    }
+
     /**
      * Add overpayment credit to supplier
      */

@@ -557,6 +557,26 @@
 
                     <div class="d-flex gap-2 justify-content-md-end">
                         @if (!$isStaff)
+                        <button class="btn btn-danger" wire:click="exportProductsPdf" wire:loading.attr="disabled" wire:target="exportProductsPdf">
+                            <span wire:loading.remove wire:target="exportProductsPdf">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                                <span class="d-none d-sm-inline">Export PDF</span>
+                            </span>
+                            <span wire:loading wire:target="exportProductsPdf">
+                                <i class="spinner-border spinner-border-sm"></i>
+                                <span class="d-none d-sm-inline">Exporting...</span>
+                            </span>
+                        </button>
+                        <button class="btn btn-outline-success" wire:click="exportProductsCsv" wire:loading.attr="disabled" wire:target="exportProductsCsv">
+                            <span wire:loading.remove wire:target="exportProductsCsv">
+                                <i class="bi bi-file-earmark-spreadsheet"></i>
+                                <span class="d-none d-sm-inline">Export CSV</span>
+                            </span>
+                            <span wire:loading wire:target="exportProductsCsv">
+                                <i class="spinner-border spinner-border-sm"></i>
+                                <span class="d-none d-sm-inline">Exporting...</span>
+                            </span>
+                        </button>
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importProductsModal">
                             <i class="bi bi-file-earmark-excel"></i>
                             <span class="d-none d-sm-inline">Import Excel</span>
@@ -615,6 +635,8 @@
                                             
                                             <th>Brand</th>
                                             <th>Model</th>
+                                            <th>Item Location</th>
+                                            <th>Rack No</th>
                                             @if ($isStaff)
                                                 @if ($staffType === 'shop_staff')
                                                 <th>Wholesale Price</th>
@@ -650,6 +672,20 @@
                                             <td wire:click="viewProductDetails({{ $product->id }})">
                                                 @if($product->model)
                                                     <span class="fw-medium text-dark">{{ $product->model }}</span>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+                                            <td wire:click="viewProductDetails({{ $product->id }})">
+                                                @if($product->store_location)
+                                                    <span class="fw-medium text-dark">{{ $product->store_location }}</span>
+                                                @else
+                                                    <span class="text-muted">—</span>
+                                                @endif
+                                            </td>
+                                            <td wire:click="viewProductDetails({{ $product->id }})">
+                                                @if($product->rack_number)
+                                                    <span class="fw-medium text-dark">{{ $product->rack_number }}</span>
                                                 @else
                                                     <span class="text-muted">—</span>
                                                 @endif
